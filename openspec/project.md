@@ -70,7 +70,12 @@ my-text/
 - **Environment Variables**: All sensitive data stored in environment variables
   - `SUPABASE_URL`: Supabase project URL
   - `SUPABASE_KEY`: Supabase API key (anon or service role)
+  - `SUPABASE_JWT_SECRET`: JWT secret for token verification (auth specific)
+  - `ACCESS_TOKEN_EXPIRY`: Access token expiration time in seconds (default: 3600)
+  - `REFRESH_TOKEN_EXPIRY`: Refresh token expiration time in seconds (default: 604800)
+  - `MIN_PASSWORD_LENGTH`: Minimum password length (default: 8)
 - **No Hardcoded Secrets**: Never commit credentials to repository
+- **Environment Template**: See `.env.example` for all required variables
 
 ### API Design
 - **Handler Pattern**: Cloud function uses `main_handler(event, context)` entry point

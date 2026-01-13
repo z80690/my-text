@@ -31,6 +31,7 @@ pip install -r src/requirements.txt
 # Set environment variables
 set SUPABASE_URL=your_url_here
 set SUPABASE_KEY=your_key_here
+set SUPABASE_JWT_SECRET=your_jwt_secret_here
 
 # Run connectivity tests
 python src/test_connectivity.py --url %SUPABASE_URL% --key %SUPABASE_KEY%
@@ -60,6 +61,9 @@ python src/test_connectivity.py --url https://your-project.supabase.co --key you
 
 # Test specific functions (in Python REPL)
 python -c "from test_connectivity import run_connectivity_tests; print(run_connectivity_tests())"
+
+# Test database schema and RLS
+python src/test_database_schema.py
 ```
 
 ### Dependencies
@@ -78,6 +82,12 @@ pip install supabase==2.27.0 httpx==0.28.1
 - `src/test_connectivity.py` - Comprehensive testing suite with multiple test functions
 - `src/requirements.txt` - Python dependencies
 - `Dockerfile` - Container configuration for deployment
+
+### Authentication Files
+- `src/auth/config.py` - Supabase Auth configuration module
+- `src/auth/migrations/` - Database migration scripts for auth system
+- `src/test_database_schema.py` - Database schema and RLS testing suite
+- `.env.example` - Environment variables template
 
 ### Configuration Files
 - `.vscode/launch.json` - VSCode debug configuration
@@ -127,6 +137,22 @@ pip install supabase==2.27.0 httpx==0.28.1
 2. Update queries in `src/index.py`
 3. Add test cases in `src/test_connectivity.py`
 4. Update database schema section in `openspec/project.md`
+
+### Authentication Setup
+1. Set environment variables (see `.env.example`):
+   ```bash
+   set SUPABASE_URL=your_url_here
+   set SUPABASE_KEY=your_key_here
+   set SUPABASE_JWT_SECRET=your_jwt_secret_here
+   ```
+2. Run database migrations in Supabase SQL Editor:
+   - `src/auth/migrations/001_supabase_auth_config.sql`
+   - `src/auth/migrations/002_user_profiles_schema.sql`
+3. Verify authentication setup:
+   ```bash
+   python src/auth/config.py
+   python src/test_database_schema.py
+   ```
 
 ### Debugging
 - Use VSCode launch configuration in `.vscode/launch.json`
