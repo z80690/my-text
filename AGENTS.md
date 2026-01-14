@@ -19,210 +19,181 @@ Keep this managed block so 'openspec update' can refresh the instructions.
 
 # AGENTS.md
 
-This file provides instructions for AI agents working on this codebase.
+Instructions for AI agents working in this codebase.
 
 ## Quick Start
 
-### Running the Application
 ```bash
-# Install Python dependencies
+# Install dependencies
 pip install -r src/requirements.txt
 
 # Set environment variables
 set SUPABASE_URL=your_url_here
 set SUPABASE_KEY=your_key_here
-set SUPABASE_JWT_SECRET=your_jwt_secret_here
 
 # Run connectivity tests
-python src/test_connectivity.py --url %SUPABASE_URL% --key %SUPABASE_KEY%
-
-# Or test with environment variables directly
 python src/test_connectivity.py
-```
 
-### Docker Commands
-```bash
-# Build Docker image
+# Docker build and run
 docker build -t my-text .
-
-# Run container with environment variables
 docker run -p 9000:9000 -e SUPABASE_URL=your_url -e SUPABASE_KEY=your_key my-text
 ```
 
-## Development Commands
+## Testing Commands
 
-### Testing
 ```bash
-# Run full connectivity test suite
+# Run full test suite
 python src/test_connectivity.py
-
-# Run with command line arguments
-python src/test_connectivity.py --url https://your-project.supabase.co --key your_anon_key
-
-# Test specific functions (in Python REPL)
-python -c "from test_connectivity import run_connectivity_tests; print(run_connectivity_tests())"
-
-# Test database schema and RLS
 python src/test_database_schema.py
+
+# Run single test function (in Python REPL)
+python -c "from src.test_connectivity import test_env_vars; print(test_env_vars())"
+python -c "from src.test_connectivity import test_supabase_connection; print(test_supabase_connection())"
+python -c "from src.test_connectivity import test_db_query; print(test_db_query())"
+
+# Run with custom URL/Key
+python src/test_connectivity.py --url https://your-project.supabase.co --key your_key
+
+# Run specific database schema test
+python -c "from src.test_database_schema import test_table_exists; print(test_table_exists())"
 ```
 
-### Dependencies
-```bash
-# Update requirements.txt
-pip freeze > src/requirements.txt
+## Code Style Guidelines
 
-# Install specific packages
-pip install supabase==2.27.0 httpx==0.28.1
-```
+### Python File Format
+- **Encoding**: Always include `# -*- coding: utf-8 -*-` or `# -*- coding: utf8 -*-` at line 1
+- **Imports**: Organize in order: stdlib → third-party → local (separated by blank lines)
+- **Line Length**: Maximum 88 characters (follow PEP 8)
+- **Indentation**: 4 spaces, no tabs
 
-## Key Files
-
-### Core Application Files
-- `src/index.py` - Main cloud function handler (SCF entry point)
-- `src/test_connectivity.py` - Comprehensive testing suite with multiple test functions
-- `src/requirements.txt` - Python dependencies
-- `Dockerfile` - Container configuration for deployment
-
-### Authentication Files
-- `src/auth/config.py` - Supabase Auth configuration module
-- `src/auth/migrations/` - Database migration scripts for auth system
-- `src/test_database_schema.py` - Database schema and RLS testing suite
-- `.env.example` - Environment variables template
-
-### Configuration Files
-- `.vscode/launch.json` - VSCode debug configuration
-- `backend/package.json` - Backend Node.js setup (minimal)
-- `frontend/package.json` - Frontend Node.js setup (minimal)
-
-## Code Conventions
-
-### Python
-- **Encoding**: UTF-8 (always include `# -*- coding: utf-8 -*-` or `# -*- coding: utf8 -*-`)
-- **Type Hints**: Use `typing` module for function signatures
+### Type Hints
+- Required for all function parameters and return values
+- Use `typing` module: `Dict[str, Any]`, `Optional[str]`, etc.
+- Example:
   ```python
   def main_handler(event: Dict[str, Any], context) -> Dict[str, Any]:
+      pass
   ```
-- **Error Handling**: Always wrap database operations in try-except blocks
-- **Response Format**: Cloud functions must return dict with statusCode, headers, body
-- **Environment Variables**: Never hardcode credentials; always use `os.getenv()`
-- **Comments**: Use Chinese comments for code documentation
+
+### Naming Conventions
+- Functions/Variables: `snake_case` (e.g., `test_env_vars`, `supabase_url`)
+- Classes: `PascalCase` (e.g., `Client`, `User`)
+- Constants: `UPPER_SNAKE_CASE` (e.g., `SUPABASE_URL`)
+- Private functions: `_leading_underscore`
+
+### Error Handling
+- Wrap all database operations in try-except blocks
+- Log errors with `[ERROR]` prefix
+- Return HTTP responses with appropriate status codes (400, 500)
+- Example:
+  ```python
+  try:
+      response = supabase.table("table").select("*").execute()
+  except Exception as e:
+      error_msg = f"Error: {str(e)}"
+      print(f"[ERROR] {error_msg}")
+      return {"statusCode": 500, "body": json.dumps({"error": error_msg})}
+  ```
+
+### Logging
+- Use prefixes: `[INFO]`, `[WARNING]`, `[ERROR]`
+- Example:
+  ```python
+  print("[INFO] Starting database query")
+  print("[WARNING] Cache miss, fetching from database")
+  print("[ERROR] Failed to connect to Supabase")
+  ```
+
+### Cloud Function Response Format
+- Must return dict with: `statusCode`, `headers`, `body`
+- Headers should include CORS headers
+- Body must be JSON string
+- Example:
+  ```python
+  return {
+      "statusCode": 200,
+      "headers": {"Content-Type": "application/json"},
+      "body": json.dumps({"success": True, "data": result})
+  }
+  ```
+
+### Comments
+- Use Chinese comments for code documentation
+- Docstrings for all public functions
+- Keep comments concise and relevant
 
 ### Database Operations
 - Use Supabase client: `from supabase import create_client, Client`
 - Query pattern: `supabase.table("table_name").select("*").limit(n).execute()`
 - Always check if response has data before processing
 
-### Testing
-- Write tests in `test_connectivity.py` following existing patterns
-- Test functions should return dict with: `test`, `status`, `message`
-- Status values: "PASSED" or "FAILED"
-- Provide optional parameters for URL and key to support flexible testing
+### Test Functions
+- Return dict with keys: `test`, `status`, `message`
+- Status values: `"PASSED"` or `"FAILED"`
+- Accept optional parameters for URL and key
+- Example:
+  ```python
+  def test_connection(supabase_url: Optional[str] = None) -> Dict[str, Any]:
+      try:
+          return {"test": "connection", "status": "PASSED", "message": "Success"}
+      except Exception as e:
+          return {"test": "connection", "status": "FAILED", "message": str(e)}
+  ```
 
 ## Common Tasks
 
+### Adding a New Test
+1. Create test function in `src/test_connectivity.py` or `src/test_database_schema.py`
+2. Follow naming pattern: `test_<feature>()`
+3. Return dict with `test`, `status`, `message` keys
+4. Add to test list in `run_connectivity_tests()` or `run_all_tests()`
+
 ### Adding a New Cloud Function
-1. Create new function in `src/` directory
+1. Create function in `src/` directory
 2. Use `main_handler(event, context)` signature
-3. Return dict with `statusCode`, `headers`, `body`
-4. Add tests to `test_connectivity.py` if database operations are involved
+3. Return proper HTTP response dict
+4. Add tests in test files if database operations involved
 
 ### Updating Dependencies
-1. Update `src/requirements.txt`
+1. Edit `src/requirements.txt`
 2. Test locally: `python src/test_connectivity.py`
-3. Rebuild Docker image to verify container compatibility
-4. Update this file if new commands are needed
-
-### Adding Database Tables
-1. Create table in Supabase dashboard
-2. Update queries in `src/index.py`
-3. Add test cases in `src/test_connectivity.py`
-4. Update database schema section in `openspec/project.md`
-
-### Authentication Setup
-1. Set environment variables (see `.env.example`):
-   ```bash
-   set SUPABASE_URL=your_url_here
-   set SUPABASE_KEY=your_key_here
-   set SUPABASE_JWT_SECRET=your_jwt_secret_here
-   ```
-2. Run database migrations in Supabase SQL Editor:
-   - `src/auth/migrations/001_supabase_auth_config.sql`
-   - `src/auth/migrations/002_user_profiles_schema.sql`
-3. Verify authentication setup:
-   ```bash
-   python src/auth/config.py
-   python src/test_database_schema.py
-   ```
-
-### Debugging
-- Use VSCode launch configuration in `.vscode/launch.json`
-- Add print statements with `[INFO]`, `[WARNING]`, or `[ERROR]` prefixes
-- Run `test_connectivity.py` for isolated testing
-- Check environment variables are set: `echo %SUPABASE_URL%`
+3. Rebuild Docker: `docker build -t my-text .`
 
 ## Linting & Code Quality
 
-**Note**: No linting or typecheck commands are currently configured in this project. 
-
-When adding Python linting/testing tools in the future, document the commands here:
+No linting commands currently configured. When adding tools:
 ```bash
-# Example (when configured):
-# python -m flake8 src/
-# python -m mypy src/
-# pytest tests/
+# Example future commands:
+python -m flake8 src/
+python -m mypy src/
 ```
 
-## Deployment Notes
+## Deployment
 
 ### Tencent Cloud SCF
 - Entry point: `index.main_handler`
 - Runtime: Python 3.10
-- Port: 9000 (SCF requirement)
-- Environment variables: Set SUPABASE_URL and SUPABASE_KEY in SCF console
+- Port: 9000
+- Environment variables: SUPABASE_URL, SUPABASE_KEY
 
 ### Docker
-- Base image: `python:3.10-slim` (via DaoCloud mirror)
+- Base image: `python:3.10-slim` (DaoCloud mirror)
 - Exposed port: 9000
-- Health check: Run `test_connectivity.py` on container startup
+- Health check: Run `test_connectivity.py` on startup
 
 ## Important Reminders
 
-1. **Never commit secrets**: Use environment variables for SUPABASE_URL and SUPABASE_KEY
-2. **Test before deploying**: Always run `test_connectivity.py` before pushing changes
-3. **Update documentation**: Keep `openspec/project.md` in sync with code changes
-4. **Encoding matters**: Ensure all Python files use UTF-8 encoding
-5. **Type hints required**: Use type hints for all function parameters and return values
-6. **Error handling**: Always handle exceptions in cloud function handlers
-7. **Response format**: Cloud functions must return proper HTTP response dict
+1. Never commit secrets - use environment variables
+2. Test before deploying - always run test scripts
+3. UTF-8 encoding required for all Python files
+4. Type hints required for all functions
+5. Error handling required in cloud functions
+6. Chinese comments for documentation
+7. Return proper HTTP response format
 
-## Architecture Overview
+## Architecture
 
 ```
-Client Request
-    ↓
-Tencent Cloud SCF (Port 9000)
-    ↓
-Python: src/index.py::main_handler
-    ↓
-Supabase Client
-    ↓
-Supabase Database (knowledge_base table)
-    ↓
-Response JSON
+Client Request → Tencent Cloud SCF (Port 9000) → Python: src/index.py
+→ Supabase Client → Supabase Database → Response JSON
 ```
-
-## Database Access
-
-### Current Table
-- **knowledge_base**: Stores knowledge base entries
-- **Operations**: SELECT queries with limit
-- **Example**: 
-  ```python
-  supabase.table("knowledge_base").select("*").limit(5).execute()
-  ```
-
-### Adding New Tables
-1. Create in Supabase dashboard
-2. Update queries in `src/index.py`
-3. Add tests to `src/test_connectivity.py`
-4. Document in `openspec/project.md`
