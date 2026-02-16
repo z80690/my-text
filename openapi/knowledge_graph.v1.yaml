@@ -1,0 +1,233 @@
+openapi: 3.1.0
+
+info:
+  title: 知识图谱 API
+  version: 1.0.0
+  description: |
+    知识图谱管理服务的 RESTful API。
+    提供了知识图谱查询和管理功能。
+  contact:
+    name: API Support
+    email: support@example.com
+
+servers:
+  - url: http://localhost:9000
+    description: 本地开发服务器
+  - url: https://api.example.com
+    description: 生产环境服务器
+
+tags:
+  - name: Health
+    description: 服务健康检查
+  - name: Knowledge Graph
+    description: 知识图谱操作
+
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      summary: 健康检查
+      description: 检查服务是否正常运行
+      operationId: getHealth
+      responses:
+        '200':
+          description: 服务健康
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: 服务不可用
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /knowledge-graph:
+    get:
+      tags:
+        - Knowledge Graph
+      summary: 查询知识图谱
+      description: 获取当前知识图谱的基本信息和统计数据
+      operationId: getKnowledgeGraph
+      parameters:
+        - name: limit
+          in: query
+          description: 返回结果数量限制
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          description: 结果偏移量（用于分页）
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: 成功获取图谱信息
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeGraphResponse'
+        '500':
+          description: 服务器内部错误
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    # 健康检查响应
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - unhealthy
+          description: 服务状态
+        timestamp:
+          type: string
+          format: date-time
+          description: 响应时间戳
+        version:
+          type: string
+          description: API 版本号
+        services:
+          type: object
+          description: 依赖服务状态
+          properties:
+            database:
+              type: string
+              enum:
+                - connected
+                - disconnected
+              description: 数据库连接状态
+            cache:
+              type: string
+              enum:
+                - connected
+                - disconnected
+              description: 缓存服务状态
+
+    # 知识图谱响应
+    KnowledgeGraphResponse:
+      type: object
+      required:
+        - graph_id
+        - node_count
+        - relationship_count
+      properties:
+        graph_id:
+          type: string
+          description: 知识图谱唯一标识符
+        node_count:
+          type: integer
+          description: 节点总数
+        relationship_count:
+          type: integer
+          description: 关系总数
+        nodes:
+          type: array
+          description: 节点列表（按需返回）
+          items:
+            $ref: '#/components/schemas/Node'
+        relationships:
+          type: array
+          description: 关系列表（按需返回）
+          items:
+            $ref: '#/components/schemas/Relationship'
+
+    # 节点
+    Node:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          description: 节点唯一标识符
+        name:
+          type: string
+          description: 节点名称
+        type:
+          type: string
+          description: 节点类型
+          default: entity
+        properties:
+          type: object
+          description: 节点附加属性
+          additionalProperties: true
+        created_at:
+          type: string
+          format: date-time
+          description: 创建时间
+        updated_at:
+          type: string
+          format: date-time
+          description: 更新时间
+
+    # 关系
+    Relationship:
+      type: object
+      required:
+        - source
+        - target
+        - type
+      properties:
+        id:
+          type: string
+          description: 关系唯一标识符
+        source:
+          type: string
+          description: 源节点ID
+        target:
+          type: string
+          description: 目标节点ID
+        type:
+          type: string
+          description: 关系类型
+        properties:
+          type: object
+          description: 关系附加属性
+          additionalProperties: true
+        created_at:
+          type: string
+          format: date-time
+          description: 创建时间
+
+    # 错误响应
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+          description: 错误代码
+        message:
+          type: string
+          description: 错误信息
+        details:
+          type: object
+          description: 错误详情
+          additionalProperties: true
+        timestamp:
+          type: string
+          format: date-time
+          description: 错误发生时间

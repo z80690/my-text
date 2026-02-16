@@ -1,0 +1,13 @@
+{
+  "name": "db_query",
+  "version": "1.0.0",
+  "description": "Query records from Supabase database",
+  "entrypoint": "handler.py",
+  "permissions": ["database:read"],
+  "parameters": {
+    "table": "string",
+    "columns": "string",
+    "where": "object",
+    "limit": "number"
+  }
+}

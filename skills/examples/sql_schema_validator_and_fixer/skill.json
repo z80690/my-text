@@ -1,0 +1,13 @@
+{
+  "$schema": "../schemas/skill-schema.json",
+  "name": "sql_schema_validator_and_fixer",
+  "version": "1.0.0",
+  "description": "Validates and fixes Supabase SQL schema files by analyzing syntax, dependencies, and foreign key references. Automatically reorders statements to resolve dependency issues and generates corrected SQL.",
+  "entrypoint": "handler.py",
+  "permissions": ["filesystem:read", "filesystem:write"],
+  "parameters": {
+    "file_path": "string",
+    "output_path": "string",
+    "strict_mode": "boolean"
+  }
+}

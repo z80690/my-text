@@ -1,0 +1,75 @@
+# -*- coding: utf-8 -*-
+# Git ignore for Knowledge Graph Project
+
+# ==================== Python ====================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ==================== Virtual Environment ====================
+venv/
+ENV/
+env/
+.venv
+
+# ==================== IDE ====================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ==================== Environment & Secrets ====================
+.env
+.env.local
+.env.*.local
+*.secret
+*.key
+*.pem
+
+# ==================== Logs ====================
+logs/
+*.log
+*.log.*
+
+# ==================== Data Files ====================
+data/
+*.json
+*.sqlite
+*.db
+
+# ==================== Testing ====================
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# ==================== OS ====================
+.DS_Store
+Thumbs.db
+
+# ==================== Cache ====================
+.cache/
+.ruff_cache/
+.mypy_cache/

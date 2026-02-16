@@ -1,0 +1,9 @@
+CALL : The term 'CALL' is not recognized as the name of a cmdlet, function, script file, o
+r operable program. Check the spelling of the name, or if a path was included, verify that
+ the path is correct and try again.
+At line:1 char:1
++ CALL D:\node\node\\node.exe D:\node\node\\node_modules\npm\bin\npm-pr ...
++ ~~~~
+    + CategoryInfo          : ObjectNotFound: (CALL:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 

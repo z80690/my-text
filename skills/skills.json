@@ -1,0 +1,84 @@
+{
+  "$schema": "./schemas/skill-registry-schema.json",
+  "version": "1.0.0",
+  "name": "AI Agent Skills Registry",
+  "description": "Central registry for all AI Agent skills",
+  "skills": [
+    {
+      "name": "example-hello",
+      "version": "1.0.0",
+      "description": "Example skill demonstrating basic structure",
+      "category": "examples",
+      "entrypoint": "examples/hello_world/handler.py",
+      "permissions": [],
+      "tags": ["example", "tutorial"]
+    },
+    {
+      "name": "db_query",
+      "version": "1.0.0",
+      "description": "Query records from Supabase database",
+      "category": "tools",
+      "entrypoint": "examples/db_query/handler.py",
+      "permissions": ["database:read"],
+      "tags": ["database", "supabase", "query"],
+      "parameters": {
+        "table": "string",
+        "columns": "string",
+        "where": "object",
+        "limit": "number"
+      }
+    },
+    {
+      "name": "code_quality_check",
+      "version": "1.0.0",
+      "description": "Analyze Python files for code quality metrics including file size, complexity, and potential issues",
+      "category": "tools",
+      "entrypoint": "examples/code_quality_check/handler.py",
+      "permissions": ["filesystem:read"],
+      "tags": ["analysis", "quality", "python", "static-analysis"],
+      "parameters": {
+        "file_path": "string"
+      }
+    },
+    {
+      "name": "code_quality_check_runner",
+      "version": "1.0.0",
+      "description": "Run comprehensive code quality checks including ESLint, Prettier, and Pylint analysis",
+      "category": "tools",
+      "entrypoint": "examples/code_quality_check_runner/handler.py",
+      "permissions": ["filesystem:read"],
+      "tags": ["quality", "lint", "eslint", "prettier", "pylint", "CI/CD"]
+    },
+    {
+      "name": "sql_schema_validator_and_fixer",
+      "version": "1.0.0",
+      "description": "Validates and fixes Supabase SQL schema files by analyzing syntax, dependencies, and foreign key references. Automatically reorders statements to resolve dependency issues and generates corrected SQL.",
+      "category": "tools",
+      "entrypoint": "examples/sql_schema_validator_and_fixer/handler.py",
+      "permissions": ["filesystem:read", "filesystem:write"],
+      "tags": ["database", "sql", "supabase", "validation", "schema"],
+      "parameters": {
+        "file_path": "string",
+        "output_path": "string",
+        "strict_mode": "boolean"
+      }
+    }
+  ],
+  "categories": [
+    {
+      "id": "examples",
+      "name": "Example Skills",
+      "description": "Reference implementations and tutorials"
+    },
+    {
+      "id": "tools",
+      "name": "Tool Skills",
+      "description": "External tool integration skills"
+    },
+    {
+      "id": "processors",
+      "name": "Processor Skills",
+      "description": "Data processing and transformation skills"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "name": "{{SKILL_NAME}}",
+  "version": "1.0.0",
+  "description": "{{SKILL_DESCRIPTION}}",
+  "entrypoint": "handler.py",
+  "permissions": []
+}

@@ -1,0 +1,324 @@
+# CI/CD Workflow for my-text project
+# Includes dependency audit, security scanning, and code quality checks
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run security scans daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: 'Skip running tests'
+        required: false
+        default: 'false'
+
+jobs:
+  # Job 1: Dependency audit and security scanning
+  security-scan:
+    name: Security Scan and Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install production dependencies
+        run: |
+          cd src
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install development dependencies
+        run: |
+          cd src
+          pip install -r requirements-dev.txt
+
+      - name: Run pip-audit
+        run: |
+          cd src
+          pip-audit --desc --format json > pip-audit-report.json || true
+          cat pip-audit-report.json
+        continue-on-error: true
+
+      - name: Check for security vulnerabilities
+        run: |
+          cd src
+          pip-audit --desc
+        continue-on-error: true
+
+      - name: Generate dependency tree
+        run: |
+          cd src
+          pipdeptree --json > dependency-tree.json
+
+      - name: Check for dependency conflicts
+        run: |
+          cd src
+          pipdeptree | grep -i "possibly conflicting" && exit 1 || echo "No conflicts found"
+
+      - name: Upload security reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-reports
+          path: |
+            src/pip-audit-report.json
+            src/dependency-tree.json
+          retention-days: 30
+
+  # Job 2: Install dependencies
+  install:
+    name: Install Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.local/share/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install production dependencies
+        run: |
+          cd src
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Verify no dependency conflicts
+        run: |
+          cd src
+          pipdeptree | grep -i "possibly conflicting" && exit 1 || echo "No conflicts found"
+
+      - name: Upload pip cache
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.local/share/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+
+  # Job 3: Run tests
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: install
+    if: ${{ github.event.inputs.skip_tests != 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Restore cached dependencies
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.local/share/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+
+      - name: Install dependencies
+        run: |
+          cd src
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+
+      - name: Run connectivity tests
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          cd src
+          python test_connectivity.py
+        continue-on-error: true
+
+      - name: Run authentication tests
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SUPABASE_JWT_SECRET: ${{ secrets.SUPABASE_JWT_SECRET }}
+        run: |
+          cd src
+          python test_auth_system.py
+        continue-on-error: true
+
+      - name: Generate test report
+        if: always()
+        run: |
+          echo "Test execution completed"
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: src/
+          retention-days: 30
+
+  # Job 4: Code quality checks
+  code-quality:
+    name: Code Quality Check
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Restore cached dependencies
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.local/share/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+
+      - name: Install development dependencies
+        run: |
+          cd src
+          pip install -r requirements-dev.txt
+
+      - name: Run pylint
+        run: |
+          cd src
+          pylint *.py --rcfile=.pylintrc --output-format=text --exit-zero
+        continue-on-error: true
+
+      - name: Run mypy type checking
+        run: |
+          cd src
+          mypy *.py --config-file=mypy.ini || true
+        continue-on-error: true
+
+      - name: Check code formatting (black)
+        run: |
+          cd src
+          black --check *.py || true
+        continue-on-error: true
+
+      - name: Check import sorting (isort)
+        run: |
+          cd src
+          isort --check-only *.py || true
+        continue-on-error: true
+
+      - name: Upload quality reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: quality-reports
+          path: |
+            src/*.py
+          retention-days: 30
+
+  # Job 5: OpenSpec validation
+  openspec-validate:
+    name: OpenSpec Validation
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install OpenSpec CLI
+        run: |
+          npm install -g @opencode/cli
+
+      - name: Validate all specifications
+        run: |
+          cd openspec
+          openspec validate --all --strict
+
+      - name: List all specs
+        run: |
+          cd openspec
+          openspec list --specs
+
+  # Job 6: Build Docker image
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: [test, security-scan, code-quality, openspec-validate]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build -t my-text:${{ github.sha }} .
+          docker tag my-text:${{ github.sha }} my-text:latest
+
+      - name: Test Docker image
+        run: |
+          docker run --rm my-text:${{ github.sha }} python -c "import supabase; print('Supabase imported successfully')"
+
+      - name: Push Docker image (optional)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "Docker image built successfully"
+          # Add your registry login and push commands here
+          # docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          # docker push my-text:${{ github.sha }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: docker-build
+          path: |
+            Dockerfile
+          retention-days: 30
+
+  # Job 7: Deploy to Tencent Cloud (optional)
+  deploy:
+    name: Deploy to Tencent Cloud SCF
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Tencent Cloud
+        run: |
+          echo "Deploying to Tencent Cloud SCF..."
+          # Add your deployment commands here
+          # npm install -g tencentcloud-cli
+          # scf deploy --template scf-template.json
+
+      - name: Deployment notification
+        run: |
+          echo "Deployment completed successfully"

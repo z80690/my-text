@@ -1,0 +1,24 @@
+# Development dependencies for my-text project
+# These are dependencies used only for development, testing, and code quality
+
+# Code quality tools
+pipdeptree>=2.30.0
+pylint>=4.0.0
+
+# Security and dependency auditing
+pip-audit>=2.0.0
+
+# Code formatting
+black>=23.0.0
+isort>=7.0.0
+
+# Testing framework (if needed)
+pytest>=7.0.0
+pytest-cov>=4.0.0
+
+# Type checking
+mypy>=1.0.0
+
+# Documentation (if needed)
+sphinx>=7.0.0
+sphinx-rtd-theme>=2.0.0

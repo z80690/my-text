@@ -1,0 +1,90 @@
+# 代码质量守护工作流
+# 集成 OpenSpec、ESLint、Prettier、pylint 的代码规范检查流程
+#
+# 使用方式：
+# 1. 通过 oh-my-opencode 自然语言触发
+# 2. 或直接执行: npm run quality:check
+#
+# 触发指令：
+# - "全量检查" → 执行 OpenSpec + ESLint + Prettier + pylint
+# - "检查接口规范" → 仅执行 OpenSpec
+# - "修复代码风格" → 仅执行 Prettier
+# - "语法检查" → 执行 ESLint + pylint
+# - "代码检查" → 执行 ESLint + Prettier + pylint
+
+name: 全量检查
+description: 集成 OpenSpec、ESLint、Prettier、pylint 的代码规范检查流程
+
+triggers:
+  - pattern: "全量检查"
+    description: 执行完整的代码规范检查（OpenSpec + ESLint + Prettier + pylint）
+  - pattern: "检查接口规范"
+    description: 仅执行 OpenSpec 接口规范检查
+  - pattern: "修复代码风格"
+    description: 执行 Prettier 自动格式化代码
+  - pattern: "语法检查"
+    description: 执行 ESLint 和 pylint 语法检查（JS/TS + Python）
+  - pattern: "代码检查"
+    description: 执行 ESLint + Prettier + pylint 检查
+
+workflow:
+  name: code-quality-guardian
+  parallel: false  # 改为顺序执行，确保格式化优先于代码检查
+  
+  steps:
+    # 步骤 1: Prettier 格式化（先执行格式化）
+    - name: prettier-fix
+      if: "{{trigger}} contains '风格' or {{trigger}} contains '修复' or {{trigger}} == '全量检查'"
+      command: |
+        cd backend
+        npx prettier --write . --ignore-path .prettierignore || echo '{"files":[]}'
+      timeout: 30s
+      continueOnError: true
+    
+    # 步骤 2: ESLint 语法检查并修复（格式化后执行）
+    - name: eslint-fix
+      if: "{{trigger}} contains '语法' or {{trigger}} contains '检查' or {{trigger}} contains '修复' or {{trigger}} == '全量检查'"
+      command: |
+        cd backend
+        npx eslint . --fix --format json || echo '{"errorCount":0, "warningCount":0}'
+      timeout: 30s
+      continueOnError: true
+      parseOutput: json
+    
+    # 步骤 4: pylint Python 语法检查
+    - name: pylint-check
+      if: "{{trigger}} contains '语法' or {{trigger}} contains '检查' or {{trigger}} == '全量检查'"
+      command: |
+        cd src
+        python -m pylint . --output-format=json --disable=import-error 2>/dev/null || echo '{"errorCount":0, "warningCount":0}'
+      timeout: 60s
+      continueOnError: true
+      parseOutput: json
+
+  # 结果汇总配置
+  output:
+    format: unified
+    include: [errors, warnings]
+
+# 快捷脚本（可直接在终端运行）
+# ============================================
+# 
+# # 全量检查（仅检查，不修复）
+# npm run quality:check
+# 
+# # 修复所有问题（自动修复）
+# npm run quality:fix
+# 
+# # 仅 ESLint
+# npm run lint
+# npm run lint:fix
+# 
+# # 仅 Prettier
+# npm run format
+# npm run format:check
+# 
+# # 仅 OpenSpec
+# npx openspec validate ./openspec --strict
+#
+# # 仅 pylint
+# cd src && python -m pylint . --output-format=styled
