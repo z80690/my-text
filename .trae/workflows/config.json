@@ -1,0 +1,33 @@
+{
+  "workflows": {
+    "directory": ".trae/workflows",
+    "max_concurrent_tasks": 5,
+    "task_timeout": 300,
+    "log_level": "INFO"
+  },
+  "registered_workflows": [
+    {
+      "name": "test_workflow",
+      "description": "测试工作流",
+      "parameters": []
+    },
+    {
+      "name": "agent_task",
+      "description": "智能体任务工作流",
+      "parameters": [
+        {
+          "name": "agent_id",
+          "type": "string",
+          "required": true,
+          "description": "智能体ID"
+        },
+        {
+          "name": "task",
+          "type": "string",
+          "required": true,
+          "description": "任务描述"
+        }
+      ]
+    }
+  ]
+}
