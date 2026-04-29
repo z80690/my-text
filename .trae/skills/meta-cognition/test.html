@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meta-Cognition 技能测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .test-case {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        .test-case h3 {
+            margin-top: 0;
+            color: #555;
+        }
+        .trigger-words {
+            background-color: #e3f2fd;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+        }
+        .info {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #1976d2;
+        }
+        .log-display {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Meta-Cognition 技能测试</h1>
+        
+        <div class="info">
+            <h3>技能信息</h3>
+            <p>Meta-Cognition 是一个元认知技能，用于在每次任务执行前后自动记录和分析调度策略的有效性。支持三种博弈模式和智能推荐功能。</p>
+        </div>
+        
+        <h2>测试用例</h2>
+        
+        <div class="test-case">
+            <h3>1. 优化任务（模式2）</h3>
+            <p>任务：请帮我优化这段代码，提升性能</p>
+            <div class="trigger-words">
+                <strong>触发关键词：</strong>优化、提升、性能
+            </div>
+            <button onclick="testTask('请帮我优化这段代码，提升性能')">测试</button>
+            <div id="result1" class="result"></div>
+        </div>
+        
+        <div class="test-case">
+            <h3>2. 对比任务（模式1）</h3>
+            <p>任务：请对比敏捷开发和瀑布模型的优缺点</p>
+            <div class="trigger-words">
+                <strong>触发关键词：</strong>对比、优缺点
+            </div>
+            <button onclick="testTask('请对比敏捷开发和瀑布模型的优缺点')">测试</button>
+            <div id="result2" class="result"></div>
+        </div>
+        
+        <div class="test-case">
+            <h3>3. 设计任务（模式3）</h3>
+            <p>任务：帮我设计一个用户认证系统</p>
+            <div class="trigger-words">
+                <strong>触发关键词：</strong>设计、系统
+            </div>
+            <button onclick="testTask('帮我设计一个用户认证系统')">测试</button>
+            <div id="result3" class="result"></div>
+        </div>
+        
+        <div class="test-case">
+            <h3>4. 简单任务（常规模式）</h3>
+            <p>任务：1+1等于几？</p>
+            <div class="trigger-words">
+                <strong>触发关键词：</strong>无（极简单一事实查询）
+            </div>
+            <button onclick="testTask('1+1等于几？')">测试</button>
+            <div id="result4" class="result"></div>
+        </div>
+        
+        <h2>日志状态</h2>
+        <div class="log-display">
+            <h3>当前日志状态</h3>
+            <pre id="logStatus">检查中...</pre>
+        </div>
+        
+        <button onclick="checkLog()">检查日志</button>
+    </div>
+    
+    <script>
+        function testTask(task) {
+            // 模拟技能触发
+            const resultDiv = document.getElementById('result' + Array.from(document.querySelectorAll('.test-case')).findIndex(el => el.textContent.includes(task)) + 1);
+            resultDiv.innerHTML = '<div class="success">测试任务已发送：' + task + '</div>';
+            
+            // 模拟技能响应
+            setTimeout(() => {
+                resultDiv.innerHTML += '<div class="info">技能已触发，正在分析任务...</div>';
+            }, 500);
+        }
+        
+        function checkLog() {
+            // 模拟检查日志
+            const logStatus = document.getElementById('logStatus');
+            logStatus.textContent = '{
+  "sessions": [],
+  "current_session": null
+}';
+        }
+        
+        // 页面加载时检查日志
+        window.onload = checkLog;
+    </script>
+</body>
+</html>

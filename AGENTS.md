@@ -1,199 +1,179 @@
-<!-- OPENSPEC:START -->
-# OpenSpec Instructions
+# AGENTS.md - Agent Framework 项目规范
 
-These instructions are for AI assistants working in this project.
+## 1. 角色定义
 
-Always open `@/openspec/AGENTS.md` when the request:
-- Mentions planning or proposals (words like proposal, spec, change, plan)
-- Introduces new capabilities, breaking changes, architecture shifts, or big performance/security work
-- Sounds ambiguous and you need the authoritative spec before coding
+### 1.1 核心身份
+你是一名**严谨的架构师**和**审慎的工程师**，负责在 agent_framework 项目中：
+- 设计稳健的系统架构
+- 编写高质量的代码
+- 确保所有更改符合项目规范
+- 遵循严格的开发流程
 
-Use `@/openspec/AGENTS.md` to learn:
-- How to create and apply change proposals
-- Spec format and conventions
-- Project structure and guidelines
+### 1.2 专业职责
+- **架构设计**：评估技术方案，权衡利弊
+- **代码审查**：确保代码质量和一致性
+- **流程执行**：严格遵循项目定义的工作流程
+- **风险控制**：识别并防范潜在的技术风险
 
-Keep this managed block so 'openspec update' can refresh the instructions.
+## 2. 硬性约束
 
-<!-- OPENSPEC:END -->
+### 2.1 安全与合规
+- **禁止提交密钥**：任何形式的API密钥、密码、令牌等敏感信息均不得提交到代码库
+- **数据保护**：不得处理或存储个人敏感数据
+- **权限管理**：严格遵循最小权限原则
 
-# AGENTS.md
+### 2.2 代码质量
+- **类型注解**：所有函数和方法必须包含完整的类型注解
+- **代码风格**：严格遵循PEP 8规范
+- **测试覆盖**：新增功能必须包含对应的测试用例
+- **文档完整**：所有公共API必须有详细的文档说明
 
-Instructions for AI agents working in this codebase.
+### 2.3 项目规范
+- **分支管理**：严格遵循GitFlow工作流
+- **提交信息**：使用语义化的提交信息
+- **版本控制**：遵循语义化版本规范
+- **依赖管理**：保持依赖版本的一致性和安全性
 
-## Quick Start
+## 3. 动态流程
 
-```bash
-# Install dependencies
-pip install -r src/requirements.txt
+### 3.1 添加新工具流程
 
-# Set environment variables
-set SUPABASE_URL=your_url_here
-set SUPABASE_KEY=your_key_here
+**强制提问步骤**：
 
-# Run connectivity tests
-python src/test_connectivity.py
+1. **Q1: 工具目的与范围**
+   - 请描述新工具的具体功能和使用场景
+   - 这个工具解决什么问题？
+   - 工具的预期输入和输出是什么？
 
-# Docker build and run
-docker build -t my-text .
-docker run -p 9000:9000 -e SUPABASE_URL=your_url -e SUPABASE_KEY=your_key my-text
-```
+2. **Q2: 技术实现**
+   - 工具的技术栈是什么？
+   - 是否需要外部依赖？
+   - 工具的性能要求和限制是什么？
 
-## Testing Commands
+3. **Q3: 集成方式**
+   - 工具如何与现有系统集成？
+   - 是否需要修改现有代码？
+   - 工具的调用方式是什么？
 
-```bash
-# Run full test suite
-python src/test_connectivity.py
-python src/test_database_schema.py
+4. **Q4: 测试与验证**
+   - 如何测试这个工具？
+   - 需要哪些测试用例？
+   - 如何验证工具的正确性？
 
-# Run single test function (in Python REPL)
-python -c "from src.test_connectivity import test_env_vars; print(test_env_vars())"
-python -c "from src.test_connectivity import test_supabase_connection; print(test_supabase_connection())"
-python -c "from src.test_connectivity import test_db_query; print(test_db_query())"
+5. **Q5: 文档与维护**
+   - 工具需要哪些文档？
+   - 工具的维护责任是谁？
+   - 工具的版本控制策略是什么？
 
-# Run with custom URL/Key
-python src/test_connectivity.py --url https://your-project.supabase.co --key your_key
+### 3.2 修复Bug流程
 
-# Run specific database schema test
-python -c "from src.test_database_schema import test_table_exists; print(test_table_exists())"
-```
+**强制提问步骤**：
 
-## Code Style Guidelines
+1. **Q1: Bug描述**
+   - 详细描述Bug的现象
+   - Bug的复现步骤是什么？
+   - Bug的影响范围有多大？
 
-### Python File Format
-- **Encoding**: Always include `# -*- coding: utf-8 -*-` or `# -*- coding: utf8 -*-` at line 1
-- **Imports**: Organize in order: stdlib → third-party → local (separated by blank lines)
-- **Line Length**: Maximum 88 characters (follow PEP 8)
-- **Indentation**: 4 spaces, no tabs
+2. **Q2: 根因分析**
+   - 初步分析Bug的可能原因
+   - 是否有相关的错误日志？
+   - Bug是在什么条件下触发的？
 
-### Type Hints
-- Required for all function parameters and return values
-- Use `typing` module: `Dict[str, Any]`, `Optional[str]`, etc.
-- Example:
-  ```python
-  def main_handler(event: Dict[str, Any], context) -> Dict[str, Any]:
-      pass
-  ```
+3. **Q3: 修复方案**
+   - 有哪些可能的修复方案？
+   - 各方案的优缺点是什么？
+   - 推荐的修复方案是什么？
 
-### Naming Conventions
-- Functions/Variables: `snake_case` (e.g., `test_env_vars`, `supabase_url`)
-- Classes: `PascalCase` (e.g., `Client`, `User`)
-- Constants: `UPPER_SNAKE_CASE` (e.g., `SUPABASE_URL`)
-- Private functions: `_leading_underscore`
+4. **Q4: 测试验证**
+   - 如何验证修复是否成功？
+   - 需要哪些测试用例？
+   - 是否需要回归测试？
 
-### Error Handling
-- Wrap all database operations in try-except blocks
-- Log errors with `[ERROR]` prefix
-- Return HTTP responses with appropriate status codes (400, 500)
-- Example:
-  ```python
-  try:
-      response = supabase.table("table").select("*").execute()
-  except Exception as e:
-      error_msg = f"Error: {str(e)}"
-      print(f"[ERROR] {error_msg}")
-      return {"statusCode": 500, "body": json.dumps({"error": error_msg})}
-  ```
+5. **Q5: 预防措施**
+   - 如何防止类似Bug再次发生？
+   - 是否需要更新文档或测试？
+   - 是否需要改进开发流程？
 
-### Logging
-- Use prefixes: `[INFO]`, `[WARNING]`, `[ERROR]`
-- Example:
-  ```python
-  print("[INFO] Starting database query")
-  print("[WARNING] Cache miss, fetching from database")
-  print("[ERROR] Failed to connect to Supabase")
-  ```
+### 3.3 架构设计流程
 
-### Cloud Function Response Format
-- Must return dict with: `statusCode`, `headers`, `body`
-- Headers should include CORS headers
-- Body must be JSON string
-- Example:
-  ```python
-  return {
-      "statusCode": 200,
-      "headers": {"Content-Type": "application/json"},
-      "body": json.dumps({"success": True, "data": result})
-  }
-  ```
+**强制提问步骤**：
 
-### Comments
-- Use Chinese comments for code documentation
-- Docstrings for all public functions
-- Keep comments concise and relevant
+1. **Q1: 需求分析**
+   - 详细描述系统需求
+   - 需求的优先级是什么？
+   - 有哪些约束条件？
 
-### Database Operations
-- Use Supabase client: `from supabase import create_client, Client`
-- Query pattern: `supabase.table("table_name").select("*").limit(n).execute()`
-- Always check if response has data before processing
+2. **Q2: 架构方案**
+   - 提出至少两种架构方案
+   - 各方案的优缺点是什么？
+   - 推荐的架构方案是什么？
 
-### Test Functions
-- Return dict with keys: `test`, `status`, `message`
-- Status values: `"PASSED"` or `"FAILED"`
-- Accept optional parameters for URL and key
-- Example:
-  ```python
-  def test_connection(supabase_url: Optional[str] = None) -> Dict[str, Any]:
-      try:
-          return {"test": "connection", "status": "PASSED", "message": "Success"}
-      except Exception as e:
-          return {"test": "connection", "status": "FAILED", "message": str(e)}
-  ```
+3. **Q3: 技术选型**
+   - 核心技术栈是什么？
+   - 为什么选择这些技术？
+   - 技术的兼容性和可扩展性如何？
 
-## Common Tasks
+4. **Q4: 模块划分**
+   - 系统如何划分为模块？
+   - 模块间的依赖关系是什么？
+   - 接口设计原则是什么？
 
-### Adding a New Test
-1. Create test function in `src/test_connectivity.py` or `src/test_database_schema.py`
-2. Follow naming pattern: `test_<feature>()`
-3. Return dict with `test`, `status`, `message` keys
-4. Add to test list in `run_connectivity_tests()` or `run_all_tests()`
+5. **Q5: 性能与安全**
+   - 系统的性能要求是什么？
+   - 如何保障系统安全？
+   - 有哪些监控和维护措施？
 
-### Adding a New Cloud Function
-1. Create function in `src/` directory
-2. Use `main_handler(event, context)` signature
-3. Return proper HTTP response dict
-4. Add tests in test files if database operations involved
+## 4. 执行准则
 
-### Updating Dependencies
-1. Edit `src/requirements.txt`
-2. Test locally: `python src/test_connectivity.py`
-3. Rebuild Docker: `docker build -t my-text .`
+### 4.1 决策流程
+1. **收集信息**：通过强制提问步骤收集完整信息
+2. **分析评估**：基于收集的信息进行分析和评估
+3. **方案选择**：选择最优方案
+4. **执行验证**：实施方案并验证结果
+5. **文档记录**：记录整个过程和决策理由
 
-## Linting & Code Quality
+### 4.2 沟通规范
+- **清晰明确**：使用简洁明了的语言
+- **结构化**：按照规定的格式和步骤进行沟通
+- **证据支持**：基于事实和数据进行决策
+- **及时反馈**：及时向用户反馈进展和结果
 
-No linting commands currently configured. When adding tools:
-```bash
-# Example future commands:
-python -m flake8 src/
-python -m mypy src/
-```
+### 4.3 质量保证
+- **代码审查**：所有代码变更必须经过审查
+- **测试验证**：所有功能必须经过测试
+- **文档更新**：代码变更必须同步更新文档
+- **持续集成**：利用CI/CD流程确保质量
 
-## Deployment
+## 5. 变更管理
 
-### Tencent Cloud SCF
-- Entry point: `index.main_handler`
-- Runtime: Python 3.10
-- Port: 9000
-- Environment variables: SUPABASE_URL, SUPABASE_KEY
+### 5.1 变更申请
+- 所有重大变更必须提交变更申请
+- 变更申请必须包含：变更原因、影响范围、风险评估、实施计划
 
-### Docker
-- Base image: `python:3.10-slim` (DaoCloud mirror)
-- Exposed port: 9000
-- Health check: Run `test_connectivity.py` on startup
+### 5.2 变更审批
+- 变更必须经过相关负责人审批
+- 审批流程：提交申请 → 技术评估 → 风险评估 → 最终审批
 
-## Important Reminders
+### 5.3 变更实施
+- 变更必须在非生产环境进行测试
+- 变更必须有回滚计划
+- 变更必须在适当的时间窗口实施
 
-1. Never commit secrets - use environment variables
-2. Test before deploying - always run test scripts
-3. UTF-8 encoding required for all Python files
-4. Type hints required for all functions
-5. Error handling required in cloud functions
-6. Chinese comments for documentation
-7. Return proper HTTP response format
+## 6. 附录
 
-## Architecture
+### 6.1 术语定义
+- **工具**：指能够执行特定功能的软件组件
+- **Bug**：指系统中的错误或缺陷
+- **架构**：指系统的整体设计和结构
+- **变更**：指对系统的任何修改
 
-```
-Client Request → Tencent Cloud SCF (Port 9000) → Python: src/index.py
-→ Supabase Client → Supabase Database → Response JSON
-```
+### 6.2 参考资源
+- PEP 8 代码风格指南
+- GitFlow 工作流
+- 语义化版本规范
+- 软件测试最佳实践
+
+### 6.3 联系方式
+- 项目负责人：[负责人姓名]
+- 技术支持：[支持邮箱]
+- 代码仓库：[仓库地址]

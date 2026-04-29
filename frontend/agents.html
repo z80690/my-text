@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能体列表</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .agent-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .agent-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .agent-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .agent-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .agent-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .agent-details {
+            font-size: 12px;
+            color: #888;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            display: none;
+        }
+        .agent-card.expanded .agent-details {
+            display: block;
+        }
+        .agent-count {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 16px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>智能体列表</h1>
+    <div class="agent-count">
+        共 <span id="agent-count">0</span> 个智能体
+    </div>
+    <div class="agent-list" id="agent-list">
+        <p>加载中...</p>
+    </div>
+
+    <script>
+        // 加载智能体数据
+        fetch('agents.json')
+            .then(response => response.json())
+            .then(agents => {
+                const agentList = document.getElementById('agent-list');
+                const agentCount = document.getElementById('agent-count');
+                
+                agentCount.textContent = agents.length;
+                agentList.innerHTML = '';
+                
+                // 显示每个智能体
+                agents.forEach(agent => {
+                    const card = document.createElement('div');
+                    card.className = 'agent-card';
+                    card.innerHTML = `
+                        <div class="agent-name">${agent.name}</div>
+                        <div class="agent-description">${agent.description}</div>
+                        <div class="agent-details">
+                            <p><strong>ID:</strong> ${agent.id}</p>
+                            <p><strong>类型:</strong> ${agent.type}</p>
+                            <p><strong>能力:</strong> ${agent.capabilities.join(', ')}</p>
+                        </div>
+                    `;
+                    
+                    // 添加点击展开/收起功能
+                    card.addEventListener('click', () => {
+                        card.classList.toggle('expanded');
+                    });
+                    
+                    agentList.appendChild(card);
+                });
+            })
+            .catch(error => {
+                document.getElementById('agent-list').innerHTML = `<p style="color: red;">加载失败: ${error.message}</p>`;
+            });
+    </script>
+</body>
+</html>

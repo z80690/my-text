@@ -1,4 +1,115 @@
 {
-  "sessions": [],
+  "sessions": [
+    {
+      "session_id": "test-session-1",
+      "phase": "completed",
+      "timestamp": "2026-04-27T10:00:00",
+      "end_timestamp": "2026-04-27T10:00:01",
+      "task_description": "这是一个简单的代码优化任务。",
+      "original_task": "这是一个简单的代码优化任务。",
+      "detected_mode": "game_theory_mode2",
+      "task_type": "normal",
+      "scheduling_advice": {},
+      "context": {},
+      "scheduling_decision": {
+        "mode": "降维打击模式（流水线博弈）",
+        "description": "通过生成、挑剔、融合三阶段，不断优化产出物的质量",
+        "recommended_agents": ["code_executor_agent", "editor_agent", "writer_agent"]
+      },
+      "result": "success",
+      "agents_used": ["code_executor_agent"],
+      "duration_ms": 1000,
+      "error": null,
+      "response_preview": "测试任务 1 完成"
+    },
+    {
+      "session_id": "test-session-2",
+      "phase": "completed",
+      "timestamp": "2026-04-27T10:01:00",
+      "end_timestamp": "2026-04-27T10:01:01",
+      "task_description": "对比一下敏捷和瀑布开发模式。",
+      "original_task": "对比一下敏捷和瀑布开发模式。",
+      "detected_mode": "game_theory_mode1",
+      "task_type": "normal",
+      "scheduling_advice": {},
+      "context": {},
+      "scheduling_decision": {
+        "mode": "辩论模式（串行模拟并行）",
+        "description": "通过视角A和视角B的对立碰撞，产出更全面的解决方案",
+        "recommended_agents": ["society_of_mind_agent", "editor_agent"]
+      },
+      "result": "success",
+      "agents_used": ["code_executor_agent"],
+      "duration_ms": 1000,
+      "error": null,
+      "response_preview": "测试任务 2 完成"
+    },
+    {
+      "session_id": "test-session-3",
+      "phase": "completed",
+      "timestamp": "2026-04-27T10:02:00",
+      "end_timestamp": "2026-04-27T10:02:01",
+      "task_description": "请设计一个用户登录系统的架构。",
+      "original_task": "请设计一个用户登录系统的架构。",
+      "detected_mode": "game_theory_mode3",
+      "task_type": "normal",
+      "scheduling_advice": {},
+      "context": {},
+      "scheduling_decision": {
+        "mode": "深度设计模式（三段式协同）",
+        "description": "通过蓝图设计、可行性挑战、融合实现，确保设计的可落地性",
+        "recommended_agents": ["society_of_mind_agent", "code_executor_agent", "editor_agent"]
+      },
+      "result": "success",
+      "agents_used": ["code_executor_agent"],
+      "duration_ms": 1000,
+      "error": null,
+      "response_preview": "测试任务 3 完成"
+    },
+    {
+      "session_id": "test-session-4",
+      "phase": "completed",
+      "timestamp": "2026-04-27T10:03:00",
+      "end_timestamp": "2026-04-27T10:03:01",
+      "task_description": "分析这个项目可能存在的风险。",
+      "original_task": "分析这个项目可能存在的风险。",
+      "detected_mode": "game_theory_mode1",
+      "task_type": "normal",
+      "scheduling_advice": {},
+      "context": {},
+      "scheduling_decision": {
+        "mode": "辩论模式（串行模拟并行）",
+        "description": "通过视角A和视角B的对立碰撞，产出更全面的解决方案",
+        "recommended_agents": ["society_of_mind_agent", "editor_agent"]
+      },
+      "result": "success",
+      "agents_used": ["code_executor_agent"],
+      "duration_ms": 1000,
+      "error": null,
+      "response_preview": "测试任务 4 完成"
+    },
+    {
+      "session_id": "test-session-5",
+      "phase": "completed",
+      "timestamp": "2026-04-27T10:04:00",
+      "end_timestamp": "2026-04-27T10:04:01",
+      "task_description": "1+1等于几？",
+      "original_task": "1+1等于几？",
+      "detected_mode": "normal",
+      "task_type": "normal",
+      "scheduling_advice": {},
+      "context": {},
+      "scheduling_decision": {
+        "mode": "常规单一路由",
+        "description": "直接匹配最合适的专业智能体进行处理",
+        "recommended_agents": ["assistant_agent"]
+      },
+      "result": "success",
+      "agents_used": ["code_executor_agent"],
+      "duration_ms": 500,
+      "error": null,
+      "response_preview": "测试任务 5 完成"
+    }
+  ],
   "current_session": null
 }
