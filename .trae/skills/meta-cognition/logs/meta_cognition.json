@@ -17,6 +17,7 @@
         "recommended_agents": ["code_executor_agent", "editor_agent", "writer_agent"]
       },
       "result": "success",
+      "success": true,
       "agents_used": ["code_executor_agent"],
       "duration_ms": 1000,
       "error": null,
@@ -39,6 +40,7 @@
         "recommended_agents": ["society_of_mind_agent", "editor_agent"]
       },
       "result": "success",
+      "success": true,
       "agents_used": ["code_executor_agent"],
       "duration_ms": 1000,
       "error": null,
@@ -61,6 +63,7 @@
         "recommended_agents": ["society_of_mind_agent", "code_executor_agent", "editor_agent"]
       },
       "result": "success",
+      "success": true,
       "agents_used": ["code_executor_agent"],
       "duration_ms": 1000,
       "error": null,
@@ -83,6 +86,7 @@
         "recommended_agents": ["society_of_mind_agent", "editor_agent"]
       },
       "result": "success",
+      "success": true,
       "agents_used": ["code_executor_agent"],
       "duration_ms": 1000,
       "error": null,
@@ -105,11 +109,69 @@
         "recommended_agents": ["assistant_agent"]
       },
       "result": "success",
+      "success": true,
       "agents_used": ["code_executor_agent"],
       "duration_ms": 500,
       "error": null,
       "response_preview": "测试任务 5 完成"
+    },
+    {
+      "session_id": "error-session-001",
+      "phase": "completed",
+      "timestamp": "2026-05-02T00:00:00",
+      "end_timestamp": "2026-05-02T00:00:01",
+      "task_description": "配置 iFlow 目录结构实现智能体同步",
+      "original_task": "我已经进入这个账户，I F L O W 这个界面里头的，我看到那个23个智能体了，但是前端没有任何显示。我想问一下那个 if LOW 这个文件夹的标准目录结构是什么样子的？",
+      "detected_mode": "game_theory_mode3",
+      "task_type": "architecture",
+      "scheduling_advice": {},
+      "scheduling_decision": {
+        "mode": "深度设计模式（三段式协同）",
+        "description": "设计并实现 iFlow 目录结构",
+        "recommended_agents": ["society_of_mind_agent", "code_executor_agent", "editor_agent"]
+      },
+      "result": "failure",
+      "success": false,
+      "agents_used": ["code_executor_agent"],
+      "duration_ms": 0,
+      "error": "混淆了 TRAE IDE 和 iFlow CLI 两个不同工具，错误创建了 .iflow 目录结构",
+      "error_details": "用户明确要求 TRAE 前端智能体同步，但系统错误地去配置 iFlow CLI 的目录结构，创建了不存在的 .iflow 文件夹，导致用户强烈不满",
+      "response_preview": "错误配置了 .iflow 目录，已被用户指出错误",
+      "root_cause": "误解了用户的需求，混淆了两个不同的产品（TRAE IDE vs iFlow CLI）",
+      "impact": "用户体验差，任务执行失败",
+      "fix_needed": true
+    },
+    {
+      "session_id": "error-session-002",
+      "phase": "completed",
+      "timestamp": "2026-05-02T00:00:02",
+      "end_timestamp": "2026-05-02T00:00:03",
+      "task_description": "自我净化功能调用检查",
+      "original_task": "分期为什么出错？然后你是否调用了自我净化功能？是否保存了错误的？",
+      "detected_mode": "game_theory_mode1",
+      "task_type": "analysis",
+      "scheduling_decision": {
+        "mode": "辩论模式（串行模拟并行）",
+        "description": "分析错误原因并检查自我净化功能",
+        "recommended_agents": ["society_of_mind_agent", "editor_agent"]
+      },
+      "result": "failure",
+      "success": false,
+      "agents_used": [],
+      "duration_ms": 0,
+      "error": "自我净化功能未被自动调用，错误任务也未被记录",
+      "error_details": "任务出错后，系统没有自动记录错误，也没有调用自我净化功能进行分析",
+      "response_preview": "正在检查自我净化功能",
+      "root_cause": "元认知技能的钩子没有被正确集成到执行流程中",
+      "impact": "错误无法被追踪和分析，无法从错误中学习",
+      "fix_needed": true
     }
   ],
-  "current_session": null
+  "current_session": null,
+  "task_statistics": {
+    "total": 7,
+    "success": 5,
+    "failure": 2,
+    "last_updated": "2026-05-02T00:00:03"
+  }
 }

@@ -59,6 +59,15 @@
             font-size: 16px;
             color: #666;
         }
+        .agent-type {
+            display: inline-block;
+            padding: 3px 8px;
+            background-color: #e8f4f8;
+            color: #2c7a9e;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -70,42 +79,69 @@
         <p>加载中...</p>
     </div>
 
-    <script>
-        // 加载智能体数据
-        fetch('agents.json')
-            .then(response => response.json())
-            .then(agents => {
-                const agentList = document.getElementById('agent-list');
-                const agentCount = document.getElementById('agent-count');
+            <script>
+        const typeMapping = {
+            "general": "通用",
+            "proxy": "代理",
+            "code": "代码",
+            "filter": "过滤",
+            "thinking": "推理",
+            "base": "基础",
+            "technical": "技术",
+            "routing": "路由",
+            "tool": "工具",
+            "game": "游戏",
+            "web": "Web",
+            "knowledge": "知识",
+            "ai": "AI",
+            "language": "语言",
+            "nlp": "NLP",
+            "content": "内容",
+            "learning": "学习",
+            "network": "网络"
+        };
+
+        function renderAgents(agents) {
+            const agentList = document.getElementById('agent-list');
+            const agentCount = document.getElementById('agent-count');
+            
+            agentCount.textContent = agents.length;
+            agentList.innerHTML = '';
+            
+            agents.forEach(agent => {
+                const card = document.createElement('div');
+                card.className = 'agent-card';
+                const typeLabel = typeMapping[agent.type] || agent.type;
                 
-                agentCount.textContent = agents.length;
-                agentList.innerHTML = '';
+                card.innerHTML = `
+                    <div class="agent-name">${agent.name}</div>
+                    <div class="agent-description">${agent.description}</div>
+                    <span class="agent-type">${typeLabel}</span>
+                    <div class="agent-details">
+                        <p><strong>ID:</strong> ${agent.id}</p>
+                        <p><strong>类型:</strong> ${typeLabel}</p>
+                        <p><strong>能力:</strong> ${agent.capabilities.join(', ')}</p>
+                    </div>
+                `;
                 
-                // 显示每个智能体
-                agents.forEach(agent => {
-                    const card = document.createElement('div');
-                    card.className = 'agent-card';
-                    card.innerHTML = `
-                        <div class="agent-name">${agent.name}</div>
-                        <div class="agent-description">${agent.description}</div>
-                        <div class="agent-details">
-                            <p><strong>ID:</strong> ${agent.id}</p>
-                            <p><strong>类型:</strong> ${agent.type}</p>
-                            <p><strong>能力:</strong> ${agent.capabilities.join(', ')}</p>
-                        </div>
-                    `;
-                    
-                    // 添加点击展开/收起功能
-                    card.addEventListener('click', () => {
-                        card.classList.toggle('expanded');
-                    });
-                    
-                    agentList.appendChild(card);
+                card.addEventListener('click', () => {
+                    card.classList.toggle('expanded');
                 });
-            })
-            .catch(error => {
-                document.getElementById('agent-list').innerHTML = `<p style="color: red;">加载失败: ${error.message}</p>`;
+                
+                agentList.appendChild(card);
             });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('agents.json?' + Date.now())
+                .then(response => response.json())
+                .then(data => renderAgents(data))
+                .catch(error => {
+                    console.error('加载失败:', error);
+                    document.getElementById('agent-list').innerHTML = 
+                        '<p style="color: red;">加载失败，请通过 HTTP 服务器访问</p>';
+                });
+        });
     </script>
 </body>
 </html>
