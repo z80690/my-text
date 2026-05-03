@@ -4,11 +4,30 @@
 
 元认知技能，用于在每次任务执行前后自动记录和分析调度策略的有效性。支持三种博弈模式和智能推荐功能，提供完整的任务执行审计和统计分析。
 
+**v2.8.1 更新**：新增守护进程模式，支持全自动触发！
+
+## 运行模式
+
+### 模式1：钩子函数模式（传统）
+- 手动调用 `pre_task_hook()` 和 `post_task_hook()`
+- 适用于手动控制流程
+
+### 模式2：守护进程模式（全自动）⭐
+- 后台自动运行，无需手动干预
+- 支持多种触发方式（文件系统、事件、API）
+- 提供HTTP监控接口
+- **完全兼容钩子函数模式**
+
 ## 文件结构
 
 ```
 meta-cognition/
 ├── SKILL.md              # 本文件
+├── daemon.py             # 守护进程主程序（命令行入口）
+├── daemon_manager.py     # 守护进程管理器
+├── auto_trigger.py       # 自动触发模块
+├── monitor.py            # HTTP监控服务
+├── test_daemon.py        # 守护进程测试脚本
 ├── test_skill.py         # 技能测试脚本
 ├── hooks/
 │   ├── __init__.py       # 模块初始化，导出所有公共接口
@@ -212,7 +231,105 @@ gt_sessions = export_sessions(filter_mode="game_theory_mode1")
 - Token
 - Secret
 
-## 使用示例
+## 守护进程模式使用
+
+### 命令行操作
+
+```bash
+# 启动守护进程（前台）
+python daemon.py start
+
+# 启动守护进程（后台）
+python daemon.py start --background
+
+# 查看状态
+python daemon.py status
+
+# 停止守护进程
+python daemon.py stop
+
+# 重启
+python daemon.py restart
+
+# 运行快速测试
+python daemon.py test
+```
+
+### Python API（推荐）
+
+```python
+# 导入快捷函数
+from meta_cognition import (
+    auto_submit,
+    auto_complete,
+    auto_start,
+    auto_stop
+)
+
+# 启动系统
+auto_start()
+
+# 提交任务（自动触发前置钩子）
+session_id = auto_submit("请帮我优化这段代码，提升性能")
+print(f"会话ID: {session_id}")
+
+# 完成任务（自动触发后置钩子）
+auto_complete(
+    session_id=session_id,
+    result="success",
+    agents_used=["code_executor_agent", "editor_agent"],
+    response_preview="优化已完成"
+)
+
+# 停止系统
+auto_stop()
+```
+
+### HTTP API（RESTful）
+
+启动监控服务后，可以通过HTTP接口操作：
+
+```bash
+# 查看系统状态
+curl http://127.0.0.1:8765/status
+
+# 提交任务
+curl -X POST http://127.0.0.1:8765/submit \
+  -H 'Content-Type: application/json' \
+  -d '{"task_description": "请帮我优化代码"}'
+
+# 完成任务
+curl -X POST http://127.0.0.1:8765/complete \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "session_id": "your-session-id",
+    "result": "success"
+  }'
+
+# 查看统计
+curl http://127.0.0.1:8765/statistics
+
+# 启动/停止
+curl -X POST http://127.0.0.1:8765/start
+curl -X POST http://127.0.0.1:8765/stop
+```
+
+### 事件触发
+
+```python
+from meta_cognition import get_auto_trigger_manager
+
+# 发射事件（自动触发任务）
+trigger = get_auto_trigger_manager()
+trigger.emit_event(
+    "user_request",
+    "请对比敏捷开发和瀑布模型的优缺点",
+    user_id="alice",
+    priority="high"
+)
+```
+
+## 使用示例（钩子函数模式）
 
 ### 完整工作流
 
@@ -251,6 +368,9 @@ print(f"博弈模式使用率: {stats['game_theory_usage_rate']}%")
 ```python
 # 运行技能测试脚本
 python test_skill.py
+
+# 运行守护进程测试
+python test_daemon.py
 ```
 
 ## 测试
