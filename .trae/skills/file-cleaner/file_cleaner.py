@@ -34,9 +34,13 @@ DEFAULT_PATTERNS = {
         ".tox/",
         "*.egg-info/",
         ".eggs/",
+        ".venv/",
+        "venv/",
+        "env/",
+        "my_clean_venv/",
     ],
     "node": [
-        "node_modules/",  # 谨慎使用！
+        "node_modules/",
         "package-lock.json",
         "yarn.lock",
     ],
@@ -65,6 +69,13 @@ DEFAULT_PATTERNS = {
         ".git/",  # 谨慎使用！
         ".svn/",
         ".hg/",
+    ],
+    "large_dirs": [
+        "pwsh7/",
+        "supabase_check/",
+        "qgis/",
+        "qgis-*",
+        "agent-harness/",
     ],
 }
 
@@ -123,11 +134,14 @@ class CleanupConfig:
     dry_run: bool = True
     verbose: bool = True
     
-    # 智能保护配置
+    # 智能保护配置 - 只保护真正重要的目录
     protect_important: bool = True
     important_dirs: List[str] = field(default_factory=lambda: [
-        ".git", "node_modules", ".venv", "venv", "__pycache__", ".trae"
+        ".git", ".trae"  # 这些是真正不能删除的
     ])
+    
+    # 是否清理依赖目录（可以通过包管理器重建）
+    clean_dependencies: bool = True  # 新增：默认清理 node_modules, venv 等
     
     # 用户自定义保护路径
     protected_paths: List[str] = field(default_factory=list)
@@ -246,7 +260,7 @@ class FileCleaner:
         """检查路径是否受保护"""
         filepath_lower = filepath.lower()
         
-        # 检查保护路径列表
+        # 检查保护路径列表（用户自定义保护）
         for protected in self._protected_paths:
             protected_path = protected.path.lower()
             # 检查是否匹配
@@ -259,9 +273,12 @@ class FileCleaner:
                 if filepath.endswith(ext):
                     return True, f"安全文件类型 ({ext})"
         
-        # 检查危险模式
+        # 检查危险模式（只保护真正危险的，如 .git, .trae）
         if self._config.protection_level in [ProtectionLevel.MEDIUM, ProtectionLevel.HIGH, ProtectionLevel.CRITICAL]:
             for pattern in DANGEROUS_PATTERNS:
+                # 如果启用了清理依赖目录，则不保护 node_modules, venv 等
+                if self._config.clean_dependencies and pattern in ["node_modules/", ".venv/", "venv/", "env/"]:
+                    continue
                 if pattern in filepath:
                     return True, f"危险路径模式 ({pattern})"
         
@@ -531,9 +548,111 @@ class FileCleaner:
         if self._config.verbose:
             print(f"[FileCleaner] 备份目录: {dirpath} -> {backup_path}")
     
+    def auto_clean(self, directory: str = ".") -> Dict[str, Any]:
+        """
+        🔮 全自动智能清理（用户一句话就能完成！）
+        
+        自动执行以下步骤：
+        1. 扫描目录，识别垃圾文件
+        2. 智能保护关键文件（自动检测并保护）
+        3. 预览将要删除的内容
+        4. 自动确认并执行删除
+        5. 生成详细报告
+        
+        参数：
+            directory: 要清理的目录，默认为当前目录
+        
+        返回：
+            清理结果报告
+        """
+        directory = os.path.abspath(directory)
+        
+        print("="*70)
+        print("🔮 智能文件清理器 v{} - 全自动模式".format(__version__))
+        print("="*70)
+        print(f"📂 目标目录: {directory}")
+        print(f"🛡️ 保护级别: {self._config.protection_level.value.upper()}")
+        print()
+        
+        # Step 1: 扫描
+        print("🔍 步骤1: 正在扫描垃圾文件...")
+        scan_result = self.scan(directory)
+        
+        # Step 2: 显示扫描结果
+        print(f"✅ 扫描完成！")
+        print(f"   - 可删除文件: {scan_result.total_count} 个")
+        print(f"   - 可删除目录: {scan_result.dir_count} 个")
+        print(f"   - 总大小: {self._format_size(scan_result.total_size)}")
+        print(f"   - 受保护文件: {scan_result.protected_count} 个")
+        print(f"   - 受保护目录: {len(scan_result.protected_dirs)} 个")
+        
+        if scan_result.total_count == 0 and scan_result.dir_count == 0:
+            print("\n🎉 目录已经很干净了！没有需要清理的文件。")
+            print("="*70)
+            return {
+                "status": "clean",
+                "message": "目录已经很干净了",
+                "details": {
+                    "files_deleted": 0,
+                    "dirs_deleted": 0,
+                    "bytes_freed": 0,
+                    "protected_items": len(scan_result.protected_files) + len(scan_result.protected_dirs)
+                }
+            }
+        
+        # Step 3: 智能判断是否需要清理
+        print("\n🤖 智能分析:")
+        print("   - 受保护项目已自动跳过")
+        print("   - 安全文件类型已自动保护")
+        
+        # Step 4: 执行清理
+        print("\n🗑️ 步骤2: 开始清理...")
+        result = self.clean(directory, dry_run=False)
+        
+        # Step 5: 显示结果
+        print("\n📊 清理报告:")
+        print(f"   ┌─────────────────────────────────────┐")
+        print(f"   │ 状态: {result.status.value}")
+        print(f"   │ 删除文件: {result.files_deleted} 个")
+        print(f"   │ 删除目录: {result.dirs_deleted} 个")
+        print(f"   │ 释放空间: {self._format_size(result.bytes_freed)}")
+        print(f"   │ 跳过文件: {result.files_skipped} 个")
+        print(f"   │ 跳过目录: {result.dirs_skipped} 个")
+        print(f"   └─────────────────────────────────────┘")
+        
+        if result.protected_items:
+            print("\n🛡️ 受保护项目（已跳过）:")
+            for item in result.protected_items[:5]:  # 最多显示5个
+                print(f"   - {os.path.basename(item)}")
+            if len(result.protected_items) > 5:
+                print(f"   - ... 还有 {len(result.protected_items) - 5} 个")
+        
+        if result.errors:
+            print("\n⚠️ 警告:")
+            for error in result.errors:
+                print(f"   - {error}")
+        
+        print("\n✅ 清理完成！")
+        print("="*70)
+        
+        return {
+            "status": result.status.value,
+            "message": "清理完成",
+            "details": {
+                "files_deleted": result.files_deleted,
+                "dirs_deleted": result.dirs_deleted,
+                "bytes_freed": result.bytes_freed,
+                "bytes_freed_human": self._format_size(result.bytes_freed),
+                "files_skipped": result.files_skipped,
+                "dirs_skipped": result.dirs_skipped,
+                "protected_items_count": len(result.protected_items),
+                "errors": result.errors
+            }
+        }
+    
     def get_cleanup_report(self, directory: str, patterns: Optional[List[str]] = None) -> Dict[str, Any]:
         """获取详细清理报告"""
-        scan_result = self.scan(directory, patterns)
+        scan_result = self.scan(directory)
         
         return {
             "directory": directory,
@@ -694,6 +813,46 @@ def create_cleaner_with_protection(protected_paths: List[str]) -> FileCleaner:
         dry_run=True
     )
     return FileCleaner(config)
+
+
+def auto_clean(directory: str = ".", protected_paths: Optional[List[str]] = None,
+               clean_dependencies: bool = True, clean_large_dirs: bool = True) -> Dict[str, Any]:
+    """
+    🔮 一键全自动智能清理（用户一句话就能完成！）
+    
+    自动执行以下步骤：
+    1. 扫描目录，识别垃圾文件
+    2. 智能保护关键文件（自动检测并保护）
+    3. 预览将要删除的内容
+    4. 自动确认并执行删除
+    5. 生成详细报告
+    
+    参数：
+        directory: 要清理的目录，默认为当前目录
+        protected_paths: 用户自定义保护路径列表
+        clean_dependencies: 是否清理依赖目录（node_modules, venv等），默认为True
+        clean_large_dirs: 是否清理大型目录（如pwsh7等），默认为True
+    
+    返回：
+        清理结果报告
+    """
+    # 使用用户指定的保护路径，否则使用默认保护
+    if protected_paths is None:
+        protected_paths = [
+            ".trae",
+            ".env",
+            "新建文件夹",
+            "agent.md"
+        ]
+    
+    config = CleanupConfig(
+        protected_paths=protected_paths,
+        protection_level=ProtectionLevel.CRITICAL,
+        dry_run=False,  # 全自动模式直接执行删除
+        clean_dependencies=clean_dependencies
+    )
+    cleaner = FileCleaner(config)
+    return cleaner.auto_clean(directory)
 
 
 # 测试

@@ -1,20 +1,21 @@
 ---
 name: file-cleaner
-description: 智能文件清理技能，用于扫描和清理项目中的垃圾文件，支持多层智能保护机制，确保关键文件和目录不会被误删。
-version: 2.0.0
+description: 智能文件清理技能，用于扫描和清理项目中的垃圾文件，支持多层智能保护机制，确保关键文件和目录不会被误删。支持**一键全自动清理**！
+version: 3.0.0
 author: Meta-Cognition Team
-tags: ["cleanup", "file-management", "maintenance", "utilities", "security"]
+tags: ["cleanup", "file-management", "maintenance", "utilities", "security", "auto-clean"]
 ---
 
-# File Cleaner Skill (智能增强版)
+# File Cleaner Skill (智能增强版 v3.0)
 
 ## 功能描述
 
 智能文件清理技能，用于扫描和清理项目中的垃圾文件，支持**多层智能保护机制**。
 
 ### 核心功能
+- 🔮 **一键全自动**：一句话就能完成清理，无需手动操作
 - 🔍 **智能扫描**：自动识别垃圾文件和保护文件
-- 🛡️ **多层保护**：支持4级保护级别，确保关键文件不被误删
+- 🛡️ **多层保护**：支持5级保护级别，确保关键文件不被误删
 - 📋 **预览模式**：默认不删除，先查看将要删除的内容
 - 🗑️ **安全删除**：支持回收站备份
 - 📊 **详细报告**：显示清理结果和保护状态
@@ -65,7 +66,24 @@ tags: ["cleanup", "file-management", "maintenance", "utilities", "security"]
 
 ## 使用说明
 
-### 方法调用
+### 🔮 一键全自动清理（推荐）
+
+**最简单的方式，一句话就能完成！**
+
+```python
+from file_cleaner import auto_clean
+
+# 方式1：直接清理当前目录（自动保护关键文件）
+result = auto_clean()
+
+# 方式2：指定目录
+result = auto_clean("/path/to/project")
+
+# 方式3：自定义保护路径
+result = auto_clean(".", protected_paths=[".trae", ".env", "my_folder"])
+```
+
+### 手动模式（高级用户）
 
 ```python
 from file_cleaner import scan, clean, get_report, create_cleaner_with_protection
