@@ -71,6 +71,16 @@ from .meta_cognition import (
     TriggerType
 )
 
+# ============================================
+# 集成配置（钩子函数自动调用）
+# ============================================
+
+from .integration_config import (
+    execute_with_hooks,
+    complete_with_hooks,
+    get_current_session_id
+)
+
 __all__ = [
     # 版本
     "__version__",
@@ -105,7 +115,11 @@ __all__ = [
     "auto_get_statistics",
     "auto_get_status",
     "auto_get_recent",
-    "HAS_DAEMON"
+    "HAS_DAEMON",
+    # 集成配置（自动调用钩子）
+    "execute_with_hooks",
+    "complete_with_hooks",
+    "get_current_session_id"
 ]
 
 # ============================================

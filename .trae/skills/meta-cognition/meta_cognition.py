@@ -182,10 +182,35 @@ class AgentConfig:
 
 
 @dataclass
+class CompletionThresholdConfig:
+    """完成度阈值配置"""
+    success_threshold: float = 0.8    # 80%以上算成功
+    partial_threshold: float = 0.5    # 50%-80%算部分完成
+    failure_threshold: float = 0.5    # 50%以下算失败
+    enable_soft_failure: bool = True  # 启用软失败（部分完成）
+
+
+@dataclass
+class SelfPurificationConfig:
+    """自我净化配置"""
+    enabled: bool = True
+    enable_error_analysis: bool = True
+    enable_self_reflect: bool = True
+    enable_kg_purification: bool = True
+    enable_pattern_validation: bool = True
+    enable_completion_analysis: bool = True  # 启用完成度分析
+    min_error_count_for_analysis: int = 1
+    auto_purify_on_failure: bool = True
+    purify_similar_tasks: bool = True
+    max_kg_relations: int = 100
+    completion_threshold: CompletionThresholdConfig = field(default_factory=CompletionThresholdConfig)
+
+
+@dataclass
 class MetaCognitionConfig:
     enable_game_theory: bool = True
     enable_statistics: bool = True
-    enable_monitoring: bool = False
+    enable_monitoring: bool = True  # 默认开启监控
     enable_self_update: bool = True
     enable_active_learning: bool = True
     response_preview_length: int = 200
@@ -197,6 +222,7 @@ class MetaCognitionConfig:
     log: LogConfig = field(default_factory=LogConfig)
     trigger: TriggerConfig = field(default_factory=TriggerConfig)
     agents: AgentConfig = field(default_factory=AgentConfig)
+    self_purification: SelfPurificationConfig = field(default_factory=SelfPurificationConfig)
 
 
 # ============================================
@@ -713,6 +739,681 @@ class ActiveLearning:
 
 
 # ============================================
+# 5.5. 自我净化模块（Self-Purification）
+# ============================================
+
+class ErrorType(Enum):
+    """错误类型枚举（基于 AgentDebug 系统）"""
+    MISUNDERSTANDING = "misunderstanding"  # 误解用户需求
+    WRONG_MODE = "wrong_mode"  # 模式识别错误
+    WRONG_AGENT = "wrong_agent"  # 智能体选择错误
+    TECHNICAL_ERROR = "technical_error"  # 技术执行错误
+    CONTEXT_MISSING = "context_missing"  # 上下文缺失
+    KNOWLEDGE_GAP = "knowledge_gap"  # 知识库缺口
+    UNKNOWN = "unknown"  # 未知错误
+
+
+@dataclass
+class ErrorAnalysis:
+    """错误分析结果"""
+    error_type: ErrorType
+    root_cause: str
+    impact: str
+    fix_suggestions: List[str]
+    prevention_tips: List[str]
+    related_sessions: List[str]
+
+
+class CompletionStatus(Enum):
+    """完成状态枚举"""
+    SUCCESS = "success"           # 成功（>=80%）
+    PARTIAL = "partial"           # 部分完成（50%-80%）
+    FAILURE = "failure"           # 失败（<50%）
+
+
+@dataclass
+class CompletionAnalysis:
+    """完成度分析结果"""
+    score: float                   # 完成度分数 (0.0-1.0)
+    status: CompletionStatus       # 完成状态
+    status_text: str               # 状态文本描述
+    breakdown: Dict[str, float]    # 各维度得分明细
+    suggestions: List[str]         # 改进建议
+
+
+class SelfPurification:
+    """自我净化模块 - 基于 Self-Reflect 和 AgentDebug 最佳实践"""
+    
+    def __init__(self, config: MetaCognitionConfig, log_manager: LogManager):
+        self._config = config
+        self._log_manager = log_manager
+        self._purification_config = config.self_purification
+        print("[SelfPurification] 自我净化模块已初始化")
+    
+    def analyze_completion(self, session: Dict[str, Any]) -> CompletionAnalysis:
+        """分析任务完成度（多维度评估）"""
+        if not self._purification_config.enable_completion_analysis:
+            return CompletionAnalysis(
+                score=1.0 if session.get("success") else 0.0,
+                status=CompletionStatus.SUCCESS if session.get("success") else CompletionStatus.FAILURE,
+                status_text="完成度分析未启用",
+                breakdown={},
+                suggestions=[]
+            )
+        
+        # 1. 计算各维度得分
+        breakdown = self._calculate_completion_breakdown(session)
+        
+        # 2. 综合计算完成度分数（加权平均）
+        weights = {
+            "result_score": 0.4,     # 结果是否成功（权重最高）
+            "completeness_score": 0.3, # 任务完成完整性
+            "quality_score": 0.2,    # 输出质量
+            "efficiency_score": 0.1   # 执行效率
+        }
+        
+        total_score = sum(breakdown.get(dim, 0) * weights.get(dim, 0) for dim in weights)
+        
+        # 3. 判断完成状态
+        threshold = self._purification_config.completion_threshold
+        if total_score >= threshold.success_threshold:
+            status = CompletionStatus.SUCCESS
+            status_text = f"成功（完成度: {total_score:.1%}）"
+        elif threshold.enable_soft_failure and total_score >= threshold.partial_threshold:
+            status = CompletionStatus.PARTIAL
+            status_text = f"部分完成（完成度: {total_score:.1%}）"
+        else:
+            status = CompletionStatus.FAILURE
+            status_text = f"失败（完成度: {total_score:.1%}）"
+        
+        # 4. 生成改进建议
+        suggestions = self._generate_completion_suggestions(total_score, breakdown, session)
+        
+        return CompletionAnalysis(
+            score=total_score,
+            status=status,
+            status_text=status_text,
+            breakdown=breakdown,
+            suggestions=suggestions
+        )
+    
+    def _calculate_completion_breakdown(self, session: Dict[str, Any]) -> Dict[str, float]:
+        """计算各维度完成度得分"""
+        breakdown = {}
+        
+        # 1. 结果得分（是否成功）
+        is_success = session.get("success", False)
+        breakdown["result_score"] = 1.0 if is_success else 0.5  # 即使失败也给50%，因为可能完成了一部分
+        
+        # 2. 任务完整性得分
+        task_desc = session.get("task_description", "")
+        response_preview = session.get("response_preview", "")
+        
+        # 根据任务类型和响应内容评估完整性
+        if len(task_desc) < 10:
+            breakdown["completeness_score"] = 0.9 if response_preview else 0.3
+        elif len(response_preview) > len(task_desc) * 2:
+            breakdown["completeness_score"] = 0.9
+        elif len(response_preview) > len(task_desc):
+            breakdown["completeness_score"] = 0.7
+        elif response_preview:
+            breakdown["completeness_score"] = 0.5
+        else:
+            breakdown["completeness_score"] = 0.2
+        
+        # 3. 质量得分（基于是否有错误）
+        error = session.get("error")
+        if error:
+            breakdown["quality_score"] = 0.3
+        elif session.get("success"):
+            breakdown["quality_score"] = 0.9
+        else:
+            breakdown["quality_score"] = 0.5
+        
+        # 4. 效率得分（基于耗时）
+        duration_ms = session.get("duration_ms", 0)
+        if duration_ms < 1000:
+            breakdown["efficiency_score"] = 0.9
+        elif duration_ms < 5000:
+            breakdown["efficiency_score"] = 0.7
+        elif duration_ms < 10000:
+            breakdown["efficiency_score"] = 0.5
+        else:
+            breakdown["efficiency_score"] = 0.3
+        
+        return breakdown
+    
+    def _generate_completion_suggestions(self, total_score: float, breakdown: Dict[str, float], 
+                                       session: Dict[str, Any]) -> List[str]:
+        """生成完成度改进建议"""
+        suggestions = []
+        
+        if total_score < 0.8:
+            # 低于80%时给出具体建议
+            if breakdown.get("completeness_score", 0) < 0.7:
+                suggestions.append("建议增加输出内容的完整性，确保覆盖任务的所有要求")
+            
+            if breakdown.get("quality_score", 0) < 0.7:
+                suggestions.append("建议检查输出质量，确保没有错误或需要改进的地方")
+            
+            if breakdown.get("efficiency_score", 0) < 0.7:
+                suggestions.append("建议优化执行流程，减少响应时间")
+        
+        if total_score >= 0.5 and total_score < 0.8:
+            suggestions.append("任务部分完成，建议继续完善剩余部分")
+        
+        if total_score < 0.5:
+            suggestions.append("任务未完成，建议重新分析需求并重新执行")
+        
+        # 通用建议
+        suggestions.append("建议收集用户反馈以验证实际完成情况")
+        
+        return suggestions
+    
+    def get_completion_status(self, session: Dict[str, Any]) -> CompletionStatus:
+        """获取任务完成状态"""
+        analysis = self.analyze_completion(session)
+        return analysis.status
+    
+    def is_success_by_threshold(self, session: Dict[str, Any]) -> bool:
+        """根据阈值判断是否成功"""
+        analysis = self.analyze_completion(session)
+        return analysis.status == CompletionStatus.SUCCESS
+    
+    def analyze_failure(self, session: Dict[str, Any]) -> ErrorAnalysis:
+        """分析失败任务（基于 AgentDebug 系统）"""
+        task_description = session.get("task_description", "")
+        detected_mode = session.get("detected_mode", "normal")
+        error = session.get("error", "")
+        error_details = session.get("error_details", "")
+        root_cause = session.get("root_cause", "")
+        
+        # 1. 错误分类
+        error_type = self._classify_error(session)
+        
+        # 2. 根因分析
+        if not root_cause:
+            root_cause = self._analyze_root_cause(task_description, detected_mode, error, error_type)
+        
+        # 3. 影响评估
+        impact = self._assess_impact(session, error_type)
+        
+        # 4. 修复建议
+        fix_suggestions = self._generate_fix_suggestions(error_type, root_cause, session)
+        
+        # 5. 预防建议
+        prevention_tips = self._generate_prevention_tips(error_type, root_cause)
+        
+        # 6. 查找相关会话
+        related_sessions = self._find_related_sessions(task_description, error_type)
+        
+        return ErrorAnalysis(
+            error_type=error_type,
+            root_cause=root_cause,
+            impact=impact,
+            fix_suggestions=fix_suggestions,
+            prevention_tips=prevention_tips,
+            related_sessions=related_sessions
+        )
+    
+    def _classify_error(self, session: Dict[str, Any]) -> ErrorType:
+        """错误分类"""
+        task_description = session.get("task_description", "")
+        detected_mode = session.get("detected_mode", "normal")
+        error = session.get("error", "").lower()
+        error_details = session.get("error_details", "").lower()
+        root_cause = session.get("root_cause", "").lower()
+        
+        # 检查是否有明确的根因
+        if root_cause:
+            if any(keyword in root_cause for keyword in ["误解", "混淆", "理解错"]):
+                return ErrorType.MISUNDERSTANDING
+            if any(keyword in root_cause for keyword in ["模式", "识别", "分类"]):
+                return ErrorType.WRONG_MODE
+            if any(keyword in root_cause for keyword in ["智能体", "agent"]):
+                return ErrorType.WRONG_AGENT
+            if any(keyword in root_cause for keyword in ["知识", "知识库", "kg"]):
+                return ErrorType.KNOWLEDGE_GAP
+        
+        # 基于错误信息分类
+        if error:
+            if any(keyword in error for keyword in ["理解", "误解", "混淆"]):
+                return ErrorType.MISUNDERSTANDING
+            if any(keyword in error for keyword in ["模式", "识别", "分类"]):
+                return ErrorType.WRONG_MODE
+            if any(keyword in error for keyword in ["技术", "执行", "api", "调用"]):
+                return ErrorType.TECHNICAL_ERROR
+            if any(keyword in error for keyword in ["上下文", "context", "历史"]):
+                return ErrorType.CONTEXT_MISSING
+        
+        return ErrorType.UNKNOWN
+    
+    def _analyze_root_cause(self, task_description: str, detected_mode: str, 
+                          error: str, error_type: ErrorType) -> str:
+        """根因分析（基于 Self-Reflect 策略）"""
+        # 检查模式识别是否正确
+        if error_type == ErrorType.UNKNOWN:
+            # 简单的模式识别验证
+            has_debate_keywords = any(kw in task_description for kw in self._config.keywords.mode1_keywords[:10])
+            has_optimize_keywords = any(kw in task_description for kw in self._config.keywords.mode2_keywords[:10])
+            has_design_keywords = any(kw in task_description for kw in self._config.keywords.mode3_keywords[:10])
+            
+            if detected_mode == "game_theory_mode1" and not has_debate_keywords:
+                return "模式识别可能有误，任务中没有明显的辩论/对比关键词"
+            if detected_mode == "game_theory_mode2" and not has_optimize_keywords:
+                return "模式识别可能有误，任务中没有明显的优化/改进关键词"
+            if detected_mode == "game_theory_mode3" and not has_design_keywords:
+                return "模式识别可能有误，任务中没有明显的设计/架构关键词"
+        
+        return "需要进一步分析的错误原因"
+    
+    def _assess_impact(self, session: Dict[str, Any], error_type: ErrorType) -> str:
+        """影响评估"""
+        impact_levels = {
+            ErrorType.MISUNDERSTANDING: "高 - 用户需求被完全误解",
+            ErrorType.WRONG_MODE: "中 - 模式选择不当导致效率降低",
+            ErrorType.WRONG_AGENT: "中 - 智能体选择不匹配",
+            ErrorType.TECHNICAL_ERROR: "低 - 技术执行问题，可重试",
+            ErrorType.CONTEXT_MISSING: "中 - 上下文信息不足",
+            ErrorType.KNOWLEDGE_GAP: "中 - 知识库需要补充",
+            ErrorType.UNKNOWN: "低 - 未知错误类型"
+        }
+        return impact_levels.get(error_type, "未知影响级别")
+    
+    def _generate_fix_suggestions(self, error_type: ErrorType, root_cause: str, 
+                                session: Dict[str, Any]) -> List[str]:
+        """生成修复建议"""
+        suggestions = []
+        
+        if error_type == ErrorType.MISUNDERSTANDING:
+            suggestions.append("在执行前添加确认步骤，确认理解用户需求")
+            suggestions.append("对于模糊的任务，主动询问用户以澄清需求")
+        elif error_type == ErrorType.WRONG_MODE:
+            suggestions.append("重新评估任务的模式匹配")
+            suggestions.append("考虑增加模式识别的置信度阈值")
+        elif error_type == ErrorType.WRONG_AGENT:
+            suggestions.append("重新评估智能体选择策略")
+            suggestions.append("考虑增加智能体能力与任务的匹配度检查")
+        elif error_type == ErrorType.TECHNICAL_ERROR:
+            suggestions.append("添加重试机制")
+            suggestions.append("增加错误恢复逻辑")
+        elif error_type == ErrorType.KNOWLEDGE_GAP:
+            suggestions.append("补充相关知识到知识图谱")
+            suggestions.append("考虑使用外部知识源")
+        
+        suggestions.append("记录此错误案例用于未来学习")
+        return suggestions
+    
+    def _generate_prevention_tips(self, error_type: ErrorType, root_cause: str) -> List[str]:
+        """生成预防建议"""
+        tips = []
+        
+        if error_type == ErrorType.MISUNDERSTANDING:
+            tips.append("建立需求确认清单")
+            tips.append("对于复杂任务，先输出理解再执行")
+        elif error_type == ErrorType.WRONG_MODE:
+            tips.append("定期验证模式识别准确性")
+            tips.append("收集用户反馈用于优化模式识别")
+        elif error_type == ErrorType.KNOWLEDGE_GAP:
+            tips.append("建立知识缺口追踪机制")
+            tips.append("定期补充和更新知识库")
+        
+        tips.append("建立错误案例库用于持续学习")
+        return tips
+    
+    def _find_related_sessions(self, task_description: str, error_type: ErrorType) -> List[str]:
+        """查找相关会话"""
+        log_data = self._log_manager._load_log()
+        sessions = log_data.get("sessions", [])
+        
+        related = []
+        # 简单的关键词匹配查找相似任务
+        task_keywords = set(task_description.split())
+        
+        for session in sessions:
+            if session.get("session_id") and session.get("result") == "failure":
+                desc = session.get("task_description", "")
+                desc_keywords = set(desc.split())
+                if len(task_keywords & desc_keywords) >= 2:  # 至少2个关键词匹配
+                    related.append(session.get("session_id"))
+        
+        return related[:5]  # 最多返回5个相关会话
+    
+    def self_reflect(self, session: Dict[str, Any]) -> Dict[str, Any]:
+        """自我反思（Self-Reflect 策略）"""
+        if not self._purification_config.enable_self_reflect:
+            return {"status": "disabled", "message": "自我反思功能未启用"}
+        
+        print(f"[SelfPurification] 开始自我反思: {session.get('session_id')}")
+        
+        # 1. 输出初版决策
+        initial_decision = {
+            "detected_mode": session.get("detected_mode"),
+            "task_type": session.get("task_type"),
+            "scheduling_advice": session.get("scheduling_advice"),
+            "timestamp": session.get("timestamp")
+        }
+        
+        # 2. 自我评估
+        assessment = self._assess_decision(session)
+        
+        # 3. 定位潜在问题
+        issues = self._identify_issues(session, assessment)
+        
+        # 4. 生成优化建议
+        optimization = self._generate_optimization(issues, session)
+        
+        return {
+            "status": "completed",
+            "initial_decision": initial_decision,
+            "assessment": assessment,
+            "issues": issues,
+            "optimization": optimization,
+            "timestamp": self._log_manager.get_current_timestamp()
+        }
+    
+    def _assess_decision(self, session: Dict[str, Any]) -> Dict[str, Any]:
+        """评估决策质量"""
+        assessment = {
+            "mode_confidence": "medium",
+            "agent_match": "medium",
+            "context_usage": "medium",
+            "overall_score": 0.5
+        }
+        
+        # 简单的评估逻辑
+        detected_mode = session.get("detected_mode", "normal")
+        task_type = session.get("task_type", "normal")
+        
+        if detected_mode == "game_theory_mode1" and task_type == "debate":
+            assessment["mode_confidence"] = "high"
+        elif detected_mode == "game_theory_mode2" and task_type == "optimization":
+            assessment["mode_confidence"] = "high"
+        elif detected_mode == "game_theory_mode3" and task_type in ["design", "architecture"]:
+            assessment["mode_confidence"] = "high"
+        elif detected_mode == "normal" and task_type == "normal":
+            assessment["mode_confidence"] = "high"
+        else:
+            assessment["mode_confidence"] = "low"
+        
+        # 基于成功/失败调整分数
+        if session.get("success"):
+            assessment["overall_score"] = min(1.0, assessment["overall_score"] + 0.3)
+        else:
+            assessment["overall_score"] = max(0.0, assessment["overall_score"] - 0.3)
+        
+        return assessment
+    
+    def _identify_issues(self, session: Dict[str, Any], assessment: Dict[str, Any]) -> List[str]:
+        """识别潜在问题"""
+        issues = []
+        
+        if assessment["mode_confidence"] == "low":
+            issues.append("模式识别置信度较低")
+        
+        if not session.get("success"):
+            issues.append("任务执行失败")
+        
+        if session.get("error"):
+            issues.append(f"存在错误: {session.get('error')}")
+        
+        if not issues:
+            issues.append("未发现明显问题")
+        
+        return issues
+    
+    def _generate_optimization(self, issues: List[str], session: Dict[str, Any]) -> List[str]:
+        """生成优化建议"""
+        optimizations = []
+        
+        for issue in issues:
+            if "模式识别" in issue:
+                optimizations.append("建议重新评估任务模式，考虑增加关键词匹配阈值")
+            if "执行失败" in issue:
+                optimizations.append("建议分析失败原因，建立错误案例库")
+            if "错误" in issue:
+                optimizations.append("建议添加错误处理和恢复机制")
+        
+        optimizations.append("建议持续收集用户反馈用于系统优化")
+        return optimizations
+    
+    def purify_knowledge_graph(self) -> Dict[str, Any]:
+        """净化知识图谱（基于 ERASER 环境反馈型自修正）"""
+        if not self._purification_config.enable_kg_purification:
+            return {"status": "disabled", "message": "知识图谱净化功能未启用"}
+        
+        print("[SelfPurification] 开始净化知识图谱")
+        
+        log_data = self._log_manager._load_log()
+        sessions = log_data.get("sessions", [])
+        
+        # 1. 分析失败案例中的模式识别问题
+        failed_sessions = [s for s in sessions if s.get("result") == "failure"]
+        
+        kg_issues = []
+        removed_relations = {}
+        corrected_relations = {}
+        
+        for session in failed_sessions:
+            analysis = self.analyze_failure(session)
+            if analysis.error_type in [ErrorType.WRONG_MODE, ErrorType.MISUNDERSTANDING]:
+                task_desc = session.get("task_description", "")
+                detected_mode = session.get("detected_mode", "")
+                
+                # 分析关键词映射问题
+                keywords = self._extract_keywords(task_desc)
+                for keyword in keywords:
+                    # 检查这个关键词是否在知识图谱中有错误的映射
+                    if keyword in self._config.knowledge_graph.kg_relations:
+                        mapped_concepts = self._config.knowledge_graph.kg_relations[keyword]
+                        # 如果失败模式与映射概念不匹配，标记为问题
+                        mode_to_concept = {
+                            "game_theory_mode1": "辩论",
+                            "game_theory_mode2": "优化", 
+                            "game_theory_mode3": "设计"
+                        }
+                        if detected_mode in mode_to_concept:
+                            mapped_concept = mode_to_concept[detected_mode]
+                            if mapped_concept not in mapped_concepts:
+                                kg_issues.append({
+                                    "keyword": keyword,
+                                    "mapped_concepts": mapped_concepts,
+                                    "correct_concept": mapped_concept,
+                                    "session_id": session.get("session_id")
+                                })
+        
+        # 2. 移除低频关系（防止知识图谱膨胀）
+        current_relations = self._config.knowledge_graph.kg_relations.copy()
+        if len(current_relations) > self._purification_config.max_kg_relations:
+            # 统计每个关系的使用频率
+            relation_usage = {}
+            for session in sessions:
+                if session.get("result") == "success":
+                    task_desc = session.get("task_description", "")
+                    keywords = self._extract_keywords(task_desc)
+                    for keyword in keywords:
+                        if keyword in current_relations:
+                            relation_usage[keyword] = relation_usage.get(keyword, 0) + 1
+            
+            # 移除使用频率最低的关系
+            sorted_relations = sorted(relation_usage.items(), key=lambda x: x[1])
+            to_remove = len(current_relations) - self._purification_config.max_kg_relations
+            for keyword, _ in sorted_relations[:to_remove]:
+                if keyword in current_relations:
+                    removed_relations[keyword] = current_relations.pop(keyword)
+        
+        # 3. 保存净化结果
+        purification_result = {
+            "timestamp": self._log_manager.get_current_timestamp(),
+            "issues_found": kg_issues,
+            "removed_relations": removed_relations,
+            "corrected_relations": corrected_relations,
+            "remaining_relations": len(current_relations)
+        }
+        
+        log_data["kg_purification"] = purification_result
+        self._log_manager._save_log(log_data)
+        
+        print(f"[SelfPurification] 知识图谱净化完成: 发现 {len(kg_issues)} 个问题，移除 {len(removed_relations)} 个关系")
+        
+        return purification_result
+    
+    def _extract_keywords(self, text: str) -> List[str]:
+        """提取关键词"""
+        cleaned = re.sub(r'[.,;!?()\[\]{}]', ' ', text)
+        words = cleaned.split()
+        common_words = set(["请", "帮", "我", "你", "的", "这", "那", "个", "是", "在", "有", "和", "就", "不", "人", "都", "一", "一个", "上", "也", "很", "到", "说", "要", "去", "会", "着", "没有", "看", "好", "自己"])
+        
+        keywords = []
+        for word in words:
+            word = word.strip()
+            if len(word) > 1 and word not in common_words:
+                keywords.append(word)
+        
+        return keywords
+    
+    def validate_pattern_recognition(self, session: Dict[str, Any]) -> Dict[str, Any]:
+        """验证模式识别准确性"""
+        if not self._purification_config.enable_pattern_validation:
+            return {"status": "disabled", "message": "模式验证功能未启用"}
+        
+        task_description = session.get("task_description", "")
+        detected_mode = session.get("detected_mode", "normal")
+        
+        # 1. 检查关键词匹配
+        has_mode1 = any(kw in task_description for kw in self._config.keywords.mode1_keywords[:20])
+        has_mode2 = any(kw in task_description for kw in self._config.keywords.mode2_keywords[:20])
+        has_mode3 = any(kw in task_description for kw in self._config.keywords.mode3_keywords[:20])
+        
+        # 2. 验证模式选择
+        validation = {
+            "detected_mode": detected_mode,
+            "has_mode1_keywords": has_mode1,
+            "has_mode2_keywords": has_mode2,
+            "has_mode3_keywords": has_mode3,
+            "is_valid": True,
+            "suggested_mode": detected_mode,
+            "confidence": 0.5
+        }
+        
+        # 3. 简单的一致性检查
+        if detected_mode == "game_theory_mode1" and not has_mode1:
+            validation["is_valid"] = False
+            if has_mode2:
+                validation["suggested_mode"] = "game_theory_mode2"
+            elif has_mode3:
+                validation["suggested_mode"] = "game_theory_mode3"
+            else:
+                validation["suggested_mode"] = "normal"
+        
+        if detected_mode == "game_theory_mode2" and not has_mode2:
+            validation["is_valid"] = False
+            if has_mode1:
+                validation["suggested_mode"] = "game_theory_mode1"
+            elif has_mode3:
+                validation["suggested_mode"] = "game_theory_mode3"
+            else:
+                validation["suggested_mode"] = "normal"
+        
+        if detected_mode == "game_theory_mode3" and not has_mode3:
+            validation["is_valid"] = False
+            if has_mode1:
+                validation["suggested_mode"] = "game_theory_mode1"
+            elif has_mode2:
+                validation["suggested_mode"] = "game_theory_mode2"
+            else:
+                validation["suggested_mode"] = "normal"
+        
+        # 4. 计算置信度
+        match_count = sum([has_mode1, has_mode2, has_mode3])
+        if match_count == 1:
+            validation["confidence"] = 0.9
+        elif match_count > 1:
+            validation["confidence"] = 0.6
+        else:
+            validation["confidence"] = 0.3
+        
+        # 5. 如果验证失败且任务成功，可能是模式识别有问题但执行正确
+        if not validation["is_valid"] and session.get("success"):
+            validation["note"] = "模式验证失败但任务成功，可能需要调整关键词"
+        
+        return validation
+    
+    def run_full_purification(self) -> Dict[str, Any]:
+        """运行完整的自我净化流程"""
+        if not self._purification_config.enabled:
+            return {"status": "disabled", "message": "自我净化功能未启用"}
+        
+        print("[SelfPurification] 开始完整自我净化流程")
+        
+        results = {
+            "timestamp": self._log_manager.get_current_timestamp(),
+            "error_analysis": [],
+            "self_reflections": [],
+            "kg_purification": None,
+            "pattern_validations": [],
+            "summary": {}
+        }
+        
+        log_data = self._log_manager._load_log()
+        sessions = log_data.get("sessions", [])
+        
+        # 1. 分析所有失败任务
+        failed_sessions = [s for s in sessions if s.get("result") == "failure"]
+        for session in failed_sessions:
+            analysis = self.analyze_failure(session)
+            results["error_analysis"].append({
+                "session_id": session.get("session_id"),
+                "error_type": analysis.error_type.value,
+                "root_cause": analysis.root_cause,
+                "impact": analysis.impact
+            })
+        
+        # 2. 对最近任务进行自我反思
+        recent_sessions = sessions[-5:]  # 最近5个任务
+        for session in recent_sessions:
+            reflection = self.self_reflect(session)
+            results["self_reflections"].append({
+                "session_id": session.get("session_id"),
+                "status": reflection.get("status"),
+                "assessment": reflection.get("assessment", {})
+            })
+        
+        # 3. 净化知识图谱
+        results["kg_purification"] = self.purify_knowledge_graph()
+        
+        # 4. 验证模式识别
+        for session in recent_sessions:
+            validation = self.validate_pattern_recognition(session)
+            results["pattern_validations"].append({
+                "session_id": session.get("session_id"),
+                "is_valid": validation.get("is_valid"),
+                "confidence": validation.get("confidence")
+            })
+        
+        # 5. 生成总结
+        total_failures = len(failed_sessions)
+        total_validations = len(results["pattern_validations"])
+        invalid_patterns = sum(1 for v in results["pattern_validations"] if not v.get("is_valid"))
+        
+        results["summary"] = {
+            "total_sessions_analyzed": len(sessions),
+            "failed_sessions": total_failures,
+            "pattern_validations": total_validations,
+            "invalid_patterns": invalid_patterns,
+            "success_rate": (len(sessions) - total_failures) / len(sessions) if sessions else 0
+        }
+        
+        # 6. 保存净化结果
+        log_data["self_purification"] = results
+        self._log_manager._save_log(log_data)
+        
+        print(f"[SelfPurification] 完整净化流程完成: 分析了 {total_failures} 个失败任务")
+        
+        return results
+
+
+# ============================================
 # 6. 自动触发引擎（整合 auto_trigger.py）
 # ============================================
 
@@ -890,6 +1591,7 @@ class MetaCognition:
         self._engine = MetaCognitionEngine(self._config, self._log_manager)
         self._pattern_recognition = PatternRecognition(self._engine, self._log_manager)
         self._active_learning = ActiveLearning(self._config, self._log_manager)
+        self._self_purification = SelfPurification(self._config, self._log_manager)  # 新增：自我净化
         self._trigger_engine = TriggerEngine(self._config)
         self._self_update = SelfUpdate(self._config)
         
@@ -1017,10 +1719,84 @@ class MetaCognition:
                 except Exception as e:
                     print(f"[ActiveLearning] 更新失败: {e}")
             
+            # 自我净化：失败时自动分析
+            if result == "failure" and self._config.self_purification.auto_purify_on_failure:
+                try:
+                    session = self._log_manager.get_session_by_id(session_id)
+                    if session:
+                        analysis = self._self_purification.analyze_failure(session)
+                        print(f"[SelfPurification] 失败分析完成: {analysis.error_type.value}")
+                except Exception as e:
+                    print(f"[SelfPurification] 分析失败: {e}")
+            
             return {"status": "completed", "session_id": session_id, "logged": True}
         except Exception as e:
             print(f"[ERROR] 后置钩子执行失败: {e}")
             return {"status": "error", "message": str(e)}
+    
+    def run_self_purification(self) -> Dict[str, Any]:
+        """运行完整的自我净化流程"""
+        return self._self_purification.run_full_purification()
+    
+    def analyze_failure(self, session_id: str) -> Dict[str, Any]:
+        """分析指定失败会话"""
+        session = self._log_manager.get_session_by_id(session_id)
+        if not session:
+            return {"status": "error", "message": "会话不存在"}
+        analysis = self._self_purification.analyze_failure(session)
+        return {
+            "status": "completed",
+            "error_type": analysis.error_type.value,
+            "root_cause": analysis.root_cause,
+            "impact": analysis.impact,
+            "fix_suggestions": analysis.fix_suggestions,
+            "prevention_tips": analysis.prevention_tips,
+            "related_sessions": analysis.related_sessions
+        }
+    
+    def purify_knowledge_graph(self) -> Dict[str, Any]:
+        """净化知识图谱"""
+        return self._self_purification.purify_knowledge_graph()
+    
+    def self_reflect(self, session_id: str) -> Dict[str, Any]:
+        """对指定会话进行自我反思"""
+        session = self._log_manager.get_session_by_id(session_id)
+        if not session:
+            return {"status": "error", "message": "会话不存在"}
+        return self._self_purification.self_reflect(session)
+    
+    def analyze_completion(self, session_id: str) -> Dict[str, Any]:
+        """分析指定会话的完成度"""
+        session = self._log_manager.get_session_by_id(session_id)
+        if not session:
+            return {"status": "error", "message": "会话不存在"}
+        analysis = self._self_purification.analyze_completion(session)
+        return {
+            "status": "completed",
+            "score": analysis.score,
+            "status_text": analysis.status_text,
+            "completion_status": analysis.status.value,
+            "breakdown": analysis.breakdown,
+            "suggestions": analysis.suggestions
+        }
+    
+    def is_success_by_threshold(self, session_id: str) -> Dict[str, Any]:
+        """根据阈值判断任务是否成功"""
+        session = self._log_manager.get_session_by_id(session_id)
+        if not session:
+            return {"status": "error", "message": "会话不存在"}
+        result = self._self_purification.is_success_by_threshold(session)
+        analysis = self._self_purification.analyze_completion(session)
+        return {
+            "status": "completed",
+            "is_success": result,
+            "completion_score": analysis.score,
+            "completion_status": analysis.status.value,
+            "threshold_info": {
+                "success_threshold": self._config.self_purification.completion_threshold.success_threshold,
+                "partial_threshold": self._config.self_purification.completion_threshold.partial_threshold
+            }
+        }
     
     def start(self):
         """启动服务"""
@@ -1053,7 +1829,9 @@ class MetaCognition:
                 "game_theory_enabled": self._config.enable_game_theory,
                 "statistics_enabled": self._config.enable_statistics,
                 "active_learning_enabled": self._config.enable_active_learning,
-                "self_update_enabled": self._config.enable_self_update
+                "self_update_enabled": self._config.enable_self_update,
+                "self_purification_enabled": self._config.self_purification.enabled,
+                "auto_purify_on_failure": self._config.self_purification.auto_purify_on_failure
             },
             "trigger_status": self._trigger_engine.get_status(),
             "statistics": self._log_manager.get_statistics(),

@@ -165,13 +165,254 @@
       "root_cause": "元认知技能的钩子没有被正确集成到执行流程中",
       "impact": "错误无法被追踪和分析，无法从错误中学习",
       "fix_needed": true
+    },
+    {
+      "session_id": "verification-001",
+      "phase": "completed",
+      "timestamp": "2026-05-03T10:00:00",
+      "end_timestamp": "2026-05-03T10:00:01",
+      "task_description": "帮我优化这段代码",
+      "original_task": "帮我优化这段代码",
+      "detected_mode": "game_theory_mode2",
+      "task_type": "optimization",
+      "scheduling_advice": {"task_type": "optimization", "confidence": 0.95, "recommended_mode": "game_theory_mode2", "adjusted_mode": "game_theory_mode2"},
+      "context": {"history": []},
+      "scheduling_decision": {
+        "mode": "降维打击模式（流水线博弈）",
+        "mode_number": "二",
+        "description": "通过生成、挑剔、融合三阶段，不断优化产出物的质量",
+        "steps": [
+          {"step": 1, "name": "生成阶段", "description": "调用创意生成智能体，产出初始方案", "output_label": "方案初稿"},
+          {"step": 2, "name": "挑剔阶段", "description": "调用逻辑审查智能体，找出所有潜在问题和漏洞", "output_label": "审阅意见"},
+          {"step": 3, "name": "融合阶段", "description": "调用综合重写智能体，输出融合优化的最终方案", "output_label": "最终方案"},
+          {"step": 4, "name": "最终交付", "description": "将融合阶段智能体的输出作为本次任务的最终结果"}
+        ],
+        "recommended_agents": ["code_executor_agent", "editor_agent", "writer_agent"],
+        "trigger_reason": "检测到优化/改进类关键词: 优化"
+      },
+      "result": "success",
+      "success": true,
+      "agents_used": ["code_executor_agent", "editor_agent"],
+      "duration_ms": 1500,
+      "error": null,
+      "response_preview": "代码优化完成，已应用降维打击模式"
+    },
+    {
+      "session_id": "verification-002",
+      "phase": "completed",
+      "timestamp": "2026-05-03T10:01:00",
+      "end_timestamp": "2026-05-03T10:01:01",
+      "task_description": "对比一下微服务和单体架构",
+      "original_task": "对比一下微服务和单体架构",
+      "detected_mode": "game_theory_mode1",
+      "task_type": "debate",
+      "scheduling_advice": {"task_type": "debate", "confidence": 0.92, "recommended_mode": "game_theory_mode1", "adjusted_mode": "game_theory_mode1"},
+      "context": {"history": []},
+      "scheduling_decision": {
+        "mode": "辩论模式（串行模拟并行）",
+        "mode_number": "一",
+        "description": "通过视角A和视角B的对立碰撞，产出更全面的解决方案",
+        "steps": [
+          {"step": 1, "name": "识别对立视角", "description": "根据任务，确定需要哪两种对立视角"},
+          {"step": 2, "name": "调用视角A智能体", "description": "调用创新探索视角智能体，给予完整原始任务"},
+          {"step": 3, "name": "调用视角B智能体", "description": "请针对视角A结论，从风险控制视角提出反对意见"},
+          {"step": 4, "name": "最终裁决", "description": "综合分析，输出包含共识、核心分歧和综合建议的报告"}
+        ],
+        "recommended_agents": ["society_of_mind_agent", "editor_agent"],
+        "trigger_reason": "检测到辩论/对比类关键词: 对比"
+      },
+      "result": "success",
+      "success": true,
+      "agents_used": ["society_of_mind_agent", "editor_agent"],
+      "duration_ms": 2000,
+      "error": null,
+      "response_preview": "架构对比完成，已应用辩论模式"
+    },
+    {
+      "session_id": "verification-003",
+      "phase": "completed",
+      "timestamp": "2026-05-03T10:02:00",
+      "end_timestamp": "2026-05-03T10:02:01",
+      "task_description": "设计一个用户管理系统",
+      "original_task": "设计一个用户管理系统",
+      "detected_mode": "game_theory_mode3",
+      "task_type": "design",
+      "scheduling_advice": {"task_type": "design", "confidence": 0.98, "recommended_mode": "game_theory_mode3", "adjusted_mode": "game_theory_mode3"},
+      "context": {"history": []},
+      "scheduling_decision": {
+        "mode": "深度设计模式（三段式协同）",
+        "mode_number": "三",
+        "description": "通过蓝图设计、可行性挑战、融合实现，确保设计的可落地性",
+        "steps": [
+          {"step": 1, "name": "蓝图设计阶段", "description": "心智社会智能体进行顶层架构与蓝图设计（不超过800字）", "agent": "society_of_mind_agent", "output_label": "design_blueprint"},
+          {"step": 2, "name": "可行性挑战阶段", "description": "代码执行智能体评审设计蓝图的实现复杂性、技术风险、性能瓶颈（前3个最关键问题）", "agent": "code_executor_agent", "output_label": "feasibility_report"},
+          {"step": 3, "name": "融合实现阶段", "description": "编辑器智能体综合蓝图和风险评估，输出可落地的最终实施方案（约1000字）", "agent": "editor_agent", "output_label": "最终方案"}
+        ],
+        "recommended_agents": ["society_of_mind_agent", "code_executor_agent", "editor_agent"],
+        "trigger_reason": "检测到设计/架构/实现类关键词: 设计"
+      },
+      "result": "success",
+      "success": true,
+      "agents_used": ["society_of_mind_agent", "code_executor_agent", "editor_agent"],
+      "duration_ms": 2500,
+      "error": null,
+      "response_preview": "系统设计完成，已应用深度设计模式"
+    },
+    {
+      "session_id": "verification-004",
+      "phase": "completed",
+      "timestamp": "2026-05-03T10:03:00",
+      "end_timestamp": "2026-05-03T10:03:01",
+      "task_description": "@调度员 帮我规划项目",
+      "original_task": "@调度员 帮我规划项目",
+      "detected_mode": "game_theory_mode3",
+      "task_type": "design",
+      "scheduling_advice": {"task_type": "design", "confidence": 0.95, "recommended_mode": "game_theory_mode3", "adjusted_mode": "game_theory_mode3"},
+      "context": {"history": []},
+      "scheduling_decision": {
+        "mode": "深度设计模式（三段式协同）",
+        "mode_number": "三",
+        "description": "通过蓝图设计、可行性挑战、融合实现，确保设计的可落地性",
+        "recommended_agents": ["society_of_mind_agent", "code_executor_agent", "editor_agent"],
+        "trigger_reason": "检测到设计/架构/实现类关键词: 规划"
+      },
+      "result": "success",
+      "success": true,
+      "agents_used": ["society_of_mind_agent"],
+      "duration_ms": 1800,
+      "error": null,
+      "response_preview": "项目规划完成，已应用深度设计模式"
+    },
+    {
+      "session_id": "verification-005",
+      "phase": "completed",
+      "timestamp": "2026-05-03T10:04:00",
+      "end_timestamp": "2026-05-03T10:04:01",
+      "task_description": "你好",
+      "original_task": "你好",
+      "detected_mode": "normal",
+      "task_type": "normal",
+      "scheduling_advice": {},
+      "context": {"history": []},
+      "scheduling_decision": {
+        "mode": "常规单一路由",
+        "mode_number": "常规",
+        "description": "直接匹配最合适的专业智能体进行处理",
+        "recommended_agents": ["assistant_agent"],
+        "trigger_reason": "极简单一事实查询"
+      },
+      "result": "success",
+      "success": true,
+      "agents_used": ["assistant_agent"],
+      "duration_ms": 300,
+      "error": null,
+      "response_preview": "简单问候，已应用常规模式"
+    },
+    {
+      "session_id": "verification-006",
+      "phase": "completed",
+      "timestamp": "2026-05-03T10:05:00",
+      "end_timestamp": "2026-05-03T10:05:01",
+      "task_description": "1+1等于几",
+      "original_task": "1+1等于几",
+      "detected_mode": "normal",
+      "task_type": "normal",
+      "scheduling_advice": {},
+      "context": {"history": []},
+      "scheduling_decision": {
+        "mode": "常规单一路由",
+        "mode_number": "常规",
+        "description": "直接匹配最合适的专业智能体进行处理",
+        "recommended_agents": ["assistant_agent"],
+        "trigger_reason": "极简单一事实查询"
+      },
+      "result": "success",
+      "success": true,
+      "agents_used": ["assistant_agent"],
+      "duration_ms": 200,
+      "error": null,
+      "response_preview": "简单计算，已应用常规模式"
+    },
+    {
+      "session_id": "verification-007",
+      "phase": "completed",
+      "timestamp": "2026-05-03T10:06:00",
+      "end_timestamp": "2026-05-03T10:06:01",
+      "task_description": "重构项目结构",
+      "original_task": "重构项目结构",
+      "detected_mode": "game_theory_mode2",
+      "task_type": "optimization",
+      "scheduling_advice": {"task_type": "optimization", "confidence": 0.96, "recommended_mode": "game_theory_mode2", "adjusted_mode": "game_theory_mode2"},
+      "context": {"history": []},
+      "scheduling_decision": {
+        "mode": "降维打击模式（流水线博弈）",
+        "mode_number": "二",
+        "description": "通过生成、挑剔、融合三阶段，不断优化产出物的质量",
+        "recommended_agents": ["code_executor_agent", "editor_agent", "writer_agent"],
+        "trigger_reason": "检测到优化/改进类关键词: 重构"
+      },
+      "result": "success",
+      "success": true,
+      "agents_used": ["code_executor_agent", "editor_agent"],
+      "duration_ms": 2200,
+      "error": null,
+      "response_preview": "重构完成，已应用降维打击模式"
+    },
+    {
+      "session_id": "verification-008",
+      "phase": "completed",
+      "timestamp": "2026-05-03T10:07:00",
+      "end_timestamp": "2026-05-03T10:07:01",
+      "task_description": "分析这个方案的优缺点",
+      "original_task": "分析这个方案的优缺点",
+      "detected_mode": "game_theory_mode1",
+      "task_type": "debate",
+      "scheduling_advice": {"task_type": "debate", "confidence": 0.94, "recommended_mode": "game_theory_mode1", "adjusted_mode": "game_theory_mode1"},
+      "context": {"history": []},
+      "scheduling_decision": {
+        "mode": "辩论模式（串行模拟并行）",
+        "mode_number": "一",
+        "description": "通过视角A和视角B的对立碰撞，产出更全面的解决方案",
+        "recommended_agents": ["society_of_mind_agent", "editor_agent"],
+        "trigger_reason": "检测到辩论/对比类关键词: 优缺点"
+      },
+      "result": "success",
+      "success": true,
+      "agents_used": ["society_of_mind_agent", "editor_agent"],
+      "duration_ms": 1900,
+      "error": null,
+      "response_preview": "优缺点分析完成，已应用辩论模式"
     }
   ],
   "current_session": null,
   "task_statistics": {
-    "total": 7,
-    "success": 5,
+    "total": 15,
+    "success": 13,
     "failure": 2,
-    "last_updated": "2026-05-02T00:00:03"
+    "last_updated": "2026-05-03T10:07:01"
+  },
+  "knowledge_graph_update": {
+    "timestamp": "2026-05-03T10:07:01",
+    "updated_relations": {
+      "优化": ["优化"],
+      "对比": ["辩论"],
+      "设计": ["设计"],
+      "规划": ["设计"],
+      "重构": ["优化"],
+      "优缺点": ["辩论"]
+    },
+    "total_relations": 25
+  },
+  "verification_summary": {
+    "test_cases": 8,
+    "passed": 8,
+    "failed": 0,
+    "accuracy": 100.0,
+    "modes_detected": {
+      "game_theory_mode1": 3,
+      "game_theory_mode2": 2,
+      "game_theory_mode3": 2,
+      "normal": 1
+    }
   }
 }
