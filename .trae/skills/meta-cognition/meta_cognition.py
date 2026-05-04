@@ -164,6 +164,14 @@ class TriggerConfig:
     filesystem_interval: float = 5.0
     api_enabled: bool = False
     api_interval: float = 0.1
+    
+    # 空闲模式配置
+    idle_mode_enabled: bool = True
+    idle_threshold_seconds: float = 60.0
+    idle_polling_interval: float = 5.0
+    idle_event_interval: float = 2.0
+    idle_filesystem_interval: float = 30.0
+    idle_api_interval: float = 1.0
 
 
 @dataclass
@@ -1428,18 +1436,64 @@ class TriggerEngine:
         self._events_lock = threading.Lock()
         self._watch_files: Dict[str, float] = {}
         self._on_task_submit = None
+        self._last_activity_time = time.time()
+    
+    def _update_activity(self):
+        """更新最后活动时间"""
+        self._last_activity_time = time.time()
+    
+    def _is_working(self) -> bool:
+        """判断是否正在执行任务（通过外部集成模块）"""
+        try:
+            from .integration_config import is_working
+            return is_working()
+        except ImportError:
+            # 如果无法导入，使用本地活动时间判断
+            elapsed = time.time() - self._last_activity_time
+            return elapsed < self._config.trigger.idle_threshold_seconds
+    
+    def _is_idle(self) -> bool:
+        """判断是否处于空闲状态"""
+        if not self._config.trigger.idle_mode_enabled:
+            return False
+        # 如果正在执行任务，不算空闲
+        if self._is_working():
+            return False
+        elapsed = time.time() - self._last_activity_time
+        return elapsed >= self._config.trigger.idle_threshold_seconds
+    
+    def _get_polling_interval(self) -> float:
+        """根据状态获取轮询间隔"""
+        # 如果正在工作，使用工作间隔
+        if self._is_working():
+            return self._config.trigger.polling_interval
+        # 否则根据空闲状态决定
+        if self._is_idle():
+            return self._config.trigger.idle_polling_interval
+        return self._config.trigger.polling_interval
+    
+    def _get_event_interval(self) -> float:
+        """根据状态获取事件间隔"""
+        # 如果正在工作，使用工作间隔
+        if self._is_working():
+            return self._config.trigger.event_interval
+        # 否则根据空闲状态决定
+        if self._is_idle():
+            return self._config.trigger.idle_event_interval
+        return self._config.trigger.event_interval
     
     def set_on_task_submit(self, callback: Callable):
         """设置任务提交回调"""
         self._on_task_submit = callback
     
     def _polling_loop(self):
-        """轮询模式循环"""
-        print(f"[Trigger] 轮询模式已启动，间隔: {self._config.trigger.polling_interval}s")
+        """轮询模式循环（支持动态频率）"""
+        print(f"[Trigger] 轮询模式已启动，工作间隔: {self._config.trigger.polling_interval}s, 空闲间隔: {self._config.trigger.idle_polling_interval}s")
         
         while not self._should_stop.is_set() and self._config.trigger.polling_enabled:
             try:
-                time.sleep(self._config.trigger.polling_interval)
+                interval = self._get_polling_interval()
+                time.sleep(interval)
             except Exception as e:
                 print(f"[Trigger][ERROR] 轮询模式错误: {e}")
                 time.sleep(1.0)
@@ -1447,8 +1501,8 @@ class TriggerEngine:
         print("[Trigger] 轮询模式已停止")
     
     def _event_loop(self):
-        """事件驱动循环"""
-        print(f"[Trigger] 事件驱动模式已启动，间隔: {self._config.trigger.event_interval}s")
+        """事件驱动循环（支持动态频率）"""
+        print(f"[Trigger] 事件驱动模式已启动，工作间隔: {self._config.trigger.event_interval}s, 空闲间隔: {self._config.trigger.idle_event_interval}s")
         
         while not self._should_stop.is_set() and self._config.trigger.event_enabled:
             try:
@@ -1456,10 +1510,14 @@ class TriggerEngine:
                     events_to_process = list(self._pending_events)
                     self._pending_events.clear()
                 
-                for event in events_to_process:
-                    self._process_event(event)
+                # 有事件处理，表示正在工作
+                if events_to_process:
+                    self._update_activity()
+                    for event in events_to_process:
+                        self._process_event(event)
                 
-                time.sleep(self._config.trigger.event_interval)
+                interval = self._get_event_interval()
+                time.sleep(interval)
             except Exception as e:
                 print(f"[Trigger][ERROR] 事件驱动模式错误: {e}")
                 time.sleep(1.0)

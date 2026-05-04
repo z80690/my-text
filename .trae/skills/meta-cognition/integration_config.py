@@ -7,10 +7,14 @@ meta-cognition 集成配置 - 确保钩子函数正确集成到调度流程
 2. 任务结束时自动调用 post_task_hook
 3. 读取历史会话信息供当前任务参考
 4. 完全无感，后台静默执行
+5. 动态频率调整：工作时高频，空闲时低频
+6. IDE关闭时自动停止守护进程
 """
 
 import time
 import threading
+import atexit
+import signal
 from typing import Dict, Any, Optional, Callable
 from .meta_cognition import (
     MetaCognition,
@@ -33,10 +37,14 @@ def execute_with_hooks(task_description: str, context: Optional[Dict[str, Any]] 
     - 读取历史会话信息
     - 检测任务模式
     - 记录任务开始
+    - 增加任务计数（进入工作模式）
     
     返回：包含 session_id 和调度决策的字典
     """
     global _current_session_id
+    
+    # 增加任务计数（标记正在工作）
+    _increment_task_count()
     
     # 读取历史会话（您要求的"开始时读取"）
     recent_sessions = get_recent_sessions(limit=5)
@@ -64,6 +72,7 @@ def complete_with_hooks(result: str = "success", agents_used: Optional[list] = N
     - 记录任务结果
     - 更新统计信息
     - 触发主动学习
+    - 减少任务计数（退出工作模式）
     
     返回：完成状态
     """
@@ -91,6 +100,9 @@ def complete_with_hooks(result: str = "success", agents_used: Optional[list] = N
     with _session_lock:
         _current_session_id = None
     
+    # 减少任务计数（标记任务完成）
+    _decrement_task_count()
+    
     return result
 
 def get_current_session_id() -> Optional[str]:
@@ -106,6 +118,10 @@ def get_current_session_id() -> Optional[str]:
 _meta_cognition_instance = None
 _daemon_thread = None
 _daemon_running = False
+
+# 任务状态追踪
+_task_count = 0
+_task_lock = threading.Lock()
 
 def _start_daemon():
     """启动守护进程"""
@@ -146,9 +162,34 @@ def is_daemon_running() -> bool:
 
 def get_daemon_status() -> Dict[str, Any]:
     """获取守护进程状态"""
+    status = {"running": _daemon_running}
     if _meta_cognition_instance:
-        return _meta_cognition_instance.get_status()
-    return {"running": False, "error": "守护进程未启动"}
+        status.update(_meta_cognition_instance.get_status())
+    with _task_lock:
+        status["active_tasks"] = _task_count
+        status["is_working"] = _task_count > 0
+    return status
+
+def _increment_task_count():
+    """增加任务计数（标记正在工作）"""
+    global _task_count
+    with _task_lock:
+        _task_count += 1
+        if _task_count == 1:
+            print("[Meta-Cognition Daemon] 进入工作模式 - 高频响应")
+
+def _decrement_task_count():
+    """减少任务计数（标记任务完成）"""
+    global _task_count
+    with _task_lock:
+        _task_count = max(0, _task_count - 1)
+        if _task_count == 0:
+            print("[Meta-Cognition Daemon] 进入空闲模式 - 低频响应")
+
+def is_working() -> bool:
+    """判断是否正在执行任务"""
+    with _task_lock:
+        return _task_count > 0
 
 # 记录最近一次任务开始时间
 _last_task_start = 0
@@ -167,6 +208,26 @@ def _auto_detect_task(task_description: str):
     # 自动调用前置钩子
     execute_with_hooks(task_description)
 
+# ============================================
+# IDE关闭时自动停止守护进程
+# ============================================
+
+def _handle_exit(signum=None, frame=None):
+    """处理进程退出信号"""
+    print(f"[Meta-Cognition Daemon] 收到退出信号 ({signum})，准备停止...")
+    _stop_daemon()
+
+# 注册退出处理
+atexit.register(_handle_exit)
+
+# 注册信号处理（Unix/Linux）
+try:
+    signal.signal(signal.SIGTERM, _handle_exit)
+    signal.signal(signal.SIGINT, _handle_exit)
+except AttributeError:
+    # Windows不支持这些信号，忽略
+    pass
+
 # 导出接口
 __all__ = [
     "execute_with_hooks",
@@ -176,7 +237,8 @@ __all__ = [
     "_start_daemon",
     "_stop_daemon",
     "is_daemon_running",
-    "get_daemon_status"
+    "get_daemon_status",
+    "is_working"
 ]
 
 # 自动启动守护进程
@@ -185,3 +247,4 @@ _start_daemon()
 print("[Meta-Cognition Integration] 集成配置已加载")
 print("[Meta-Cognition Integration] execute_with_hooks / complete_with_hooks 已就绪")
 print("[Meta-Cognition Integration] 守护进程模式已启用")
+print("[Meta-Cognition Integration] IDE关闭时将自动停止守护进程")
