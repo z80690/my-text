@@ -68,7 +68,10 @@ from .meta_cognition import (
     LogConfig,
     TriggerConfig,
     AgentConfig,
-    TriggerType
+    TriggerType,
+    SciBotConfig,
+    SciBot,
+    SciBotKnowledgeGraph
 )
 
 # ============================================
@@ -97,6 +100,9 @@ __all__ = [
     "TriggerConfig",
     "AgentConfig",
     "TriggerType",
+    "SciBotConfig",
+    "SciBot",
+    "SciBotKnowledgeGraph",
     # 钩子函数
     "pre_task_hook",
     "detect_task_mode",
@@ -129,3 +135,4 @@ __all__ = [
 print(f"[Meta-Cognition] v{__version__} 内生重构版已加载")
 print("[Meta-Cognition] 所有功能已整合到单一模块中")
 print("[Meta-Cognition] 自动触发系统已启动")
+print("[Meta-Cognition] SciBot 科研助手模块已集成（含知识图谱功能）")
