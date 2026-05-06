@@ -1,63 +1,46 @@
-from typing import Dict, List, Any, Optional
-import os
-import importlib
-import inspect
-from .base import BaseAgent, AgentConfig
+# -*- coding: utf-8 -*-
+"""智能体注册中心 - 自动启用"""
+
+import yaml
+from pathlib import Path
+from typing import Dict, Any, List, Optional
 
 class AgentRegistry:
+    """智能体注册中心"""
+    
     _instance = None
-
+    
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance._agents = {}
             cls._instance._initialized = False
         return cls._instance
-
-    def __init__(self):
-        if not self._initialized:
-            self._agents: Dict[str, BaseAgent] = {}
-            self._initialized = True
-
-    def register(self, agent: BaseAgent):
-        self._agents[agent.id] = agent
-        print(f"Registered agent: {agent.name} ({agent.id})")
-
-    def unregister(self, agent_id: str):
-        if agent_id in self._agents:
-            del self._agents[agent_id]
-
-    def get(self, agent_id: str) -> Optional[BaseAgent]:
+    
+    async def initialize(self):
+        """初始化注册中心"""
+        if self._initialized:
+            return
+        
+        # 从YAML配置加载智能体
+        config_path = Path('.trae/agents.yaml')
+        if config_path.exists():
+            with open(config_path, 'r', encoding='utf-8') as f:
+                config = yaml.safe_load(f)
+                
+                for agent_data in config.get('agents', []):
+                    self._agents[agent_data['id']] = agent_data
+        
+        self._initialized = True
+    
+    def get(self, agent_id: str) -> Optional[Dict[str, Any]]:
+        """获取智能体"""
         return self._agents.get(agent_id)
-
+    
     def list_agents(self) -> List[Dict[str, Any]]:
-        return [agent.get_metadata() for agent in self._agents.values()]
-
-    def execute(self, agent_id: str, task: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
-        agent = self.get(agent_id)
-        if not agent:
-            return {"status": "error", "message": f"Agent {agent_id} not found"}
-        try:
-            result = agent.execute(task, context or {})
-            return {
-                "status": "success",
-                "agent_id": agent_id,
-                "agent_name": agent.name,
-                "task": task,
-                "result": result
-            }
-        except Exception as e:
-            return {"status": "error", "message": str(e)}
-
-    def load_agents_from_module(self, module):
-        for name, obj in inspect.getmembers(module):
-            if inspect.isclass(obj) and issubclass(obj, BaseAgent) and obj != BaseAgent:
-                if hasattr(module, '_agent_config'):
-                    config = module._agent_config
-                    agent = obj(config)
-                    self.register(agent)
-
-_registry = AgentRegistry()
-
-def get_registry() -> AgentRegistry:
-    return _registry
+        """列出所有智能体"""
+        return list(self._agents.values())
+    
+    def get_agent_ids(self) -> List[str]:
+        """获取所有智能体ID"""
+        return list(self._agents.keys())

@@ -1,0 +1,203 @@
+# .trae/workflows.yaml - 工作流模板配置（机器可读）
+# 与 workflow-templates.md 规则文件同步
+
+version: "3.0.0"
+last_updated: "2026-05-06T10:00:00Z"
+schema_version: "1.0"
+
+templates:
+  - template_id: seq_flow
+    name: 顺序流
+    name_en: Sequential Flow
+    description: 按顺序依次执行多个任务节点
+    qos_level: normal
+    execution_mode: sequential
+    parameters:
+      type: object
+      properties:
+        steps:
+          type: array
+          items:
+            type: object
+            properties:
+              agent_id: { type: string }
+              task: { type: string }
+            required: ["agent_id", "task"]
+
+  - template_id: parallel_gateway
+    name: 并行网关
+    name_en: Parallel Gateway
+    description: 多个分支任务同时执行
+    qos_level: high
+    execution_mode: parallel
+    parameters:
+      type: object
+      properties:
+        branches:
+          type: array
+          items:
+            type: object
+            properties:
+              agent_id: { type: string }
+              task: { type: string }
+            required: ["agent_id", "task"]
+
+  - template_id: conditional_branch
+    name: 条件分支
+    name_en: Conditional Branch
+    description: 根据条件表达式选择执行路径
+    qos_level: normal
+    execution_mode: conditional
+    parameters:
+      type: object
+      properties:
+        conditions:
+          type: array
+          items:
+            type: object
+            properties:
+              condition: { type: string }
+              agent_id: { type: string }
+              task: { type: string }
+            required: ["condition", "agent_id", "task"]
+
+  - template_id: loop_flow
+    name: 循环流
+    name_en: Loop Flow
+    description: 重复执行任务直到满足退出条件
+    qos_level: normal
+    execution_mode: loop
+    parameters:
+      type: object
+      properties:
+        max_iterations: { type: integer, default: 10 }
+        condition: { type: string }
+        agent_id: { type: string }
+        task: { type: string }
+      required: ["condition", "agent_id", "task"]
+
+  - template_id: split_join
+    name: 分合流
+    name_en: Split Join
+    description: 拆分执行后聚合结果
+    qos_level: high
+    execution_mode: split_join
+    parameters:
+      type: object
+      properties:
+        split:
+          type: array
+          items:
+            type: object
+            properties:
+              agent_id: { type: string }
+              task: { type: string }
+            required: ["agent_id", "task"]
+        join:
+          type: object
+          properties:
+            agent_id: { type: string }
+            task: { type: string }
+          required: ["agent_id", "task"]
+
+  - template_id: compensation
+    name: 补偿事务
+    name_en: Compensation Transaction
+    description: 失败时自动回滚
+    qos_level: critical
+    execution_mode: compensation
+    parameters:
+      type: object
+      properties:
+        steps:
+          type: array
+          items:
+            type: object
+            properties:
+              agent_id: { type: string }
+              task: { type: string }
+              compensation:
+                type: object
+                properties:
+                  agent_id: { type: string }
+                  task: { type: string }
+            required: ["agent_id", "task"]
+
+  - template_id: game_theory
+    name: 博弈模式
+    name_en: Game Theory
+    description: 多智能体辩论决策模式
+    qos_level: high
+    execution_mode: game_theory
+    parameters:
+      type: object
+      properties:
+        strategy:
+          type: string
+          enum: ["optimization", "design"]
+        agents:
+          type: array
+          items:
+            type: object
+            properties:
+              agent_id: { type: string }
+              role: { type: string }
+            required: ["agent_id", "role"]
+      required: ["strategy"]
+
+  - template_id: monitor_flow
+    name: 监控流
+    name_en: Monitor Flow
+    description: 全程监控执行状态
+    qos_level: high
+    execution_mode: monitor
+    parameters:
+      type: object
+      properties:
+        agent_id: { type: string }
+        task: { type: string }
+        monitor:
+          type: object
+          properties:
+            metrics:
+              type: array
+              items: { type: string }
+            alerts:
+              type: array
+              items:
+                type: object
+                properties:
+                  condition: { type: string }
+                  action: { type: string }
+      required: ["agent_id", "task"]
+
+  - template_id: rule_interpreter_flow
+    name: 规则解释流
+    name_en: Rule Interpreter Flow
+    description: 解析规则文档并生成执行计划
+    qos_level: normal
+    execution_mode: rule_interpreter
+    parameters:
+      type: object
+      properties:
+        rule_document: { type: string }
+        output_format: { type: string, default: "execution_plan" }
+      required: ["rule_document"]
+
+qos_levels:
+  critical:
+    latency_target_ms: 50
+    availability: "99.99%"
+    resource_priority: highest
+  high:
+    latency_target_ms: 100
+    availability: "99.9%"
+    resource_priority: high
+  normal:
+    latency_target_ms: 200
+    availability: "99%"
+    resource_priority: medium
+  low:
+    latency_target_ms: 500
+    availability: "95%"
+    resource_priority: low
