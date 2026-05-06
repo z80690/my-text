@@ -1,0 +1,75 @@
+### 1. Think Before Coding（编码前思考）
+Don't assume. Don't hide confusion. Surface tradeoffs.  
+不要假设。不要隐藏困惑。暴露权衡。  
+
+Before implementing: 实施前：  
+- State your assumptions explicitly. If uncertain, ask.  
+  明确陈述假设。如果不确定，提问。  
+- If multiple interpretations exist, present them—don’t pick silently.  
+  如果存在多种解释，请呈现它们——不要沉默选择。  
+- If a simpler approach exists, say so. Push back when warranted.  
+  如果存在更简单的方法，请说明。在适当的时候提出反对意见。  
+- If something is unclear, stop. Name what’s confusing. Ask.  
+  如果某事不清楚，请停止。指出令人困惑的地方。提问。  
+
+
+### 2. Simplicity First（先求简单）
+Minimum code that solves the problem. Nothing speculative.  
+解决问题的关键是**最少代码**。不要猜测。  
+
+- No features beyond what was asked.  
+  不要添加超出所要求的功能。  
+- No abstractions for single-use code.  
+  不要为一次性使用的代码添加抽象。  
+- No "flexibility" or "configurability" that wasn’t requested.  
+  不要添加未请求的“灵活性”或“可配置性”。  
+- No error handling for impossible scenarios.  
+  不要为不可能发生的场景添加错误处理。  
+- If you write 200 lines and it could be 50, rewrite it.  
+  如果你写了200行代码，但实际只需要50行，那就重写它。  
+
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.  
+问问自己：“一个高级工程师会认为这太复杂了吗？” 如果会，那就简化。  
+
+
+### 3. Surgical Changes（手术性修改）
+Touch only what you must. Clean up only your own mess.  
+只触碰必须修改的部分。清理你自己的烂摊子。  
+
+When editing existing code: 编辑现有代码时：  
+- Don't "improve" adjacent code, comments, or formatting.  
+  不要“改进”相邻的代码、注释或格式。  
+- Don't refactor things that aren't broken.  
+  不要重构那些没有问题的东西。  
+- If you find unrelated dead code, flag it — don't delete it.  
+  如果你发现无关的废弃代码，请指出来——不要删除它。  
+
+When your changes create orphans: 当你的修改产生孤儿代码时：  
+- Remove imports/variables/functions that YOUR changes made unused.  
+  删除你修改所导致未使用的导入/变量/函数。  
+- Don't remove pre-existing dead code unless asked.  
+  除非被要求，否则不要删除现有的废弃代码。  
+
+The test: Every changed line should trace directly to the user's request.  
+测试：每行修改都应该直接追溯到用户请求。  
+
+
+### 4. Goal-Driven Execution（目标驱动执行）
+Define success criteria. Loop until verified.  
+定义成功标准。循环直到验证通过。  
+
+Transform tasks into verifiable goals: 将任务转化为可验证的目标：  
+- "Add validation" → "Write tests for invalid inputs, then make them pass"  
+  “添加” → “为无效输入编写测试，然后使其通过”验证  
+- "Fix the bug" → "Write a test that reproduces it, then make it pass"  
+  “修复错误” → “编写一个可复现该错误的测试，然后使其通过”  
+- "Refactor X" → "Ensure tests pass before and after"  
+  “重构X” → “确保测试前后通过”  
+
+For multi-step tasks: 对于多步骤任务：  
+1. [Step] – verify: [check]  
+2 [St.ep] – verify: [check]  
+3. [Step] – verify: [check]  
+
+Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.  
+强大的成功标准让你可以独立循环。薄弱的标准（“让它运行”）需要不断的澄清。
