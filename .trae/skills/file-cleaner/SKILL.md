@@ -1,16 +1,16 @@
 ---
 name: file-cleaner
-description: 智能文件清理技能，用于扫描和清理项目中的垃圾文件，支持多层智能保护机制，确保关键文件和目录不会被误删。支持**一键全自动清理**！
+description: 智能文件清理技能（Knip增强版），集成未使用文件检测、未使用依赖检测、未使用导出检测功能
 version: 3.0.0
 author: Meta-Cognition Team
-tags: ["cleanup", "file-management", "maintenance", "utilities", "security", "auto-clean"]
+tags: ["cleanup", "file-management", "maintenance", "utilities", "security", "auto-clean", "knip", "analysis"]
 ---
 
-# File Cleaner Skill (智能增强版 v3.0)
+# File Cleaner Skill (Knip增强版 v3.0)
 
 ## 功能描述
 
-智能文件清理技能，用于扫描和清理项目中的垃圾文件，支持**多层智能保护机制**。
+智能文件清理技能，集成**Knip核心功能**，用于扫描和清理项目中的垃圾文件，支持**多层智能保护机制**。
 
 ### 核心功能
 - 🔮 **一键全自动**：一句话就能完成清理，无需手动操作
@@ -20,15 +20,11 @@ tags: ["cleanup", "file-management", "maintenance", "utilities", "security", "au
 - 🗑️ **安全删除**：支持回收站备份
 - 📊 **详细报告**：显示清理结果和保护状态
 
-### 支持清理的文件类型
-
-| 类型 | 扩展名/目录 | 说明 |
-|------|-------------|------|
-| 日志文件 | `.log`, `.log.*`, `.txt`, `logs/` | 日志和临时文本文件 |
-| Python缓存 | `.pyc`, `__pycache__`, `.pytest_cache` | Python缓存 |
-| 构建产物 | `dist`, `build`, `out` | 编译输出目录 |
-| 临时文件 | `.tmp`, `.temp`, `.bak`, `.DS_Store` | 临时文件 |
-| IDE配置 | `.idea/`, `.vscode/` | 编辑器配置（谨慎使用） |
+### Knip增强功能
+- 📁 **未使用文件检测**：分析模块导入关系，找出未被引用的文件
+- 📦 **未使用依赖检测**：分析package.json，找出未被使用的依赖包
+- 📤 **未使用导出检测**：分析代码导出，找出未被引用的导出项
+- 🔗 **模块图分析**：构建完整的模块依赖关系图
 
 ---
 
@@ -68,8 +64,6 @@ tags: ["cleanup", "file-management", "maintenance", "utilities", "security", "au
 
 ### 🔮 一键全自动清理（推荐）
 
-**最简单的方式，一句话就能完成！**
-
 ```python
 from file_cleaner import auto_clean
 
@@ -100,7 +94,7 @@ cleaner = create_cleaner_with_protection(protected_paths)
 # 2. 扫描（预览模式）
 result = cleaner.scan(".")
 
-# 3. 获取详细报告
+# 3. 获取详细报告（包含Knip分析）
 report = cleaner.get_cleanup_report(".")
 
 # 4. 清理（先预览）
@@ -108,6 +102,28 @@ clean_result = cleaner.clean(".", dry_run=True)
 
 # 5. 真正删除
 clean_result = cleaner.clean(".", dry_run=False)
+```
+
+### Knip分析功能
+
+```python
+from file_cleaner import FileCleaner, CleanupConfig
+
+# 创建配置，启用Knip分析
+config = CleanupConfig(
+    analyze_unused_files=True,
+    analyze_unused_dependencies=True,
+    analyze_unused_exports=True
+)
+cleaner = FileCleaner(config)
+
+# 扫描并获取分析结果
+result = cleaner.scan(".")
+
+# 访问Knip分析结果
+print("未使用文件:", result.unused_files)
+print("未使用依赖:", result.unused_dependencies)
+print("未使用导出:", result.unused_exports)
 ```
 
 ### 参数说明
@@ -119,19 +135,9 @@ clean_result = cleaner.clean(".", dry_run=False)
 | `dry_run` | bool | True | 预览模式（不实际删除） |
 | `protected_paths` | list | [] | 用户自定义保护路径 |
 | `protection_level` | ProtectionLevel | HIGH | 保护级别 |
-
-### 快捷函数
-
-```python
-# 扫描（带保护）
-result = scan(".", protected_paths=[".trae", ".env"])
-
-# 清理（带保护）
-clean_result = clean(".", dry_run=True, protected_paths=[".trae", ".env"])
-
-# 获取报告
-report = get_report(".", protected_paths=[".trae", ".env"])
-```
+| `analyze_unused_files` | bool | True | 是否分析未使用文件 |
+| `analyze_unused_dependencies` | bool | True | 是否分析未使用依赖 |
+| `analyze_unused_exports` | bool | True | 是否分析未使用导出 |
 
 ---
 
@@ -155,7 +161,7 @@ report = get_report(".", protected_paths=[".trae", ".env"])
 |------|------|
 | `scan(directory, patterns)` | 扫描目录中的垃圾文件 |
 | `clean(directory, patterns, dry_run)` | 清理垃圾文件 |
-| `get_cleanup_report(directory, patterns)` | 获取详细报告 |
+| `get_cleanup_report(directory, patterns)` | 获取详细报告（含Knip分析） |
 | `add_protected_path(path, reason)` | 添加自定义保护路径 |
 | `remove_protected_path(path)` | 移除保护路径 |
 | `get_protected_paths()` | 获取所有保护路径 |
@@ -164,14 +170,20 @@ report = get_report(".", protected_paths=[".trae", ".env"])
 ### 数据结构
 
 ```python
-# 扫描结果
+# 扫描结果（含Knip分析）
 ScanResult(
-    files_found=[...],       # 可删除文件列表
-    protected_files=[...],   # 受保护文件列表
-    directories_found=[...], # 可删除目录列表
-    protected_dirs=[...],    # 受保护目录列表
-    total_size=123456,       # 总大小（字节）
-    total_count=42           # 可删除文件数量
+    files_found=[...],           # 可删除文件列表
+    protected_files=[...],       # 受保护文件列表
+    directories_found=[...],     # 可删除目录列表
+    protected_dirs=[...],        # 受保护目录列表
+    total_size=123456,          # 总大小（字节）
+    total_count=42,              # 可删除文件数量
+    
+    # Knip分析结果
+    unused_files=[...],          # 未使用文件列表
+    unused_dependencies=[...],   # 未使用依赖列表
+    unused_exports=[...],        # 未使用导出列表
+    circular_dependencies=[...]  # 循环依赖列表
 )
 
 # 清理结果
@@ -181,7 +193,12 @@ CleanupResult(
     dirs_deleted=2,             # 删除目录数
     bytes_freed=1024000,        # 释放空间（字节）
     protected_items=[...],      # 跳过的保护项目
-    dry_run=False               # 是否预览模式
+    dry_run=False,              # 是否预览模式
+    
+    # Knip分析统计
+    unused_files_found=5,       # 发现的未使用文件数
+    unused_dependencies_found=3, # 发现的未使用依赖数
+    unused_exports_found=8      # 发现的未使用导出数
 )
 ```
 
@@ -191,6 +208,7 @@ CleanupResult(
 
 - 清理、clean、cleanup、垃圾文件、删除临时文件
 - 删除缓存、清除日志、清理项目、整理文件
+- 分析未使用、检测死代码、检查依赖
 
 ---
 
@@ -198,8 +216,23 @@ CleanupResult(
 
 | 版本 | 更新内容 |
 |------|---------|
+| v3.0.0 | 集成Knip核心功能：未使用文件检测、未使用依赖检测、未使用导出检测 |
 | v2.0.0 | 新增智能保护机制、多级保护级别、自定义保护路径 |
 | v1.0.0 | 基础文件清理功能 |
+
+---
+
+## 📊 Knip vs 原生功能对比
+
+| 功能 | 原生file-cleaner | Knip插件 | 本增强版 |
+|------|------------------|----------|----------|
+| 垃圾文件清理 | ✅ | ❌ | ✅ |
+| 构建产物清理 | ✅ | ❌ | ✅ |
+| 未使用文件检测 | ❌ | ✅ | ✅ |
+| 未使用依赖检测 | ❌ | ✅ | ✅ |
+| 未使用导出检测 | ❌ | ✅ | ✅ |
+| 循环依赖检测 | ❌ | ✅ | ⚙️（开发中） |
+| 支持语言 | 通用 | JS/TS | Python + JS/TS |
 
 ---
 
