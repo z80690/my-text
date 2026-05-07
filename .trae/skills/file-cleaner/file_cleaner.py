@@ -249,9 +249,26 @@ class FileCleaner:
             if ".trae" in filepath:
                 return True, ".trae 目录受最高级别保护"
             filename = os.path.basename(filepath)
-            config_files = ["agent.md", "config.json", "workflow.json", "skills.json"]
+            # 核心配置文件保护（规则体系）
+            config_files = [
+                "agent.md", 
+                "config.json", 
+                "workflow.json", 
+                "skills.json",
+                "agents.yaml",
+                "skills.yaml",
+                "workflows.yaml",
+                "sandbox.json",
+                "config.yaml",
+                ".ignore"
+            ]
             if filename in config_files:
-                return True, f"核心配置文件 ({filename})"
+                return True, f"核心规则体系文件 ({filename})"
+            # 配置文件类型保护（.json, .yaml, .yml）
+            config_extensions = [".json", ".yaml", ".yml"]
+            for ext in config_extensions:
+                if filepath.endswith(ext):
+                    return True, f"配置文件类型保护 ({ext})"
         return False, ""
     
     def scan(self, directory: str, patterns: Optional[List[str]] = None) -> ScanResult:
