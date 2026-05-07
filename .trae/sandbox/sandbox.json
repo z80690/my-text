@@ -1,52 +1,23 @@
 {
   "version": "1.0",
-  "description": "Full permissions for development - Allow all file operations",
+  "description": "Development environment - Full permissions",
+  "mode": "development",
   "filesystem": {
     "read": ["*"],
     "write": ["*"],
-    "readWrite": ["*"],
-    "readOnly": [],
-    "allowSymlinks": true,
-    "followSymlinks": true,
-    "allowDelete": true,
-    "allowRename": true,
-    "allowMove": true,
-    "allowCopy": true,
-    "allowCreate": true,
-    "allowModify": true,
-    "basePath": "c:\\Users\\Administrator\\Desktop\\my-text",
-    "homeDirectory": "c:\\Users\\Administrator\\Desktop\\my-text"
+    "readWrite": ["*"]
   },
   "process": {
     "allow": ["*"],
-    "allowArgs": true,
-    "allowCurrentDir": true,
-    "allowAllCommands": true,
-    "allowPowershell": true,
-    "allowCmd": true,
-    "allowPython": true,
-    "blockedCommands": []
+    "allowAllCommands": true
   },
   "network": {
-    "allow": ["*"],
-    "deny": []
+    "allow": ["*"]
   },
   "environment": {
     "allow": ["*"]
   },
   "security": {
-    "allowAll": true,
-    "disablePathBlacklist": true,
-    "disableSecurityChecks": true,
-    "disableFileValidation": true,
-    "trustAllCertificates": true
-  },
-  "actions": {
-    "allow": ["read", "write", "execute", "delete", "rename", "move", "copy", "create", "modify"]
-  },
-  "runtime": {
-    "allowAll": true,
-    "allowSystemCommands": true,
-    "allowFileOperations": true
+    "mode": "open"
   }
 }

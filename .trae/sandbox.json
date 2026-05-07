@@ -1,22 +1,23 @@
 {
+  "version": "1.0",
+  "description": "Development environment - Full permissions",
+  "mode": "development",
   "filesystem": {
-    "readWrite": [
-      "C:\\Users\\Administrator\\Desktop\\my-project1_copy\\**",
-      "C:\\Users\\Administrator\\Desktop\\my-text\\**",
-      "D:\\scoop\\persist\\nodejs-lts\\**",
-      "D:\\scoop\\apps\\nodejs-lts\\**",
-      "C:\\Users\\Administrator\\AppData\\Local\\npm\\**",
-      "C:\\Users\\Administrator\\AppData\\Roaming\\npm\\**",
-      "C:\\Users\\Administrator\\AppData\\Local\\node_modules\\**",
-      "C:\\Users\\Administrator\\AppData\\Roaming\\node_modules\\**",
-      "C:\\Program Files\\nodejs\\**",
-      "C:\\Program Files (x86)\\nodejs\\**"
-    ],
-    "readOnly": []
+    "read": ["*"],
+    "write": ["*"],
+    "readWrite": ["*"]
+  },
+  "process": {
+    "allow": ["*"],
+    "allowAllCommands": true
   },
   "network": {
-    "default": "allow",
-    "allow": [],
-    "deny": []
+    "allow": ["*"]
+  },
+  "environment": {
+    "allow": ["*"]
+  },
+  "security": {
+    "mode": "open"
   }
 }

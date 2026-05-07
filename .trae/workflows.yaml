@@ -30,6 +30,7 @@ templates:
     description: 多个分支任务同时执行
     qos_level: high
     execution_mode: parallel
+    is_default: true
     parameters:
       type: object
       properties:
@@ -41,6 +42,12 @@ templates:
               agent_id: { type: string }
               task: { type: string }
             required: ["agent_id", "task"]
+        monitor_agent_id:
+          type: string
+          default: "monitor_agent"
+        max_recursion_depth:
+          type: integer
+          default: 3
 
   - template_id: conditional_branch
     name: 条件分支

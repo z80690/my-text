@@ -1,19 +1,26 @@
 {
   "workflows": {
     "directory": ".trae/workflows",
-    "max_concurrent_tasks": 5,
+    "default_template": "parallel_gateway",
+    "enforce_parallel": true,
+    "max_concurrent_tasks": 10,
     "task_timeout": 300,
-    "log_level": "INFO"
+    "log_level": "INFO",
+    "monitor_agent_id": "monitor_agent",
+    "max_recursion_depth": 3,
+    "auto_monitor": true
   },
   "registered_workflows": [
     {
       "name": "test_workflow",
       "description": "测试工作流",
+      "template": "parallel_gateway",
       "parameters": []
     },
     {
       "name": "agent_task",
-      "description": "智能体任务工作流",
+      "description": "智能体任务工作流（默认并行）",
+      "template": "parallel_gateway",
       "parameters": [
         {
           "name": "agent_id",
@@ -26,6 +33,31 @@
           "type": "string",
           "required": true,
           "description": "任务描述"
+        },
+        {
+          "name": "monitor",
+          "type": "boolean",
+          "default": true,
+          "description": "是否启用监控"
+        }
+      ]
+    },
+    {
+      "name": "parallel_tasks",
+      "description": "多任务并行工作流",
+      "template": "parallel_gateway",
+      "parameters": [
+        {
+          "name": "branches",
+          "type": "array",
+          "required": true,
+          "description": "并行任务分支"
+        },
+        {
+          "name": "max_depth",
+          "type": "integer",
+          "default": 3,
+          "description": "最大递归深度"
         }
       ]
     }

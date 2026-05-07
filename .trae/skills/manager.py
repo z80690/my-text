@@ -19,7 +19,7 @@ class SkillManager:
                 config = yaml.safe_load(f)
                 
                 for skill_data in config.get('skills', []):
-                    self.skills[skill_data['id']] = skill_data
+                    self.skills[skill_data['skill_id']] = skill_data
     
     def get(self, skill_id: str) -> Optional[Dict[str, Any]]:
         """获取技能"""
