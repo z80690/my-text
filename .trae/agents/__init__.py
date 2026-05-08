@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-智能体模块初始化
+智能体模块初始化 - V2
 """
 
-from .base import BaseAgent, AgentConfig
-from .registry import get_registry
-from .implementations import load_all_agents
-
-# 自动加载所有智能体
-load_all_agents()
+from .base import BaseAgent, AgentConfig, ModuleRegistry, get_registry
+from .registry import AgentRegistry, get_registry as get_agent_registry
+from .implementations_v2 import *
 
 __all__ = [
     'BaseAgent',
     'AgentConfig',
+    'ModuleRegistry',
+    'AgentRegistry',
     'get_registry',
-    'load_all_agents'
+    'get_agent_registry',
 ]
