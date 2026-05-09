@@ -1,0 +1,43 @@
+{
+  "name": "trae-auto-memory-mcp",
+  "version": "1.0.1",
+  "description": "自动记忆MCP服务器 - 自动识别暗知识并记忆",
+  "main": "dist/index.js",
+  "bin": {
+    "auto-memory-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "memory",
+    "auto-memory",
+    "trae",
+    "model-context-protocol"
+  ],
+  "author": "z80690 <z80690@qq.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/auto-memory-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/auto-memory-mcp/issues"
+  },
+  "homepage": "https://github.com/yourusername/auto-memory-mcp#readme"
+}

@@ -1,0 +1,19 @@
+{
+  "name": "auto-memory",
+  "version": "1.0",
+  "description": "自动记忆MCP - 收到消息自动识别暗知识并记忆",
+  "protocol": "stdio",
+  "auto_start": true,
+  "start_on_ide_launch": true,
+  "restart_on_crash": true,
+  "working_directory": "C:\\Users\\Administrator\\Desktop\\my-text",
+  "command": "C:\\Users\\Administrator\\Desktop\\my-project1_copy\\.venv\\Scripts\\python.exe",
+  "args": ["auto_memory_mcp_stdio.py"],
+  "endpoints": {
+    "write_memory": {
+      "auto_invoke": true,
+      "trigger": "on_message_received",
+      "description": "处理用户消息，自动识别暗知识"
+    }
+  }
+}
