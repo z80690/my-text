@@ -168,7 +168,8 @@ class AgentRegistry:
             FastAPIAgent, StreamlitAgent, GraphRAGAgent,
             DSPyAgent, XlangAgent, SemanticRouterAgent,
             EditorAgent, WriterAgent, TeachableAgent, GRPCAgent,
-            MonitorAgent, DispatcherAgent, RuleInterpreterAgent
+            MonitorAgent, DispatcherAgent, RuleInterpreterAgent,
+            NuwaAgent
         )
         
         agent_class_map = {
@@ -195,6 +196,7 @@ class AgentRegistry:
             'monitor_agent': MonitorAgent,
             'dispatcher_agent': DispatcherAgent,
             'rule_interpreter_agent': RuleInterpreterAgent,
+            'nuwa_agent': NuwaAgent,
         }
         
         return agent_class_map.get(agent_id, BaseAgentImpl)

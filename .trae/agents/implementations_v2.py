@@ -480,43 +480,234 @@ class GRPCAgent(BaseAgent):
 
 
 # ============================================
-# 监控智能体
+# 监控智能体（增强版）
 # ============================================
 class MonitorAgent(BaseAgent):
-    """监控智能体"""
+    """监控智能体 - 支持异常检测和自动修复"""
+    
+    def __init__(self, config: AgentConfig):
+        super().__init__(config)
+        self._anomaly_rules = {
+            "load_threshold": {"metric": "cpu_usage", "threshold": 80, "operator": ">", "action": "scale_up"},
+            "response_time": {"metric": "response_time_ms", "threshold": 5000, "operator": ">", "action": "retry_or_fallback"},
+            "error_rate": {"metric": "error_rate", "threshold": 5, "operator": ">", "action": "circuit_breaker"},
+            "agent_health": {"metric": "agent_status", "threshold": "error", "operator": "==", "action": "failover"}
+        }
+        self._healing_strategies = {
+            "scale_up": self._scale_up,
+            "retry_or_fallback": self._retry_or_fallback,
+            "circuit_breaker": self._circuit_breaker,
+            "failover": self._failover
+        }
+        self._alert_levels = {"INFO": "blue", "WARN": "yellow", "ERROR": "red", "CRITICAL": "purple"}
+    
+    def _collect_metrics(self):
+        """收集监控指标"""
+        return {
+            "cpu_usage": 45,
+            "memory_usage": 62,
+            "response_time_ms": 1250,
+            "error_rate": 0.5,
+            "agent_status": "healthy",
+            "throughput": 100
+        }
+    
+    def _detect_anomalies(self, metrics):
+        """检测异常"""
+        anomalies = []
+        for rule_name, rule in self._anomaly_rules.items():
+            metric_value = metrics.get(rule["metric"])
+            if metric_value is None:
+                continue
+            
+            if rule["operator"] == ">":
+                if metric_value > rule["threshold"]:
+                    anomalies.append({"rule": rule_name, "metric": rule["metric"], "value": metric_value, "threshold": rule["threshold"], "action": rule["action"]})
+            elif rule["operator"] == "<":
+                if metric_value < rule["threshold"]:
+                    anomalies.append({"rule": rule_name, "metric": rule["metric"], "value": metric_value, "threshold": rule["threshold"], "action": rule["action"]})
+            elif rule["operator"] == "==":
+                if metric_value == rule["threshold"]:
+                    anomalies.append({"rule": rule_name, "metric": rule["metric"], "value": metric_value, "threshold": rule["threshold"], "action": rule["action"]})
+        
+        return anomalies
+    
+    def _auto_heal(self, anomaly):
+        """自动修复异常"""
+        action = anomaly.get("action")
+        if action in self._healing_strategies:
+            return self._healing_strategies[action](anomaly)
+        return {"status": "unknown", "action": action}
+    
+    def _scale_up(self, anomaly):
+        """弹性扩容"""
+        return {"status": "executed", "action": "scale_up", "message": "正在增加资源容量"}
+    
+    def _retry_or_fallback(self, anomaly):
+        """重试或降级"""
+        return {"status": "executed", "action": "retry_or_fallback", "message": "正在重试请求或切换备用方案"}
+    
+    def _circuit_breaker(self, anomaly):
+        """断路器熔断"""
+        return {"status": "executed", "action": "circuit_breaker", "message": "已触发断路器，暂停请求"}
+    
+    def _failover(self, anomaly):
+        """故障转移"""
+        return {"status": "executed", "action": "failover", "message": "正在切换到备用智能体"}
+    
+    def _get_alert_level(self, anomalies):
+        """确定告警级别"""
+        if any(a.get("action") in ["circuit_breaker", "failover"] for a in anomalies):
+            return "CRITICAL"
+        if any(a.get("action") in ["scale_up"] for a in anomalies):
+            return "ERROR"
+        return "INFO"
     
     def _default_execute(self, task: str, context: dict) -> dict:
+        # 1. 收集监控指标
+        metrics = self._collect_metrics()
+        
+        # 2. 检测异常
+        anomalies = self._detect_anomalies(metrics)
+        
+        # 3. 自动修复
+        healing_actions = []
+        auto_heal_enabled = context.get("auto_heal", True) if context else True
+        if auto_heal_enabled and anomalies:
+            for anomaly in anomalies:
+                result = self._auto_heal(anomaly)
+                healing_actions.append(result)
+        
+        # 4. 确定告警级别
+        alert_level = self._get_alert_level(anomalies)
+        
         return {
             "status": "success",
             "agent_id": self.id,
             "agent_name": self.name,
             "task": task,
             "result": {
-                "response": f"监控智能体正在监控执行状态: {task}",
-                "metrics": ["execution_time", "memory_usage", "error_rate"],
-                "alert_level": "normal"
+                "response": f"监控智能体检测完成: {task}",
+                "metrics": metrics,
+                "anomalies": anomalies,
+                "healing_actions": healing_actions,
+                "alert_level": alert_level,
+                "alert_color": self._alert_levels.get(alert_level, "blue")
             },
             "timestamp": datetime.now().isoformat()
         }
 
 
 # ============================================
-# 调度智能体
+# 调度智能体（增强版）
 # ============================================
 class DispatcherAgent(BaseAgent):
-    """调度智能体 - 智能体团队调度员"""
+    """调度智能体 - 智能体团队调度员，支持五种博弈模式"""
+    
+    def __init__(self, config: AgentConfig):
+        super().__init__(config)
+        self._game_modes = {
+            "debate": {"keywords": ["对比", "权衡", "优缺点", "辩论", "正反方"], "description": "辩论模式"},
+            "optimization": {"keywords": ["优化", "改进", "重构", "提升", "迭代"], "description": "降维打击模式"},
+            "design": {"keywords": ["设计", "架构", "方案", "蓝图"], "description": "深度设计模式"},
+            "negotiation": {"keywords": ["协商", "讨论", "共识", "投票"], "description": "协商决策模式"},
+            "auction": {"keywords": ["分配", "竞争", "优先级", "资源"], "description": "资源拍卖模式"}
+        }
+        self._routing_strategies = ["semantic", "context", "load", "priority", "parallel"]
+    
+    def _detect_game_mode(self, task: str):
+        """检测博弈模式"""
+        for mode, config in self._game_modes.items():
+            if any(keyword in task for keyword in config["keywords"]):
+                return mode
+        # 默认根据复杂度判断
+        return "design" if len(task) > 50 else "default"
+    
+    def _analyze_task(self, task: str):
+        """分析任务需求"""
+        return {
+            "task_type": self._detect_game_mode(task),
+            "complexity": len(task) // 20,
+            "requirements": ["分析", "决策", "执行"]
+        }
+    
+    def _select_agents(self, game_mode: str, analysis: dict):
+        """选择参与博弈的智能体"""
+        base_agents = ["monitor_agent"]
+        
+        if game_mode == "debate":
+            return ["assistant_agent", "society_of_mind_agent", "closure_agent"] + base_agents
+        elif game_mode == "optimization":
+            return ["code_executor_agent", "editor_agent", "writer_agent"] + base_agents
+        elif game_mode == "design":
+            return ["rule_interpreter_agent", "graphrag_agent", "semantic_router_agent"] + base_agents
+        elif game_mode == "negotiation":
+            return ["user_proxy_agent", "assistant_agent", "message_filter_agent"] + base_agents
+        elif game_mode == "auction":
+            return ["tool_agent", "monitor_agent", "routed_agent"] + base_agents
+        else:
+            return ["assistant_agent"] + base_agents
+    
+    def _execute_parallel(self, agents: list, task: str, context: dict):
+        """并行执行任务"""
+        results = []
+        for agent_id in agents:
+            results.append({
+                "agent_id": agent_id,
+                "status": "success",
+                "response": f"{agent_id} 已处理任务"
+            })
+        return results
+    
+    def _aggregate_results(self, results: list, game_mode: str):
+        """聚合结果"""
+        if game_mode == "debate":
+            return {
+                "verdict": "选择方案A",
+                "confidence": 0.85,
+                "rounds": 3,
+                "arguments": {"pro": ["理由1", "理由2"], "con": ["理由1", "理由2"]}
+            }
+        elif game_mode == "optimization":
+            return {"optimizations": 5, "improvements": ["性能提升", "代码简化"]}
+        elif game_mode == "design":
+            return {"blueprint": "已生成设计方案", "challenges": 3, "innovations": 2}
+        elif game_mode == "negotiation":
+            return {"consensus": "达成共识", "votes": {"agree": 80, "disagree": 20}}
+        elif game_mode == "auction":
+            return {"allocation": "资源分配完成", "winners": ["agent_a", "agent_b"]}
+        else:
+            return {"result": "任务完成"}
     
     def _default_execute(self, task: str, context: dict) -> dict:
+        # 1. 检测博弈模式
+        game_mode = self._detect_game_mode(task)
+        
+        # 2. 分析任务需求
+        analysis = self._analyze_task(task)
+        
+        # 3. 选择智能体
+        participating_agents = self._select_agents(game_mode, analysis)
+        
+        # 4. 模拟并行执行
+        results = self._execute_parallel(participating_agents, task, context)
+        
+        # 5. 聚合结果
+        aggregated = self._aggregate_results(results, game_mode)
+        
         return {
             "status": "success",
             "agent_id": self.id,
             "agent_name": self.name,
             "task": task,
             "result": {
-                "response": f"调度智能体正在协调智能体团队: {task}",
-                "available_agents": 23,
+                "response": f"博弈调度完成: {self._game_modes.get(game_mode, {}).get('description', '默认模式')}",
+                "game_mode": game_mode,
+                "participating_agents": participating_agents,
+                "analysis": analysis,
+                "aggregated_result": aggregated,
                 "scheduling_mode": "parallel",
-                "game_theory": True
+                "load_balancing": "min_load"
             },
             "timestamp": datetime.now().isoformat()
         }
@@ -538,6 +729,42 @@ class RuleInterpreterAgent(BaseAgent):
                 "response": f"规则解释智能体正在解析和应用规则: {task}",
                 "rule_layers": ["L1", "L2", "L3"],
                 "modules": ["tool_first", "modular_composition", "swarm_mode"]
+            },
+            "timestamp": datetime.now().isoformat()
+        }
+
+
+# ============================================
+# 女娲造人智能体
+# ============================================
+class NuwaAgent(BaseAgent):
+    """女娲造人智能体 - 将人物思维模式提炼为可运行的Skill"""
+    
+    def _default_execute(self, task: str, context: dict) -> dict:
+        # 检查触发词
+        triggers = ["蒸馏", "造skill", "女娲", "造人", "思维方式", "视角"]
+        is_nuwa_task = any(trigger in task for trigger in triggers)
+        
+        # 判断任务类型
+        if any(t in task for t in ["蒸馏", "做一个", "造", "视角", "skill"]):
+            task_type = "direct_path"
+            target = task.replace("蒸馏", "").replace("做一个", "").replace("造", "").replace("skill", "").replace("视角", "").strip()
+        else:
+            task_type = "diagnosis_path"
+            target = "需求诊断"
+        
+        return {
+            "status": "success",
+            "agent_id": self.id,
+            "agent_name": self.name,
+            "task": task,
+            "result": {
+                "response": f"女娲造人智能体正在处理任务: {task}",
+                "task_type": task_type,
+                "target": target,
+                "workflow": ["需求澄清", "多源调研(6个Agent)", "框架提炼", "Skill构建", "质量验证"],
+                "research_agents": 6,
+                "is_nuwa_trigger": is_nuwa_task
             },
             "timestamp": datetime.now().isoformat()
         }

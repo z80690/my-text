@@ -33,6 +33,20 @@ skills:
     dependencies: []
     status: active
 
+  - skill_id: nuwa_skill
+    name: 女娲造人
+    name_en: Nuwa Skill Creator
+    description: 输入人名/主题/模糊需求，自动深度调研→思维框架提炼→生成可运行的人物Skill
+    version: "1.0.0"
+    author: alchaincyf
+    entry_point: ".trae/skills/nuwa-skill/SKILL.md"
+    definition_file: ".trae/skills/nuwa-skill/SKILL.md"
+    permissions:
+      - filesystem.read
+      - filesystem.write
+    dependencies: []
+    status: active
+
 scan_config:
   directories:
     - path: ".trae/skills"
