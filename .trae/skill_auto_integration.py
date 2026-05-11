@@ -2,6 +2,7 @@
 """
 Skills 自动化集成系统 v1.0
 整合追踪、日志、建议三大功能，为所有 Skills 提供自动化支持
+自动触发钩子，无需手动调用
 """
 
 import json
@@ -24,6 +25,81 @@ class SkillExecution:
     input_data: Optional[Dict] = None
     output_data: Optional[Dict] = None
     error: Optional[str] = None
+
+
+class AutoHookIntegration:
+    """自动钩子集成模块 - 关键！连接 Skill 执行和钩子系统"""
+
+    _instance = None
+    _initialized = False
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    def __init__(self):
+        if AutoHookIntegration._initialized:
+            return
+        AutoHookIntegration._initialized = True
+        self._hook_system = None
+        self._init_hooks()
+
+    def _init_hooks(self):
+        """延迟导入并初始化钩子系统"""
+        try:
+            from auto_hook_system import get_hook_system, initialize_default_hooks
+            initialize_default_hooks()
+            self._hook_system = get_hook_system()
+        except Exception as e:
+            print(f"⚠️ 钩子系统初始化失败: {e}")
+            self._hook_system = None
+
+    def trigger_pre_hook(self, skill_id: str, action: str, tool_type: str = "skill"):
+        """触发前置钩子"""
+        if self._hook_system is None:
+            return
+        try:
+            self._hook_system.trigger_hooks('pre_tool_call', {
+                'skill_id': skill_id,
+                'action': action,
+                'tool_type': tool_type,
+                'phase': 'pre'
+            })
+        except Exception as e:
+            print(f"⚠️ 前置钩子触发失败: {e}")
+
+    def trigger_post_hook(self, skill_id: str, action: str, status: str, duration_ms: float,
+                         tool_type: str = "skill", output_data: Dict = None):
+        """触发后置钩子"""
+        if self._hook_system is None:
+            return
+        try:
+            self._hook_system.trigger_hooks('post_tool_call', {
+                'skill_id': skill_id,
+                'action': action,
+                'status': status,
+                'duration_ms': duration_ms,
+                'tool_type': tool_type,
+                'phase': 'post',
+                'output': output_data
+            })
+        except Exception as e:
+            print(f"⚠️ 后置钩子触发失败: {e}")
+
+    def trigger_skill_load_hook(self, skill_id: str, action: str, tool_type: str = "skill"):
+        """触发Skill加载钩子"""
+        if self._hook_system is None:
+            return
+        try:
+            self._hook_system.trigger_hooks('post_skill_load', {
+                'skill_id': skill_id,
+                'action': action,
+                'tool_type': tool_type,
+                'phase': 'load'
+            })
+        except Exception as e:
+            print(f"⚠️ Skill加载钩子触发失败: {e}")
 
 
 class AutoTracker:
@@ -240,25 +316,42 @@ class SmartSuggester:
 
 
 class SkillExecutor:
-    """Skill 执行包装器 - 自动集成追踪、日志、建议"""
+    """Skill 执行包装器 - 自动集成追踪、日志、建议、钩子"""
 
     def __init__(self):
         self.tracker = AutoTracker()
         self.logger = AutoLogger()
         self.suggester = SmartSuggester()
+        self.hook_integration = AutoHookIntegration()  # 关键：自动钩子集成
 
     def execute(self, skill_id: str, action: str, func: Callable, *args, **kwargs) -> Any:
         input_data = {"args": str(args)[:200], "kwargs": str(kwargs)[:200]}
 
+        # 触发前置钩子
+        self.hook_integration.trigger_pre_hook(skill_id, action)
+
+        # 开始追踪
         execution = self.tracker.start_tracking(skill_id, action, input_data)
         self.logger.log_skill_start(skill_id, action, input_data)
 
         try:
+            # 执行实际函数
             result = func(*args, **kwargs)
 
+            # 结束追踪
             self.tracker.end_tracking(execution, "success", {"result": str(result)[:500]})
             self.logger.log_skill_end(skill_id, action, "success", execution.duration_ms)
 
+            # 触发后置钩子
+            self.hook_integration.trigger_post_hook(
+                skill_id, action, "success", execution.duration_ms,
+                output_data={"result": str(result)[:200]}
+            )
+
+            # 触发Skill加载钩子
+            self.hook_integration.trigger_skill_load_hook(skill_id, action)
+
+            # 记录执行历史
             self.suggester.record_execution(skill_id)
             suggestions = self.suggester.get_next_suggestions(skill_id)
 
@@ -267,8 +360,16 @@ class SkillExecutor:
             return result
 
         except Exception as e:
+            # 失败追踪
             self.tracker.end_tracking(execution, "failed", error=str(e))
             self.logger.log_skill_end(skill_id, action, "failed", execution.duration_ms, {"error": str(e)})
+
+            # 触发失败钩子
+            self.hook_integration.trigger_post_hook(
+                skill_id, action, "failed", execution.duration_ms,
+                output_data={"error": str(e)}
+            )
+
             raise
 
     def _show_suggestions(self, suggestions: List[Dict]):
@@ -281,7 +382,7 @@ class SkillExecutor:
 
 
 def with_auto_tracking(skill_id: str, action: str = "execute"):
-    """装饰器：为任何函数添加自动追踪"""
+    """装饰器：为任何函数添加自动追踪和钩子"""
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -333,10 +434,7 @@ def get_today_summary() -> str:
 
 
 if __name__ == '__main__':
-    print(get_today_summary())
-
-    print("\n" + "="*60)
-    print("🧪 测试自动追踪功能")
+    print("🧪 测试自动追踪和钩子功能")
     print("="*60)
 
     @with_auto_tracking("test-skill", "demo")
