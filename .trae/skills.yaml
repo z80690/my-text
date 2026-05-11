@@ -1,61 +1,53 @@
-# .trae/skills.yaml - 技能配置中心（机器可读）
-# 与 .trae/skills/ 目录下的技能文件同步
-
-version: "1.0.0"
-last_updated: "2026-05-06T10:00:00Z"
-schema_version: "1.0"
+# Skills配置文件
 
 skills:
-  - skill_id: file_cleaner
-    name: 文件清理
-    name_en: File Cleaner
-    description: 智能文件清理技能，用于扫描和清理项目中的垃圾文件
-    version: "1.0.0"
-    author: system
-    entry_point: ".trae/skills/file_cleaner/__init__.py"
-    definition_file: ".trae/skills/file_cleaner/SKILL.md"
-    permissions:
-      - filesystem.read
-      - filesystem.write
-    dependencies: []
-    status: active
+  - skill_id: auto-debug
+    name: 智能排错
+    description: 自动化调试，从报错到修复一站式
+    trigger_keywords:
+      - 调试
+      - 报错
+      - bug
+      - 错误
+      - 修复
+    category: debugging
 
-  - skill_id: my_code_review
-    name: 代码审查
-    name_en: Code Review
-    description: 专业的代码审查技能，用于分析代码质量、识别潜在问题并提供改进建议
-    version: "1.0.0"
-    author: system
-    entry_point: ".trae/skills/my-code-review/__init__.py"
-    definition_file: ".trae/skills/my-code-review/SKILL.md"
-    permissions:
-      - filesystem.read
-    dependencies: []
-    status: active
+  - skill_id: auto-hook
+    name: 自动化钩子
+    description: 事件驱动的自动化触发器
+    trigger_keywords:
+      - hook
+      - 钩子
+      - 自动化
+      - 触发
+    category: automation
 
-  - skill_id: nuwa_skill
-    name: 女娲造人
-    name_en: Nuwa Skill Creator
-    description: 输入人名/主题/模糊需求，自动深度调研→思维框架提炼→生成可运行的人物Skill
-    version: "1.0.0"
-    author: alchaincyf
-    entry_point: ".trae/skills/nuwa-skill/SKILL.md"
-    definition_file: ".trae/skills/nuwa-skill/SKILL.md"
-    permissions:
-      - filesystem.read
-      - filesystem.write
-    dependencies: []
-    status: active
+  - skill_id: auto-doc
+    name: 一键生成文档
+    description: 自动生成README、API文档、代码注释
+    trigger_keywords:
+      - 文档
+      - README
+      - 注释
+      - 生成文档
+    category: documentation
 
-scan_config:
-  directories:
-    - path: ".trae/skills"
-      pattern: "*/SKILL.md"
-      recursive: true
-  exclude_patterns:
-    - "__pycache__"
-    - "*.pyc"
-    - "node_modules"
-    - ".git"
-  auto_reload: true
-  reload_interval: 30
+  - skill_id: auto-refactor
+    name: 全局代码重构
+    description: 批量安全重构整个项目
+    trigger_keywords:
+      - 重构
+      - refactor
+      - 批量修改
+      - 迁移
+    category: refactoring
+
+  - skill_id: local-privacy
+    name: 本地隐私联动
+    description: 本地资源安全读取，不上传云端
+    trigger_keywords:
+      - 本地
+      - 隐私
+      - local
+      - 笔记
+    category: privacy
