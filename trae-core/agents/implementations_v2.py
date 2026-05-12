@@ -599,11 +599,14 @@ class MonitorAgent(BaseAgent):
 
 
 # ============================================
-# 调度智能体（增强版）
+# 调度智能体（增强版 - 强耦合模式）
 # ============================================
 class DispatcherAgent(BaseAgent):
-    """调度智能体 - 智能体团队调度员，支持五种博弈模式"""
-    
+    """调度智能体 - 智能体团队调度员，与TRAE调度引擎强耦合"""
+
+    SYNC_MODE = "sync"
+    ASYNC_MODE = "async"
+
     def __init__(self, config: AgentConfig):
         super().__init__(config)
         self._game_modes = {
@@ -614,13 +617,69 @@ class DispatcherAgent(BaseAgent):
             "auction": {"keywords": ["分配", "竞争", "优先级", "资源"], "description": "资源拍卖模式"}
         }
         self._routing_strategies = ["semantic", "context", "load", "priority", "parallel"]
-    
+        self._execution_mode = self.SYNC_MODE
+        
+        # 强耦合核心组件
+        self._registry = None
+        self._call_interface = None
+        self._message_bus = None
+        self._init_core_components()
+
+    def _init_core_components(self):
+        """初始化核心组件（强耦合）"""
+        # 1. 获取注册中心（TRAE核心）
+        from .registry import get_registry
+        self._registry = get_registry()
+        self._registry.initialize()
+        
+        # 2. 创建智能体调用接口
+        from .agent_protocol import AgentCallInterface, MessageBus, AgentMessage, MessageType
+        self._call_interface = AgentCallInterface(self._registry)
+        self._message_bus = MessageBus()
+        self._agent_message_cls = AgentMessage
+        self._message_type_cls = MessageType
+        
+        # 3. 注册调度器到消息总线
+        self._message_bus.register_endpoint("dispatcher", self._handle_message)
+        
+        # 4. 注册所有智能体到消息总线
+        self._register_agents_to_bus()
+
+    def _register_agents_to_bus(self):
+        """注册所有智能体到消息总线"""
+        for agent_id in self._registry.get_agent_ids():
+            try:
+                agent_instance = self._registry.create_agent_instance(agent_id)
+                if agent_instance:
+                    self._message_bus.register_endpoint(agent_id, agent_instance.execute)
+            except Exception as e:
+                print(f"[Dispatcher] 注册智能体失败 {agent_id}: {e}")
+
+    def _handle_message(self, message):
+        """处理消息总线消息"""
+        if message.action == "execute":
+            return self._default_execute(
+                message.payload.get("task", ""),
+                message.payload.get("context", {})
+            )
+        return {"status": "success", "message": "Received"}
+
+    def set_execution_mode(self, mode: str) -> bool:
+        """设置执行模式"""
+        if mode in [self.SYNC_MODE, self.ASYNC_MODE]:
+            self._execution_mode = mode
+            return True
+        return False
+
+    def get_execution_mode(self) -> str:
+        """获取当前执行模式"""
+        return self._execution_mode
+
     def _detect_game_mode(self, task: str):
         """检测博弈模式"""
         for mode, config in self._game_modes.items():
             if any(keyword in task for keyword in config["keywords"]):
                 return mode
-        # 默认根据复杂度判断
         return "design" if len(task) > 50 else "default"
     
     def _analyze_task(self, task: str):
@@ -648,53 +707,81 @@ class DispatcherAgent(BaseAgent):
         else:
             return ["assistant_agent"] + base_agents
     
-    def _execute_parallel(self, agents: list, task: str, context: dict):
-        """并行执行任务"""
+    def _execute_sync(self, participating_agents: list, task: str, context: dict) -> list:
+        """同步执行（默认模式）- 使用AgentCallInterface"""
+        return self._call_interface.parallel_call(participating_agents, task, context)
+
+    def _execute_async(self, participating_agents: list, task: str, context: dict) -> list:
+        """异步执行（消息总线模式）- 使用MessageBus"""
         results = []
-        for agent_id in agents:
-            results.append({
-                "agent_id": agent_id,
-                "status": "success",
-                "response": f"{agent_id} 已处理任务"
-            })
+        for agent_id in participating_agents:
+            try:
+                msg = self._agent_message_cls(
+                    action="execute",
+                    source="dispatcher",
+                    target=agent_id,
+                    payload={"task": task, "context": context},
+                    priority="normal"
+                )
+                response = self._message_bus.send(msg)
+                results.append({
+                    "agent_id": agent_id,
+                    "status": response.get("status", "success"),
+                    "response": response,
+                    "mode": "async"
+                })
+            except Exception as e:
+                results.append({
+                    "agent_id": agent_id,
+                    "status": "error",
+                    "error": str(e),
+                    "mode": "async"
+                })
         return results
-    
+
     def _aggregate_results(self, results: list, game_mode: str):
         """聚合结果"""
+        success_count = sum(1 for r in results if r.get("status") == "success")
+        total_count = len(results)
+        
         if game_mode == "debate":
             return {
                 "verdict": "选择方案A",
                 "confidence": 0.85,
                 "rounds": 3,
-                "arguments": {"pro": ["理由1", "理由2"], "con": ["理由1", "理由2"]}
+                "arguments": {"pro": ["理由1", "理由2"], "con": ["理由1", "理由2"]},
+                "success_rate": success_count / total_count if total_count > 0 else 0
             }
         elif game_mode == "optimization":
-            return {"optimizations": 5, "improvements": ["性能提升", "代码简化"]}
+            return {"optimizations": 5, "improvements": ["性能提升", "代码简化"], "success_rate": success_count / total_count if total_count > 0 else 0}
         elif game_mode == "design":
-            return {"blueprint": "已生成设计方案", "challenges": 3, "innovations": 2}
+            return {"blueprint": "已生成设计方案", "challenges": 3, "innovations": 2, "success_rate": success_count / total_count if total_count > 0 else 0}
         elif game_mode == "negotiation":
-            return {"consensus": "达成共识", "votes": {"agree": 80, "disagree": 20}}
+            return {"consensus": "达成共识", "votes": {"agree": 80, "disagree": 20}, "success_rate": success_count / total_count if total_count > 0 else 0}
         elif game_mode == "auction":
-            return {"allocation": "资源分配完成", "winners": ["agent_a", "agent_b"]}
+            return {"allocation": "资源分配完成", "winners": ["agent_a", "agent_b"], "success_rate": success_count / total_count if total_count > 0 else 0}
         else:
-            return {"result": "任务完成"}
-    
+            return {"result": "任务完成", "success_rate": success_count / total_count if total_count > 0 else 0}
+
     def _default_execute(self, task: str, context: dict) -> dict:
         # 1. 检测博弈模式
         game_mode = self._detect_game_mode(task)
-        
+
         # 2. 分析任务需求
         analysis = self._analyze_task(task)
-        
+
         # 3. 选择智能体
         participating_agents = self._select_agents(game_mode, analysis)
-        
-        # 4. 模拟并行执行
-        results = self._execute_parallel(participating_agents, task, context)
-        
+
+        # 4. 根据模式执行
+        if self._execution_mode == self.ASYNC_MODE:
+            results = self._execute_async(participating_agents, task, context)
+        else:
+            results = self._execute_sync(participating_agents, task, context)
+
         # 5. 聚合结果
         aggregated = self._aggregate_results(results, game_mode)
-        
+
         return {
             "status": "success",
             "agent_id": self.id,
@@ -707,7 +794,10 @@ class DispatcherAgent(BaseAgent):
                 "analysis": analysis,
                 "aggregated_result": aggregated,
                 "scheduling_mode": "parallel",
-                "load_balancing": "min_load"
+                "execution_mode": self._execution_mode,
+                "load_balancing": "min_load",
+                "bus_status": "connected" if self._message_bus else "disconnected",
+                "registry_status": "connected" if self._registry else "disconnected"
             },
             "timestamp": datetime.now().isoformat()
         }

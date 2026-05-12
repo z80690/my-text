@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-"""Skill Manager - Dynamic Loading"""
-
 import re
 from pathlib import Path
 from typing import Dict, Any, List, Optional
