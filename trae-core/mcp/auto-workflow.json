@@ -1,0 +1,27 @@
+{
+  "name": "auto-workflow",
+  "version": "1.0",
+  "description": "自动工作流MCP - 自动执行工作流任务",
+  "protocol": "http",
+  "host": "127.0.0.1",
+  "port": 8001,
+  "auto_start": true,
+  "start_on_ide_launch": true,
+  "restart_on_crash": true,
+  "working_directory": ".trae",
+  "command": "python auto_workflow_mcp.py",
+  "endpoints": {
+    "execute": {
+      "method": "POST",
+      "path": "/execute",
+      "auto_invoke": true,
+      "trigger": "on_workflow_event",
+      "description": "自动执行工作流任务"
+    },
+    "health": {
+      "method": "GET",
+      "path": "/health",
+      "description": "健康检查"
+    }
+  }
+}

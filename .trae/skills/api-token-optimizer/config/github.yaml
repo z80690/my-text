@@ -1,0 +1,41 @@
+# GitHub API Configuration Template
+# 用于优化GitHub API调用，节省Token消耗
+
+github:
+  tokens:
+    - $GITHUB_TOKEN_1
+    - $GITHUB_TOKEN_2
+    - $GITHUB_TOKEN_3
+
+  rate_limit:
+    per_hour: 5000
+    core_limit: 60
+
+  cache:
+    enabled: true
+    ttl_seconds: 3600
+    max_size: 500
+
+  retry:
+    max_attempts: 3
+    backoff_factor: 2
+    retry_on:
+      - 429
+      - 500
+      - 502
+      - 503
+      - 504
+
+  strategies:
+    use_conditional_requests: true
+    use_etag: true
+    prefer_graphql: true
+
+  circuit_breaker:
+    failure_threshold: 5
+    timeout_seconds: 30
+
+  fallback:
+    enabled: true
+    use_cache_on_failure: true
+    stale_data_max_age_hours: 24

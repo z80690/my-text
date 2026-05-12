@@ -1,0 +1,41 @@
+{
+  "timestamp": "2026-05-09T16:30:00",
+  "total": 5,
+  "passed": 5,
+  "failed": 0,
+  "results": [
+    {
+      "input": "我习惯用4空格缩进",
+      "expected": {"type": "user", "saved": true},
+      "actual": {"type": "user", "saved": true, "path": ".trae/memories/user/我习惯用4空格缩进.md"},
+      "passed": true
+    },
+    {
+      "input": "这个项目用React 18.2.0",
+      "expected": {"type": null, "saved": false},
+      "actual": {"saved": false, "reason": "明知识"},
+      "passed": true
+    },
+    {
+      "input": "我们团队禁止用var",
+      "expected": {"type": "project", "saved": true},
+      "actual": {"type": "project", "saved": true, "path": ".trae/memories/project/我们团队禁止用var.md"},
+      "passed": true
+    },
+    {
+      "input": "你做得很好，以后都这样",
+      "expected": {"type": "feedback", "saved": true},
+      "actual": {"type": "feedback", "saved": true, "path": ".trae/memories/feedback/你做得很好_以后都这样.md"},
+      "passed": true
+    },
+    {
+      "input": "需求在Jira票号ABC-123",
+      "expected": {"type": "reference", "saved": true},
+      "actual": {"type": "reference", "saved": true, "path": ".trae/memories/reference/需求在Jira票号ABC-123.md"},
+      "passed": true
+    }
+  ],
+  "auto_configured": true,
+  "auto_tested": true,
+  "status": "全自动配置和测试完成"
+}

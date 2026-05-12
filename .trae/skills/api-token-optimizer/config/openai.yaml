@@ -1,0 +1,51 @@
+# OpenAI API Configuration Template
+# 用于优化OpenAI API调用，降低Token消耗
+
+openai:
+  api_key: $OPENAI_API_KEY
+  organization: $ORG_ID
+
+  models:
+    default: gpt-4o
+    fallback: gpt-3.5-turbo
+
+  cache:
+    enabled: true
+    ttl_seconds: 86400
+
+    cache_embeddings: true
+    cache_completions: false
+
+  prompt:
+    compress: true
+    system_prompt_optimize: true
+    remove_redundancy: true
+
+  strategies:
+    use_function_calling: true
+    use_json_mode: true
+    stream_response: false
+
+  rate_limit:
+    requests_per_minute: 200
+    tokens_per_minute: 150000
+
+  retry:
+    max_attempts: 3
+    backoff_factor: 1.5
+    timeout_seconds: 60
+
+  circuit_breaker:
+    failure_threshold: 3
+    timeout_seconds: 60
+
+  fallback:
+    enabled: true
+    fallback_to_cache: true
+    fallback_to_rules: true
+    rules_file: ./config/fallback_rules.yaml
+
+  token_optimization:
+    max_tokens_limit: 4096
+    temperature: 0.7
+    stop_sequences_enabled: true

@@ -1,12 +1,15 @@
 {
   "mcpServers": {
     "auto-memory": {
-      "command": "npx",
+      "command": "D:\\scoop\\apps\\python312\\current\\python.exe",
       "args": [
-        "-y",
-        "trae-auto-memory-mcp"
+        ".trae\\auto_memory_mcp_stdio.py"
       ],
-      "env": {}
+      "workingDirectory": ".",
+      "protocol": "stdio",
+      "autoStart": true,
+      "startOnIdeLaunch": true,
+      "restartOnCrash": true
     }
   }
 }

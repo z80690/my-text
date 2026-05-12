@@ -6,10 +6,10 @@
   "auto_start": true,
   "start_on_ide_launch": true,
   "restart_on_crash": true,
-  "working_directory": ".trae",
-  "command": "npx",
-  "args": ["-y", "@itseasy21/mcp-knowledge-graph"],
+  "working_directory": "C:\\Users\\Administrator\\Desktop\\my-text\\.trae",
+  "command": "D:\\scoop\\apps\\python312\\current\\python.exe",
+  "args": ["knowledge_graph_mcp.py"],
   "env": {
-    "MEMORY_FILE_PATH": ".trae/knowledge_graph.db"
+    "MEMORY_FILE_PATH": "knowledge_graph.db"
   }
 }

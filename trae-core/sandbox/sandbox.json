@@ -1,0 +1,23 @@
+{
+  "version": "1.0",
+  "description": "Development environment - Full permissions",
+  "mode": "development",
+  "filesystem": {
+    "read": ["*"],
+    "write": ["*"],
+    "readWrite": ["*"]
+  },
+  "process": {
+    "allow": ["*"],
+    "allowAllCommands": true
+  },
+  "network": {
+    "allow": ["*"]
+  },
+  "environment": {
+    "allow": ["*"]
+  },
+  "security": {
+    "mode": "open"
+  }
+}

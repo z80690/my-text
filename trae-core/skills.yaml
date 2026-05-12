@@ -1,0 +1,61 @@
+# .trae/skills.yaml - 技能配置中心（机器可读）
+# 与 .trae/skills/ 目录下的技能文件同步
+
+version: "1.0.0"
+last_updated: "2026-05-06T10:00:00Z"
+schema_version: "1.0"
+
+skills:
+  - skill_id: file_cleaner
+    name: 文件清理
+    name_en: File Cleaner
+    description: 智能文件清理技能，用于扫描和清理项目中的垃圾文件
+    version: "1.0.0"
+    author: system
+    entry_point: ".trae/skills/file_cleaner/__init__.py"
+    definition_file: ".trae/skills/file_cleaner/SKILL.md"
+    permissions:
+      - filesystem.read
+      - filesystem.write
+    dependencies: []
+    status: active
+
+  - skill_id: my_code_review
+    name: 代码审查
+    name_en: Code Review
+    description: 专业的代码审查技能，用于分析代码质量、识别潜在问题并提供改进建议
+    version: "1.0.0"
+    author: system
+    entry_point: ".trae/skills/my-code-review/__init__.py"
+    definition_file: ".trae/skills/my-code-review/SKILL.md"
+    permissions:
+      - filesystem.read
+    dependencies: []
+    status: active
+
+  - skill_id: nuwa_skill
+    name: 女娲造人
+    name_en: Nuwa Skill Creator
+    description: 输入人名/主题/模糊需求，自动深度调研→思维框架提炼→生成可运行的人物Skill
+    version: "1.0.0"
+    author: alchaincyf
+    entry_point: ".trae/skills/nuwa-skill/SKILL.md"
+    definition_file: ".trae/skills/nuwa-skill/SKILL.md"
+    permissions:
+      - filesystem.read
+      - filesystem.write
+    dependencies: []
+    status: active
+
+scan_config:
+  directories:
+    - path: ".trae/skills"
+      pattern: "*/SKILL.md"
+      recursive: true
+  exclude_patterns:
+    - "__pycache__"
+    - "*.pyc"
+    - "node_modules"
+    - ".git"
+  auto_reload: true
+  reload_interval: 30
