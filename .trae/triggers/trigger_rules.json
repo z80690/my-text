@@ -1,6 +1,42 @@
 {
   "rules": [
     {
+      "rule_id": "tracker_keyword_1",
+      "name": "追踪触发",
+      "trigger_type": "keyword",
+      "pattern": "追踪",
+      "skill_id": "tool-usage-tracker",
+      "action": "generate_report",
+      "enabled": true,
+      "cooldown_seconds": 0,
+      "last_triggered": null,
+      "priority": 10
+    },
+    {
+      "rule_id": "tracker_keyword_2",
+      "name": "工具调用触发",
+      "trigger_type": "keyword",
+      "pattern": "工具调用",
+      "skill_id": "tool-usage-tracker",
+      "action": "generate_report",
+      "enabled": true,
+      "cooldown_seconds": 0,
+      "last_triggered": null,
+      "priority": 10
+    },
+    {
+      "rule_id": "tracker_keyword_3",
+      "name": "统计触发",
+      "trigger_type": "keyword",
+      "pattern": "统计",
+      "skill_id": "tool-usage-tracker",
+      "action": "get_summary",
+      "enabled": true,
+      "cooldown_seconds": 0,
+      "last_triggered": null,
+      "priority": 10
+    },
+    {
       "rule_id": "debug_keyword_1",
       "name": "调试关键词触发",
       "trigger_type": "keyword",
@@ -9,7 +45,7 @@
       "action": "analyze",
       "enabled": true,
       "cooldown_seconds": 0,
-      "last_triggered": "2026-05-11T09:00:19.447547",
+      "last_triggered": null,
       "priority": 10
     },
     {
@@ -45,7 +81,7 @@
       "action": "analyze",
       "enabled": true,
       "cooldown_seconds": 0,
-      "last_triggered": "2026-05-11T09:00:19.665532",
+      "last_triggered": null,
       "priority": 10
     },
     {
@@ -69,7 +105,7 @@
       "action": "register",
       "enabled": true,
       "cooldown_seconds": 0,
-      "last_triggered": "2026-05-11T09:00:19.828837",
+      "last_triggered": null,
       "priority": 10
     },
     {
@@ -117,7 +153,7 @@
       "action": "generate",
       "enabled": true,
       "cooldown_seconds": 0,
-      "last_triggered": "2026-05-11T09:00:19.927007",
+      "last_triggered": null,
       "priority": 10
     },
     {
@@ -129,7 +165,7 @@
       "action": "generate",
       "enabled": true,
       "cooldown_seconds": 0,
-      "last_triggered": "2026-05-11T09:00:20.031113",
+      "last_triggered": null,
       "priority": 10
     },
     {
@@ -165,7 +201,7 @@
       "action": "batch",
       "enabled": true,
       "cooldown_seconds": 0,
-      "last_triggered": "2026-05-11T09:00:20.111438",
+      "last_triggered": null,
       "priority": 10
     },
     {
@@ -213,7 +249,7 @@
       "action": "read",
       "enabled": true,
       "cooldown_seconds": 0,
-      "last_triggered": "2026-05-11T09:00:20.166150",
+      "last_triggered": null,
       "priority": 10
     },
     {
@@ -249,8 +285,176 @@
       "action": "read",
       "enabled": true,
       "cooldown_seconds": 0,
-      "last_triggered": "2026-05-11T09:00:20.234369",
+      "last_triggered": null,
       "priority": 10
+    },
+    {
+      "rule_id": "github_keyword_1",
+      "name": "GitHub仓库触发",
+      "trigger_type": "keyword",
+      "pattern": "GitHub",
+      "mcp_id": "mcp_GitHub",
+      "action": "search_repositories",
+      "enabled": true,
+      "cooldown_seconds": 0,
+      "last_triggered": null,
+      "priority": 5
+    },
+    {
+      "rule_id": "github_keyword_2",
+      "name": "仓库搜索触发",
+      "trigger_type": "keyword",
+      "pattern": "搜索仓库",
+      "mcp_id": "mcp_GitHub",
+      "action": "search_repositories",
+      "enabled": true,
+      "cooldown_seconds": 0,
+      "last_triggered": null,
+      "priority": 5
+    },
+    {
+      "rule_id": "github_keyword_3",
+      "name": "创建仓库触发",
+      "trigger_type": "keyword",
+      "pattern": "创建仓库",
+      "mcp_id": "mcp_GitHub",
+      "action": "create_repository",
+      "enabled": true,
+      "cooldown_seconds": 0,
+      "last_triggered": null,
+      "priority": 5
+    },
+    {
+      "rule_id": "github_keyword_4",
+      "name": "pull request触发",
+      "trigger_type": "keyword",
+      "pattern": "pull request",
+      "mcp_id": "mcp_GitHub",
+      "action": "create_pull_request",
+      "enabled": true,
+      "cooldown_seconds": 0,
+      "last_triggered": null,
+      "priority": 5
+    },
+    {
+      "rule_id": "github_keyword_5",
+      "name": "issue触发",
+      "trigger_type": "keyword",
+      "pattern": "issue",
+      "mcp_id": "mcp_GitHub",
+      "action": "create_issue",
+      "enabled": true,
+      "cooldown_seconds": 0,
+      "last_triggered": null,
+      "priority": 5
+    },
+    {
+      "rule_id": "thinking_keyword_1",
+      "name": "思考触发",
+      "trigger_type": "keyword",
+      "pattern": "思考",
+      "mcp_id": "mcp_Sequential_Thinking",
+      "action": "sequentialthinking",
+      "enabled": true,
+      "cooldown_seconds": 0,
+      "last_triggered": null,
+      "priority": 5
+    },
+    {
+      "rule_id": "thinking_keyword_2",
+      "name": "分析触发",
+      "trigger_type": "keyword",
+      "pattern": "分析",
+      "mcp_id": "mcp_Sequential_Thinking",
+      "action": "sequentialthinking",
+      "enabled": true,
+      "cooldown_seconds": 0,
+      "last_triggered": null,
+      "priority": 5
+    },
+    {
+      "rule_id": "thinking_keyword_3",
+      "name": "推理触发",
+      "trigger_type": "keyword",
+      "pattern": "推理",
+      "mcp_id": "mcp_Sequential_Thinking",
+      "action": "sequentialthinking",
+      "enabled": true,
+      "cooldown_seconds": 0,
+      "last_triggered": null,
+      "priority": 5
+    },
+    {
+      "rule_id": "context7_keyword_1",
+      "name": "文档查询触发",
+      "trigger_type": "keyword",
+      "pattern": "文档查询",
+      "mcp_id": "mcp_context7",
+      "action": "query_docs",
+      "enabled": true,
+      "cooldown_seconds": 0,
+      "last_triggered": null,
+      "priority": 5
+    },
+    {
+      "rule_id": "context7_keyword_2",
+      "name": "API文档触发",
+      "trigger_type": "keyword",
+      "pattern": "API文档",
+      "mcp_id": "mcp_context7",
+      "action": "query_docs",
+      "enabled": true,
+      "cooldown_seconds": 0,
+      "last_triggered": null,
+      "priority": 5
+    },
+    {
+      "rule_id": "context7_keyword_3",
+      "name": "技术文档触发",
+      "trigger_type": "keyword",
+      "pattern": "技术文档",
+      "mcp_id": "mcp_context7",
+      "action": "query_docs",
+      "enabled": true,
+      "cooldown_seconds": 0,
+      "last_triggered": null,
+      "priority": 5
+    },
+    {
+      "rule_id": "supabase_keyword_1",
+      "name": "数据库查询触发",
+      "trigger_type": "keyword",
+      "pattern": "数据库查询",
+      "mcp_id": "mcp_supabase-community",
+      "action": "postgrestRequest",
+      "enabled": true,
+      "cooldown_seconds": 0,
+      "last_triggered": null,
+      "priority": 5
+    },
+    {
+      "rule_id": "supabase_keyword_2",
+      "name": "SQL查询触发",
+      "trigger_type": "keyword",
+      "pattern": "SQL查询",
+      "mcp_id": "mcp_supabase-community",
+      "action": "sqlToRest",
+      "enabled": true,
+      "cooldown_seconds": 0,
+      "last_triggered": null,
+      "priority": 5
+    },
+    {
+      "rule_id": "supabase_keyword_3",
+      "name": "数据查询触发",
+      "trigger_type": "keyword",
+      "pattern": "数据查询",
+      "mcp_id": "mcp_supabase-community",
+      "action": "postgrestRequest",
+      "enabled": true,
+      "cooldown_seconds": 0,
+      "last_triggered": null,
+      "priority": 5
     }
   ]
 }

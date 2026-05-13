@@ -617,7 +617,7 @@ class DispatcherAgent(BaseAgent):
             "auction": {"keywords": ["分配", "竞争", "优先级", "资源"], "description": "资源拍卖模式"}
         }
         self._routing_strategies = ["semantic", "context", "load", "priority", "parallel"]
-        self._execution_mode = self.SYNC_MODE
+        self._execution_mode = self.ASYNC_MODE
         
         # 强耦合核心组件
         self._registry = None

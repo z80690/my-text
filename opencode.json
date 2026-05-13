@@ -1,4 +1,11 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["oh-my-openagent"]
+  "plugin": ["oh-my-openagent"],
+  "mcp": {
+    "auto-memory": {
+      "type": "local",
+      "command": ["node", ".opencode/mcps/auto-memory-mcp/dist/index.js"],
+      "enabled": true
+    }
+  }
 }
