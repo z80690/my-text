@@ -8,7 +8,7 @@
 
 ```yaml
 name: "my-text"
-version: "3.2"
+version: "2.8"
 description: "智能体团队调度系统"
 ```
 
