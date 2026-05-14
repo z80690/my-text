@@ -1,39 +1,19 @@
 {
-  "mcp_servers": [
-    {
-      "id": "auto-memory",
-      "name": "自动记忆服务",
-      "config_path": "mcp/auto-memory.json",
-      "enabled": true,
-      "auto_start": true,
-      "priority": 1
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "env": {
+        "DEFAULT_MINIMUM_TOKENS": "10000",
+        "CONTEXT7_API_KEY": "${env:CONTEXT7_API_KEY}"
+      }
     },
-    {
-      "id": "trae-auto-memory",
-      "name": "Trae Auto Memory (NPM)",
-      "config_path": "mcp/trae-auto-memory.json",
-      "enabled": true,
-      "auto_start": true,
-      "priority": 2
-    },
-    {
-      "id": "knowledge-graph",
-      "name": "Knowledge Graph Memory",
-      "config_path": "mcp/knowledge-graph.json",
-      "enabled": true,
-      "auto_start": true,
-      "priority": 3
-    },
-    {
-      "id": "auto-workflow",
-      "name": "自动工作流服务",
-      "config_path": "mcp/auto-workflow.json",
-      "enabled": true,
-      "auto_start": true,
-      "priority": 4
+    "GitHub": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${env:GITHUB_TOKEN}"
+      }
     }
-  ],
-  "auto_start_all": true,
-  "start_on_ide_launch": true,
-  "watch_changes": true
+  }
 }
