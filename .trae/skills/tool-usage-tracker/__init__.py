@@ -1,5 +1,5 @@
 """
-工具调用追踪技能实现模块
+工具调用追踪技能实现模块 v2.0
 提供追踪、统计和报告功能
 """
 
@@ -9,10 +9,12 @@ import os
 # 添加上层目录到路径
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from tool_usage_tracker import (
+from tool_usage_tracker_v2 import (
     get_tracker,
     track_mcp_call,
     track_skill_call,
+    get_recent_calls,
+    get_summary,
     ToolUsageTracker
 )
 
@@ -66,30 +68,29 @@ def get_log_path(date: str = None) -> str:
     return str(tracker._get_today_log_path())
 
 
-def get_summary() -> str:
-    """获取简洁的今日摘要"""
-    stats = get_daily_stats()
+def get_recent_calls_summary(count: int = 10) -> list:
+    """获取最近N次调用摘要"""
+    return get_recent_calls(count)
+
+
+def check_logs() -> dict:
+    """检查日志状态"""
+    tracker = get_tracker()
+    records = tracker.read_log()
     
-    if stats["total_calls"] == 0:
-        return "今日暂无工具调用记录"
-    
-    summary = [
-        f"📊 今日工具调用统计",
-        f"  ├─ 总调用: {stats['total_calls']}次",
-        f"  ├─ MCP: {stats['mcp_calls']}次",
-        f"  ├─ Skill: {stats['skill_calls']}次",
-        f"  ├─ 成功率: {stats['success_rate']:.1f}%",
-        f"  └─ 平均耗时: {stats['avg_duration_ms']:.2f}ms"
-    ]
-    
-    return "\n".join(summary)
+    return {
+        "log_exists": len(records) > 0,
+        "record_count": len(records),
+        "log_path": str(tracker._get_today_log_path()),
+        "message": f"找到 {len(records)} 条记录" if records else "暂无工具调用记录"
+    }
 
 
 # 技能注册信息
 SKILL_INFO = {
     "name": "tool-usage-tracker",
-    "version": "1.0.0",
-    "description": "工具调用追踪技能",
+    "version": "2.0.0",
+    "description": "工具调用追踪技能 - 自动记录和读取真实工具调用日志",
     "author": "TRAE System",
     "functions": [
         {"name": "record_mcp_call", "description": "记录 MCP 调用"},
@@ -97,21 +98,29 @@ SKILL_INFO = {
         {"name": "generate_daily_report", "description": "生成每日报告"},
         {"name": "get_daily_stats", "description": "获取今日统计"},
         {"name": "list_all_reports", "description": "列出所有报告"},
-        {"name": "get_summary", "description": "获取今日摘要"}
+        {"name": "get_summary", "description": "获取今日摘要"},
+        {"name": "get_recent_calls_summary", "description": "获取最近调用摘要"},
+        {"name": "check_logs", "description": "检查日志状态"}
     ]
 }
 
 
 if __name__ == "__main__":
-    print("工具调用追踪技能")
+    print("工具调用追踪技能 v2.0")
     print("=" * 50)
     
-    stats = get_daily_stats()
-    print(f"今日调用次数: {stats['total_calls']}")
+    # 检查日志状态
+    log_status = check_logs()
+    print(f"\n📁 日志路径: {log_status['log_path']}")
+    print(f"📊 记录数量: {log_status['record_count']}")
+    print(f"💬 状态: {log_status['message']}")
     
-    if stats['total_calls'] > 0:
-        print(get_summary())
-        report = generate_daily_report()
-        print(f"\n报告已生成: {get_report_path()}")
+    if log_status['log_exists']:
+        print("\n" + get_summary())
+        recent = get_recent_calls_summary(10)
+        print(f"\n📋 最近{len(recent)}次调用:")
+        for i, r in enumerate(recent, 1):
+            print(f"  {i}. [{r['timestamp']}] {r['tool_type']}: {r['tool_name']} -> {r['action']}")
     else:
-        print("暂无调用记录，请先调用 MCP 或 Skills")
+        print("\n⚠️ 提示: 暂无工具调用记录")
+        print("   系统将自动记录未来的工具调用")
