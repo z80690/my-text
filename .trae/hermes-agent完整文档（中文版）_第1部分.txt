@@ -1,0 +1,352 @@
+# Hermes Agent — 完整文档
+本文档是整个 Hermes Agent 文档的串联版本，适合 LLM 上下文摄取。章节顺序反映了文档网站导航：快速开始、使用 Hermes、功能特性、消息平台、集成、指南、开发者指南、参考资料，然后是其他内容。
+官方站点：https://hermes-agent.nousresearch.com/docs
+简短索引：https://hermes-agent.nousresearch.com/docs/llms.txt
+
+---
+
+# 安装指南
+# 安装指南
+在两分钟内通过一行安装命令让 Hermes Agent 启动并运行。
+
+## 快速安装
+
+### Linux / macOS / WSL2
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
+```
+
+### Windows（原生，PowerShell）— 早期测试版
+
+:::warning 早期测试版
+原生 Windows 支持处于**早期测试版**。它可以安装并适用于常见路径，但尚未像我们的 POSIX 安装程序那样经过广泛测试。当您遇到问题时，请[提交问题](https://github.com/NousResearch/hermes-agent/issues)。要在 Windows 上获得最可靠的设置，请改用 **WSL2** 中的上述 Linux/macOS 一行命令。
+:::
+
+打开 PowerShell 并运行：
+
+```powershell
+irm https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.ps1 | iex
+```
+
+安装程序处理**一切**：`uv`、Python 3.11、Node.js 22、`ripgrep`、`ffmpeg`、**和一个便携式 Git Bash**（PortableGit——一个自包含的 Git-for-Windows 发行版，包含 `bash.exe` 和 Hermes 用于 shell 命令的完整 POSIX 工具链；在 32 位 Windows 上安装程序回退到 MinGit，它缺少 bash 并禁用终端工具/代理浏览器功能）。它将仓库克隆到 `%LOCALAPPDATA%\hermes\hermes-agent`，创建一个虚拟环境，并将 `hermes` 添加到您的**用户 PATH**。安装后重新启动终端（或打开一个新的 PowerShell 窗口），以便 PATH 生效。
+
+**Git 的处理方式：**
+1. 如果 `git` 已经在您的 PATH 上，安装程序使用您现有的安装。
+2. 否则，它会下载便携式 **PortableGit**（~50MB，来自官方 `git-for-windows` GitHub 发布版）并将其解压缩到 `%LOCALAPPDATA%\hermes\git`。无需管理员权限。完全隔离——它不会干扰任何系统 Git 安装，无论是否损坏。（在 32 位 Windows 上，它回退到 MinGit，因为 PortableGit 仅发布 64 位和 ARM64 资产；bash 依赖的 Hermes 功能在 32 位主机上无法工作。）
+
+**为什么不使用 winget？** 早期的设计通过 `winget install Git.Git` 自动安装 Git，但当系统 Git 安装处于部分或损坏状态时，winget 会严重失败（正是用户需要安装程序正常工作时）。便携式 Git 方法绕过了 winget、Windows 安装程序注册表以及任何现有的系统 Git。如果 Hermes Git 安装本身坏了，`Remove-Item %LOCALAPPDATA%\hermes\git` 并重新运行安装程序——无系统影响，无卸载麻烦。
+
+安装程序还将 `HERMES_GIT_BASH_PATH` 设置为找到的 `bash.exe`，以便 Hermes 在新 shell 中确定性地解析它。
+
+如果您喜欢 WSL2，上面的 Linux 安装程序可以在其中工作；原生和 WSL 安装可以共存而不会冲突（原生数据位于 `%LOCALAPPDATA%\hermes`，WSL 数据位于 `~/.hermes`）。
+
+### Android / Termux
+
+Hermes 现在也有一个 Termux 感知的安装路径：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
+```
+
+安装程序自动检测 Termux 并切换到经过测试的 Android 流程：
+- 使用 Termux `pkg` 安装系统依赖项（`git`、`python`、`nodejs`、`ripgrep`、`ffmpeg`、构建工具）
+- 使用 `python -m venv` 创建虚拟环境
+- 自动为 Android  wheel 构建导出 `ANDROID_API_LEVEL`
+- 优先使用宽泛的 `.[termux-all]` 额外依赖，如果第一次尝试编译失败则回退到较小的 `.[termux]` 额外依赖（最后是基础安装）
+- 默认跳过未经测试的浏览器/WhatsApp 引导
+
+如果您想要完全明确的路径，请遵循专用的 [Termux 指南](./termux.md)。
+
+:::note Windows 功能对等（早期测试版）
+原生 Windows 处于**早期测试版**。除基于浏览器的仪表板聊天终端外，其他所有功能都在 Windows 上原生运行：
+- **CLI（`hermes chat`、`hermes setup`、`hermes gateway`…）** — 原生，使用您的默认终端
+- **网关（Telegram、Discord、Slack…）** — 原生，作为后台 PowerShell 进程运行
+- **Cron 调度器** — 原生
+- **浏览器工具** — 原生（通过 Node.js 的 Chromium）
+- **MCP 服务器** — 原生（stdio 和 HTTP 传输都支持）
+- **仪表板 `/chat` 终端窗格** — **仅限 WSL2**（使用 POSIX PTY；原生 Windows 没有等效功能）。仪表板的其余部分（会话、作业、指标）在原生模式下工作——只有嵌入式 PTY 终端选项卡受限。
+
+如果您遇到编码相关的 bug 并想回退到传统的 cp1252 stdio 路径，请在您的环境中设置 `HERMES_DISABLE_WINDOWS_UTF8=1`（有助于二分查找）。
+:::
+
+### 安装程序做什么
+
+安装程序自动处理一切——所有依赖项（Python、Node.js、ripgrep、ffmpeg）、仓库克隆、虚拟环境、全局 `hermes` 命令设置和 LLM 提供商配置。到最后，您已准备好聊天。
+
+#### 安装布局
+
+安装程序将内容放在哪里取决于您是作为普通用户还是 root 安装：
+
+| 安装程序 | 代码位于 | `hermes` 二进制文件 | 数据目录 |
+|---|---|---|---|
+| 每用户（普通） | `~/.hermes/hermes-agent/` | `~/.local/bin/hermes`（符号链接） | `~/.hermes/` |
+| Root 模式（`sudo curl … \| sudo bash`） | `/usr/local/lib/hermes-agent/` | `/usr/local/bin/hermes` | `/root/.hermes/`（或 `$HERMES_HOME`） |
+
+Root 模式的 **FHS 布局**（`/usr/local/lib/…`、`/usr/local/bin/hermes`）与其他系统级开发工具在 Linux 上的位置一致。它对于共享机器部署很有用，在这种部署中，一个系统安装应该为每个用户提供服务。每用户配置（认证、技能、会话）仍位于每个用户的 `~/.hermes/` 或明确的 `HERMES_HOME` 下。
+
+### 安装后
+
+重新加载 shell 并开始聊天：
+
+```bash
+source ~/.bashrc   # 或者：source ~/.zshrc
+hermes             # 开始聊天！
+```
+
+以后要重新配置单个设置，请使用专用命令：
+
+```bash
+hermes model          # 选择您的 LLM 提供商和模型
+hermes tools          # 配置启用哪些工具
+hermes gateway setup  # 设置消息平台
+hermes config set     # 设置单个配置值
+hermes setup          # 或者运行完整的设置向导一次性配置一切
+```
+
+---
+
+## 先决条件
+
+唯一的先决条件是 **Git**。安装程序自动处理其他一切：
+
+- **uv**（快速的 Python 包管理器）
+- **Python 3.11**（通过 uv，无需 sudo）
+- **Node.js v22**（用于浏览器自动化和 WhatsApp 桥接）
+- **ripgrep**（快速文件搜索）
+- **ffmpeg**（TTS 音频格式转换）
+
+:::info
+您**不需要**手动安装 Python、Node.js、ripgrep 或 ffmpeg。安装程序检测缺少的内容并为您安装。只需确保 `git` 可用（`git --version`）。
+:::
+
+:::tip Nix 用户
+如果您使用 Nix（在 NixOS、macOS 或 Linux 上），有一条专用的设置路径，包括 Nix flake、声明式 NixOS 模块和可选的容器模式。请参阅 **[Nix 和 NixOS 设置](./nix-setup.md)** 指南。
+:::
+
+---
+
+## 手动/开发者安装
+
+如果您想克隆仓库并从源代码安装——用于贡献、运行特定分支或完全控制虚拟环境——请参阅贡献指南中的[开发设置](../developer-guide/contributing.md#development-setup)部分。
+
+---
+
+## 故障排除
+
+| 问题 | 解决方案 |
+|---------|----------|
+| `hermes: command not found` | 重新加载 shell（`source ~/.bashrc`）或检查 PATH |
+| `API key not set` | 运行 `hermes model` 配置您的提供商，或 `hermes config set OPENROUTER_API_KEY your_key` |
+| 更新后缺少配置 | 运行 `hermes config check` 然后 `hermes config migrate` |
+
+要获取更多诊断信息，请运行 `hermes doctor`——它会告诉您确切缺少什么以及如何修复。
+
+---
+
+# 快速入门指南
+# 快速入门
+
+本指南帮助您从零开始到一个可以经受真实使用的 Hermes 设置。安装，选择提供商，验证一个可工作的聊天，并在出现问题时确切知道该怎么做。
+
+## 宁愿看视频？
+
+**Onchain AI Garage** 制作了安装、设置和基本命令的 Masterclass 演练——如果您更喜欢跟着视频看，这是本页面的好伴侣。有关更多信息，请参阅完整的 [Hermes Agent 教程和使用案例](https://www.youtube.com/channel/UCqB1bhMwGsW-yefBxYwFCCg) 播放列表。
+
+## 谁适合这个指南
+
+- 全是新手，想要最短路径到可工作的设置
+- 切换提供商，不想在配置错误上浪费时间
+- 为团队、机器人或持续工作流设置 Hermes
+- 厌倦了"安装了，但它仍然什么都不做"
+
+## 最快路径
+
+选择与您的目标匹配的行：
+
+| 目标 | 首先这样做 | 然后这样做 |
+|---|---|---|
+| 我只想让 Hermes 在我的机器上工作 | `hermes setup` | 运行一个真实的聊天并验证它是否响应 |
+| 我已经知道我的提供商 | `hermes model` | 保存配置，然后开始聊天 |
+| 我想要一个机器人或持续工作设置 | CLI 工作后的 `hermes gateway setup` | 连接 Telegram、Discord、Slack 或其他平台 |
+| 我想要本地或自托管模型 | `hermes model` → 自定义端点 | 验证端点、模型名称和上下文长度 |
+| 我想要多提供商回退 | 首先 `hermes model` | 仅在基础聊天工作后添加路由和回退 |
+
+**经验法则：** 如果 Hermes 无法完成一个正常的聊天，还不要添加更多功能。先让一个干净的对话工作，然后才能添加网关、cron、技能、语音或路由。
+
+---
+
+## 1. 安装 Hermes Agent
+
+运行一行安装程序：
+
+```bash
+# Linux / macOS / WSL2 / Android (Termux)
+curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh | bash
+```
+
+:::tip Android / Termux
+如果您在手机上安装，请参阅专用的 [Termux 指南](./termux.md) 获取经过测试的手动路径、支持的额外功能以及当前的 Android 特定限制。
+:::
+
+:::tip Windows 用户
+首先安装 [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install)，然后在 WSL2 终端内运行上述命令。
+:::
+
+完成后重新加载 shell：
+
+```bash
+source ~/.bashrc   # 或者 source ~/.zshrc
+```
+
+有关详细的安装选项、先决条件和故障排除，请参阅[安装指南](./installation.md)。
+
+## 2. 选择提供商
+
+最关键的设置步骤。使用 `hermes model` 交互式地完成选择：
+
+```bash
+hermes model
+```
+
+好的默认值：
+
+| 提供商 | 是什么 | 如何设置 |
+|----------|-----------|---------------|
+| **Nous Portal** | 基于订阅，零配置 | 通过 `hermes model` 进行 OAuth 登录 |
+| **OpenAI Codex** | ChatGPT OAuth，使用 Codex 模型 | 通过 `hermes model` 进行设备代码认证 |
+| **Anthropic** | 直接使用 Claude 模型——Max 计划 + 额外使用积分（OAuth），或按需付费的 API 密钥 | `hermes model` → OAuth 登录（需要 Max + 额外积分），或 Anthropic API 密钥 |
+| **OpenRouter** | 跨多个模型的多元提供商路由 | 输入您的 API 密钥 |
+| **Z.AI** | GLM / 智谱托管模型 | 设置 `GLM_API_KEY` / `ZAI_API_KEY` |
+| **Kimi / Moonshot** | Moonshot 托管的编码和聊天模型 | 设置 `KIMI_API_KEY`（或特定于 Kimi-Coding 的 `KIMI_CODING_API_KEY`） |
+| **Kimi / Moonshot 中国** | 中国区域的 Moonshot 端点 | 设置 `KIMI_CN_API_KEY` |
+| **Arcee AI** | Trinity 模型 | 设置 `ARCEEAI_API_KEY` |
+| **GMI Cloud** | 多模型直接 API | 设置 `GMI_API_KEY` |
+| **MiniMax (OAuth)** | 通过浏览器 OAuth 的 MiniMax-M2.7——无需 API 密钥 | `hermes model` → MiniMax (OAuth) |
+| **MiniMax** | 国际 MiniMax 端点 | 设置 `MINIMAX_API_KEY` |
+| **MiniMax 中国** | 中国区域的 MiniMax 端点 | 设置 `MINIMAX_CN_API_KEY` |
+| **阿里云** | 通过 DashScope 的 Qwen 模型 | 设置 `DASHSCOPE_API_KEY` |
+| **Hugging Face** | 通过统一路由器访问 20+ 个开放模型（Qwen、DeepSeek、Kimi 等） | 设置 `HF_TOKEN` |
+| **AWS Bedrock** | 通过原生 Converse API 访问 Claude、Nova、Llama、DeepSeek | IAM 角色或 `aws configure`（[指南](../guides/aws-bedrock.md)） |
+| **Kilo Code** | KiloCode 托管的模型 | 设置 `KILOCODE_API_KEY` |
+| **OpenCode Zen** | 按需付费访问精选模型 | 设置 `OPENCODE_ZEN_API_KEY` |
+| **OpenCode Go** | 每月 $10 订阅开放模型 | 设置 `OPENCODE_GO_API_KEY` |
+| **DeepSeek** | 直接 DeepSeek API 访问 | 设置 `DEEPSEEK_API_KEY` |
+| **NVIDIA NIM** | 通过 build.nvidia.com 或本地 NIM 的 Nemotron 模型 | 设置 `NVIDIA_API_KEY`（可选：`NVIDIA_BASE_URL`） |
+| **GitHub Copilot** | GitHub Copilot 订阅（GPT-5.x、Claude、Gemini 等） | 通过 `hermes model` 进行 OAuth，或 `COPILOT_GITHUB_TOKEN` / `GH_TOKEN` |
+| **GitHub Copilot ACP** | Copilot ACP Agent 后端（生成本地 `copilot` CLI） | `hermes model`（需要 `copilot` CLI + `copilot login`） |
+| **Vercel AI Gateway** | Vercel AI Gateway 路由 | 设置 `AI_GATEWAY_API_KEY` |
+| **自定义端点** | VLLM、SGLang、Ollama 或任何 OpenAI 兼容 API | 设置基础 URL + API 密钥 |
+
+对于大多数首次用户：选择提供商，接受默认值，除非您知道为什么要更改它们。完整的提供商目录和环境变量设置步骤位于[提供商](../integrations/providers.md)页面。
+
+:::caution 最低上下文：64K tokens
+Hermes Agent 需要至少 **64,000 tokens** 上下文的模型。上下文窗口较小的模型无法维持多步骤工具调用工作流所需的足够工作内存，将在启动时被拒绝。大多数托管模型（Claude、GPT、Gemini、Qwen、DeepSeek）很容易满足此要求。如果您运行本地模型，请将其上下文大小设置为至少 64K（例如，llama.cpp 的 `--ctx-size 65536` 或 Ollama 的 `-c 65536`）。
+:::
+
+:::tip
+您可以随时通过 `hermes model` 切换提供商——无锁定。有关所有支持的提供商的完整列表和设置详细信息，请参阅 [AI 提供商](../integrations/providers.md)。
+:::
+
+### 设置如何存储
+
+Hermes 将 secrets 与正常配置分开：
+
+- **Secrets 和 tokens** → `~/.hermes/.env`
+- **非 secrets 设置** → `~/.hermes/config.yaml`
+
+通过 CLI 设置值的最简单方法：
+
+```bash
+hermes config set model anthropic/claude-opus-4.6
+hermes config set terminal.backend docker
+hermes config set OPENROUTER_API_KEY sk-or-...
+```
+
+正确的值会自动进入正确的文件。
+
+## 3. 运行您的第一次聊天
+
+```bash
+hermes            # 经典 CLI
+hermes --tui      # 现代 TUI（推荐）
+```
+
+您将看到欢迎横幅，显示您的模型、可用工具和技能。使用一个具体且易于验证的提示：
+
+:::tip 选择您的界面
+Hermes 提供两个终端界面：经典的 `prompt_toolkit` CLI 和更新的 [TUI](../user-guide/tui.md)，具有模态叠加层、鼠标选择和非阻塞输入。两者共享相同的会话、斜杠命令和配置——使用 `hermes` 和 `hermes --tui` 分别尝试。
+:::
+
+```
+用 5 个要点总结这个仓库，告诉我主要的入口点是什么。
+```
+
+```
+检查我的当前目录，告诉我看起来像主要项目文件的是什么。
+```
+
+```
+帮我为这个代码库设置一个干净的 GitHub PR 工作流。
+```
+
+**成功的标志：**
+- 横幅显示您选择的模型/提供商
+- Agent 响应了（可能需要几秒钟）
+- 没有错误消息
+
+**如果失败：**
+- 检查横幅中的模型名称是否正确
+- 运行 `hermes doctor` 诊断问题
+- 验证您的 API 密钥设置正确（`hermes model` 或检查 `~/.hermes/.env`）
+
+---
+
+## 下一步
+
+### 完全设置
+
+要配置所有内容（模型、工具、消息网关），请运行：
+
+```bash
+hermes setup
+```
+
+这将启动一个交互式向导，引导您完成完整设置。
+
+### 探索功能
+
+设置完成后，尝试这些：
+
+| 尝试这个 | 学习这个 |
+|---------|---------|
+| `hermes tools` | 查看所有可用工具 |
+| `hermes gateway setup` | 连接 Telegram、Discord 等 |
+| `Ctrl+R` 在 CLI 中 | 搜索命令历史 |
+| `/help` 在聊天中 | 查看斜杠命令 |
+
+### 加入社区
+
+- [GitHub Discussions](https://github.com/NousResearch/hermes-agent/discussions) — 提问、分享用例
+- [Discord 服务器](https://discord.gg/nousresearch) — 与其他用户和开发者交流
+- [Twitter/X](https://twitter.com/nousresearch) — 获取更新和公告
+
+---
+
+## 接下来该读什么
+
+| 如果您想... | 请阅读 |
+|------------|--------|
+| 深入了解配置 | [配置指南](../user-guide/configuration) |
+| 设置消息平台 | [消息网关概览](../user-guide/messaging/index) |
+| 了解技能系统 | [技能系统](../user-guide/features/skills) |
+| 了解记忆如何工作 | [记忆系统](../user-guide/features/memory) |
+| 自动化任务 | [定时任务](../user-guide/features/cron) |
+| 扩展 Hermes | [MCP 集成](../user-guide/features/mcp) |
+| 贡献代码 | [开发者指南](../developer-guide/contributing) |
+
+---
+
+**记住**：如果 Hermes 不能完成一个正常的聊天，不要添加更多功能。先让基础工作，然后才能构建！
+
+**安装成功了吗？** 查看[完整的安装指南](./installation.md)获取更多细节和故障排除。

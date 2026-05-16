@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 
-__version__ = "3.0.0"  # Knip增强版
+__version__ = "3.1.0"  # Knip 增强版 + API Token 优化集成
 
 # 默认清理模式
 DEFAULT_PATTERNS = {

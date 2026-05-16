@@ -1,9 +1,9 @@
 ---
 name: file-cleaner
-description: 智能文件清理技能（Knip增强版），集成未使用文件检测、未使用依赖检测、未使用导出检测功能
-version: 3.0.0
+description: 智能文件清理技能（Knip 增强版 + API Token 优化），集成未使用文件检测、未使用依赖检测、未使用导出检测和 API Token 优化功能
+version: 3.1.0
 author: Meta-Cognition Team
-tags: ["cleanup", "file-management", "maintenance", "utilities", "security", "auto-clean", "knip", "analysis"]
+tags: ["cleanup", "file-management", "maintenance", "utilities", "security", "auto-clean", "knip", "analysis", "api-token-optimizer"]
 ---
 
 # File Cleaner Skill (Knip增强版 v3.0)
@@ -20,11 +20,17 @@ tags: ["cleanup", "file-management", "maintenance", "utilities", "security", "au
 - 🗑️ **安全删除**：支持回收站备份
 - 📊 **详细报告**：显示清理结果和保护状态
 
-### Knip增强功能
+### Knip 增强功能
 - 📁 **未使用文件检测**：分析模块导入关系，找出未被引用的文件
-- 📦 **未使用依赖检测**：分析package.json，找出未被使用的依赖包
+- 📦 **未使用依赖检测**：分析 package.json，找出未被使用的依赖包
 - 📤 **未使用导出检测**：分析代码导出，找出未被引用的导出项
 - 🔗 **模块图分析**：构建完整的模块依赖关系图
+
+### API Token 优化功能（v3.1.0 新增）
+- 🚀 **API 缓存清理**：自动检测和清理 API 缓存文件
+- 💰 **Token 使用报告**：分析 API 调用日志，生成优化建议
+- 📊 **缓存命中率分析**：检测缓存策略效果
+- 🔍 **浪费检测**：识别不必要的 API 调用
 
 ---
 

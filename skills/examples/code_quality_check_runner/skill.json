@@ -1,8 +1,0 @@
-{
-  "$schema": "../schemas/skill-schema.json",
-  "name": "code_quality_check_runner",
-  "version": "1.0.0",
-  "description": "Run code quality checks for the project including ESLint, Prettier, and Pylint",
-  "entrypoint": "handler.py",
-  "permissions": ["filesystem:read"]
-}

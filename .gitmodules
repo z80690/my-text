@@ -1,3 +1,0 @@
-[submodule ".trae/rules"]
-	path = .trae/rules
-	url = git@github.com:z80690/my-agents.git
