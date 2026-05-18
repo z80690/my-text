@@ -9,7 +9,8 @@
       "protocol": "stdio",
       "autoStart": true,
       "startOnIdeLaunch": true,
-      "restartOnCrash": true
+      "restartOnCrash": true,
+      "description": "基于规则体系 L3.4.7 的知识应用闭环：记录→应用→反馈→进化"
     }
   }
 }
