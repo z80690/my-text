@@ -1,0 +1,72 @@
+{
+  "test_name": "技能功能对比AB测试",
+  "test_date": "2026-05-19T10:58:23.169974",
+  "total_test_cases": 6,
+  "a_group": {
+    "skill": "auto-memory",
+    "description": "自动记忆技能",
+    "test_count": 3,
+    "results": [
+      {
+        "test_case": "消息记录能力",
+        "skill": "auto-memory",
+        "status": "success",
+        "memory_file": ".trae/memories/user\\memory_20260519_105823.json",
+        "message_length": 6,
+        "timestamp": "2026-05-19T10:58:23.157447"
+      },
+      {
+        "test_case": "上下文管理",
+        "skill": "auto-memory",
+        "status": "success",
+        "current_focus": "消息处理",
+        "recent_changes_count": 2,
+        "known_issues_count": 0
+      },
+      {
+        "test_case": "规则日志记录",
+        "skill": "auto-memory",
+        "status": "success",
+        "total_executions": 2,
+        "success_rate": 100.0,
+        "suggestions": []
+      }
+    ]
+  },
+  "b_group": {
+    "skill": "api-token-optimizer",
+    "description": "API Token优化技能",
+    "test_count": 3,
+    "results": [
+      {
+        "test_case": "Token池管理",
+        "skill": "api-token-optimizer",
+        "status": "success",
+        "selected_token": "token2",
+        "remaining_quota": 4500,
+        "tokens_count": 2
+      },
+      {
+        "test_case": "熔断机制",
+        "skill": "api-token-optimizer",
+        "status": "success",
+        "initial_state": "CLOSED",
+        "after_failures_state": "OPEN",
+        "can_execute": false
+      },
+      {
+        "test_case": "缓存机制",
+        "skill": "api-token-optimizer",
+        "status": "success",
+        "cache_hit": true,
+        "cache_hit_value": "test_value",
+        "cache_miss": true
+      }
+    ]
+  },
+  "comparison": {
+    "auto-memory_focus": "消息记录、上下文管理、规则日志",
+    "api-token-optimizer_focus": "Token池、熔断、缓存",
+    "complementary": "两个技能可互补使用"
+  }
+}

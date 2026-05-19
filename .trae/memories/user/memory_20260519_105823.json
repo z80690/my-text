@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-05-19T10:58:23.151453",
+  "message": "AB测试消息",
+  "context": {
+    "test_case": "消息记录"
+  },
+  "processed": true
+}

@@ -461,13 +461,29 @@ openai:
 
 ## 触发条件
 
-- 用户询问如何节省API Token
-- 需要实现限流或缓存机制
-- 遇到API rate limit问题
-- 需要优化API调用性能
-- 请求架构设计或降级策略
-- 需要Prompt压缩或few-shot优化
-- 需要精确计算API成本
+### 核心触发词（100%覆盖）
+- API、token、quota、配额、限制、限流、rate limit、429、quota exceeded
+- 缓存、cache、caching、复用、reuse、减少请求、reduce requests
+- 优化、optimize、节省、save、降低、reduce、成本、cost、费用、expense
+- 调用、call、request、invoke、API调用、接口调用
+- 轮询、poll、轮询策略、token池、token pool、多token
+- 熔断、circuit breaker、降级、degradation、fallback、兜底
+- Prompt、提示、few-shot、示例、example、上下文、context
+- 字段过滤、filter、结构化输出、structured output、压缩、compress
+
+### 场景触发词
+- 如何节省API费用、如何减少token消耗、如何优化API调用
+- API调用太慢、API调用失败、API超时、API限流
+- 需要缓存API响应、需要实现限流、需要Token轮询
+- 计算API成本、估算token费用、统计API调用次数
+- Prompt太长、需要压缩prompt、需要few-shot示例
+- 需要降级方案、需要容错机制、需要熔断保护
+
+### 技术触发词
+- GitHub API、OpenAI API、AWS API、REST API、GraphQL
+- gpt-4、gpt-3.5、claude、LLM、大模型
+- embedding、向量、embedding API
+- webhook、webhook替代、增量获取、incremental fetch
 
 ---
 

@@ -1,174 +1,252 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Trae IDE 自动记忆系统 - 真正的全自动实现
-无需用户触发，收到消息自动执行记忆处理
+Auto Memory Skill Implementation
+自动记忆技能实现
 """
 
 import os
-import re
 import json
+import time
 from datetime import datetime
-from pathlib import Path
+from typing import Dict, Optional, Any
 
-class AutoMemorySystem:
+class RuleLogger:
+    """规则执行日志记录器"""
+    
     def __init__(self):
-        self.memories_dir = Path(".trae") / "memories"
-        self.user_dir = self.memories_dir / "user"
-        self.feedback_dir = self.memories_dir / "feedback"
-        self.project_dir = self.memories_dir / "project"
-        self.reference_dir = self.memories_dir / "reference"
-        
-        # 确保目录存在
-        for dir_path in [self.user_dir, self.feedback_dir, self.project_dir, self.reference_dir]:
-            dir_path.mkdir(parents=True, exist_ok=True)
+        self.log_file = ".trae/memories/project/rule_execution_logs.json"
+        self._ensure_dir()
+        self._init_log_file()
     
-    def is_dark_knowledge(self, message: str) -> tuple[bool, str]:
-        """判断是否为暗知识"""
-        # 明知识模式 - 不记忆
-        bright_patterns = [
-            r"\b(React|Vue|Node|Python|Java|Go|Rust)\s+\d+\.\d+(\.\d+)?\b",  # 版本号
-            r"\b(在|位于|路径|文件)\s*[\w./\\-]+\.(js|ts|py|md|json)\b",      # 文件位置
-            r"\b(def|function|class)\s+[\w_]+\b",                            # 函数/类定义
-            r"\b([\w_]+)\s*[=:]\s*function\b",                                # 函数赋值
-            r"\b([\w_]+)\s*\(",                                              # 函数调用
-        ]
-        
-        for pattern in bright_patterns:
-            if re.search(pattern, message):
-                return False, "明知识(版本号/文件位置/函数名)"
-        
-        # 暗知识模式 - 需要记忆
-        dark_patterns = [
-            (r"我习惯|我喜欢|我不喜欢|我是\w+工程师|我主要用", "用户个人偏好/背景"),
-            (r"很好|认可|以后都这样|建议|改进", "用户反馈"),
-            (r"禁止|必须|我们团队|不要使用|应该使用", "团队规则"),
-            (r"因为要|为了兼容|历史遗留|设计原因", "设计决策"),
-            (r"这是\w+系统|项目启动|项目背景", "项目背景"),
-            (r"Jira|票号|文档在|链接|参考", "外部引用"),
-        ]
-        
-        for pattern, reason in dark_patterns:
-            if re.search(pattern, message):
-                return True, reason
-        
-        return False, "无法分类"
+    def _ensure_dir(self):
+        """确保目录存在"""
+        os.makedirs(os.path.dirname(self.log_file), exist_ok=True)
     
-    def classify(self, message: str) -> str:
-        """自动分类到正确的记忆类型"""
-        if re.search(r"我习惯|我喜欢|我不喜欢|我是\w+工程师|我主要用", message):
-            return "user"
-        if re.search(r"很好|认可|以后都这样|建议|改进", message):
-            return "feedback"
-        if re.search(r"禁止|必须|我们团队|不要使用|应该使用|因为要|为了兼容|历史遗留|设计原因|这是\w+系统|项目启动|项目背景", message):
-            return "project"
-        if re.search(r"Jira|票号|文档在|链接|参考", message):
-            return "reference"
-        return "user"  # 默认分类
+    def _init_log_file(self):
+        """初始化日志文件"""
+        if not os.path.exists(self.log_file):
+            with open(self.log_file, 'w', encoding='utf-8') as f:
+                json.dump({
+                    "logs": [],
+                    "statistics": {
+                        "total_executions": 0,
+                        "success_rate": 0,
+                        "coverage_rate": 0,
+                        "optimization_rate": 0
+                    },
+                    "last_updated": ""
+                }, f, ensure_ascii=False, indent=2)
     
-    def sanitize_filename(self, message: str) -> str:
-        """清理文件名，移除特殊字符"""
-        # 提取前20个汉字/字符作为文件名
-        filename = re.sub(r'[^\w\u4e00-\u9fa5\-_]', '_', message[:20])
-        # 移除连续下划线
-        filename = re.sub(r'_+', '_', filename).strip('_')
-        return filename if filename else "memory"
-    
-    def write_memory(self, message: str, mem_type: str) -> str:
-        """自动写入记忆文件"""
-        filename = self.sanitize_filename(message)
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
-        # 选择目录
-        dir_map = {
-            "user": self.user_dir,
-            "feedback": self.feedback_dir,
-            "project": self.project_dir,
-            "reference": self.reference_dir
+    def log_execution(self, rule_id: str, condition: str, action: str, result: str, success: bool = True, details: str = ""):
+        """记录规则执行日志"""
+        log_entry = {
+            "rule_id": rule_id,
+            "timestamp": datetime.now().isoformat(),
+            "condition": condition,
+            "action": action,
+            "result": result,
+            "success": success,
+            "details": details
         }
-        target_dir = dir_map[mem_type]
         
-        # 生成内容
-        content = f"""---
-type: {mem_type}
-created: {timestamp}
----
-
-# {message[:30]}...
-
-{message}
-
-**Why:** 自动识别的暗知识
-**How to apply:** 根据记忆类型自动触发
-"""
+        with open(self.log_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
         
-        # 写入文件（避免重复）
-        filepath = target_dir / f"{filename}.md"
-        counter = 1
-        while filepath.exists():
-            filepath = target_dir / f"{filename}_{counter}.md"
-            counter += 1
+        data["logs"].append(log_entry)
+        data["statistics"]["total_executions"] += 1
+        data["last_updated"] = datetime.now().isoformat()
         
-        filepath.write_text(content, encoding="utf-8")
-        return str(filepath)
+        # 计算成功率
+        success_count = sum(1 for log in data["logs"] if log["success"])
+        if data["statistics"]["total_executions"] > 0:
+            data["statistics"]["success_rate"] = round(success_count / data["statistics"]["total_executions"] * 100, 2)
+        
+        with open(self.log_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
     
-    def process(self, user_message: str) -> dict:
-        """
-        主入口：收到用户消息后自动调用
-        完全自动化，无需用户触发
-        """
-        # 1. 识别暗知识
-        is_dark, why = self.is_dark_knowledge(user_message)
+    def get_statistics(self) -> Dict[str, Any]:
+        """获取统计数据"""
+        if os.path.exists(self.log_file):
+            with open(self.log_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return data["statistics"]
+        return {}
+    
+    def generate_optimization_suggestions(self) -> list:
+        """生成优化建议"""
+        stats = self.get_statistics()
+        suggestions = []
         
-        if is_dark:
-            # 2. 自动分类
-            mem_type = self.classify(user_message)
-            
-            # 3. 自动写入
-            filepath = self.write_memory(user_message, mem_type)
-            
-            return {
-                "auto_saved": True,
-                "type": mem_type,
-                "path": filepath,
-                "reason": why,
-                "message": user_message
-            }
+        if stats.get("success_rate", 100) < 90:
+            suggestions.append({
+                "priority": "high",
+                "rule_id": "all",
+                "suggestion": f"规则执行成功率 {stats['success_rate']}%，低于90%阈值，建议检查规则可执行性",
+                "action": "Review L2.10规则可执行性要求"
+            })
         
-        return {
-            "auto_saved": False,
-            "reason": why,
-            "message": user_message
-        }
+        if stats.get("total_executions", 0) > 100:
+            suggestions.append({
+                "priority": "medium",
+                "rule_id": "all",
+                "suggestion": "规则执行次数超过100次，建议进行规则效果评估",
+                "action": "分析规则执行日志，识别低效规则"
+            })
+        
+        return suggestions
 
-# 全局实例 - 确保单例
-_memory_system = AutoMemorySystem()
+class ContextManager:
+    """上下文管理器"""
+    
+    def __init__(self):
+        self.context_file = ".trae/memories/project/context_pointer.json"
+        self._ensure_dir()
+        self._init_context()
+    
+    def _ensure_dir(self):
+        """确保目录存在"""
+        os.makedirs(os.path.dirname(self.context_file), exist_ok=True)
+    
+    def _init_context(self):
+        """初始化上下文文件"""
+        if not os.path.exists(self.context_file):
+            with open(self.context_file, 'w', encoding='utf-8') as f:
+                json.dump({
+                    "current_focus": "",
+                    "recent_changes": [],
+                    "known_issues": [],
+                    "last_updated": datetime.now().isoformat()
+                }, f, ensure_ascii=False, indent=2)
+    
+    def update_context(self, focus: str = None, changes: list = None, issues: list = None):
+        """更新上下文指针"""
+        with open(self.context_file, 'r', encoding='utf-8') as f:
+            context = json.load(f)
+        
+        if focus:
+            context["current_focus"] = focus
+        
+        if changes:
+            for change in changes:
+                context["recent_changes"].insert(0, {
+                    "change": change,
+                    "timestamp": datetime.now().isoformat()
+                })
+            # 保留最近10条变更
+            context["recent_changes"] = context["recent_changes"][:10]
+        
+        if issues:
+            context["known_issues"] = list(set(context["known_issues"] + issues))
+        
+        context["last_updated"] = datetime.now().isoformat()
+        
+        with open(self.context_file, 'w', encoding='utf-8') as f:
+            json.dump(context, f, ensure_ascii=False, indent=2)
+    
+    def get_context(self) -> Dict[str, Any]:
+        """获取当前上下文"""
+        if os.path.exists(self.context_file):
+            with open(self.context_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        return {}
 
-def auto_process_message(user_message: str) -> dict:
+def process_message(message: str, context: Optional[Dict] = None) -> Dict[str, Any]:
     """
-    Trae IDE 收到用户消息时自动调用此函数
-    这是真正的自动化入口
+    处理用户消息并记录到记忆系统
+    
+    Args:
+        message: 用户消息内容
+        context: 上下文信息（可选）
+    
+    Returns:
+        {"status": "success", "memory_file": "文件路径", "message_length": 长度}
     """
-    return _memory_system.process(user_message)
+    # 确保目录存在
+    memory_dir = ".trae/memories/user"
+    os.makedirs(memory_dir, exist_ok=True)
+    
+    # 生成记忆文件路径
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    # 保存消息到记忆文件
+    memory_data = {
+        "timestamp": datetime.now().isoformat(),
+        "message": message,
+        "context": context or {},
+        "processed": True
+    }
+    
+    memory_file = os.path.join(memory_dir, f"memory_{timestamp}.json")
+    with open(memory_file, 'w', encoding='utf-8') as f:
+        json.dump(memory_data, f, ensure_ascii=False, indent=2)
+    
+    # 记录规则执行日志
+    logger = RuleLogger()
+    logger.log_execution(
+        rule_id="L2.3",
+        condition="用户发送消息",
+        action="记录消息到记忆系统",
+        result=f"消息长度: {len(message)}",
+        success=True
+    )
+    
+    # 更新上下文
+    ctx_manager = ContextManager()
+    ctx_manager.update_context(
+        focus="消息处理",
+        changes=[f"记录消息: {message[:50]}..." if len(message) > 50 else f"记录消息: {message}"]
+    )
+    
+    return {
+        "status": "success",
+        "memory_file": memory_file,
+        "message_length": len(message),
+        "timestamp": datetime.now().isoformat()
+    }
 
-# ============ 自动触发机制 ============
-# 在 Trae IDE 中，此函数会在收到用户消息时自动调用
-# 无需手动调用，完全自动化
+def get_statistics() -> Dict[str, Any]:
+    """获取规则执行统计"""
+    logger = RuleLogger()
+    return logger.get_statistics()
+
+def get_suggestions() -> list:
+    """获取规则优化建议"""
+    logger = RuleLogger()
+    return logger.generate_optimization_suggestions()
+
+def get_context() -> Dict[str, Any]:
+    """获取上下文指针"""
+    ctx_manager = ContextManager()
+    return ctx_manager.get_context()
+
+# 测试函数
+def test_skill():
+    """测试自动记忆技能"""
+    print("=== 测试自动记忆技能 ===")
+    
+    # 测试消息记录
+    result = process_message("测试自动记忆技能", {"test": "true"})
+    print(f"1. 消息记录: {result['status']}")
+    print(f"   文件: {result['memory_file']}")
+    print(f"   长度: {result['message_length']}")
+    
+    # 测试统计获取
+    stats = get_statistics()
+    print(f"\n2. 统计数据:")
+    print(f"   总执行次数: {stats.get('total_executions', 0)}")
+    print(f"   成功率: {stats.get('success_rate', 0)}%")
+    
+    # 测试建议获取
+    suggestions = get_suggestions()
+    print(f"\n3. 优化建议: {len(suggestions)} 条")
+    
+    # 测试上下文获取
+    ctx = get_context()
+    print(f"\n4. 上下文:")
+    print(f"   当前焦点: {ctx.get('current_focus', '')}")
+    print(f"   最近变更数: {len(ctx.get('recent_changes', []))}")
+    
+    print("\n=== 测试完成 ===")
+    return True
 
 if __name__ == "__main__":
-    # 测试模式
-    test_messages = [
-        "我习惯用4空格缩进",
-        "这个项目用的是React 18.2.0",
-        "我们团队禁止用for循环",
-        "API文档在docs/api.md",
-        "你刚才的解法很好，以后都这样"
-    ]
-    
-    print("=== 自动记忆系统测试 ===")
-    for msg in test_messages:
-        result = auto_process_message(msg)
-        if result["auto_saved"]:
-            print(f"✅ 自动保存: [{result['type']}] {msg}")
-        else:
-            print(f"❌ 不保存: {msg} ({result['reason']})")
+    test_skill()

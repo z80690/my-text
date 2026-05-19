@@ -1,0 +1,29 @@
+{
+  "logs": [
+    {
+      "rule_id": "L2.3",
+      "timestamp": "2026-05-19T10:48:41.443001",
+      "condition": "用户发送消息",
+      "action": "记录消息到记忆系统",
+      "result": "消息长度: 8",
+      "success": true,
+      "details": ""
+    },
+    {
+      "rule_id": "L2.3",
+      "timestamp": "2026-05-19T10:58:23.153447",
+      "condition": "用户发送消息",
+      "action": "记录消息到记忆系统",
+      "result": "消息长度: 6",
+      "success": true,
+      "details": ""
+    }
+  ],
+  "statistics": {
+    "total_executions": 2,
+    "success_rate": 100.0,
+    "coverage_rate": 0,
+    "optimization_rate": 0
+  },
+  "last_updated": "2026-05-19T10:58:23.153447"
+}

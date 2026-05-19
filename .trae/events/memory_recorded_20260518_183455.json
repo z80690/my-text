@@ -1,0 +1,1 @@
+{"event_type": "memory_recorded", "timestamp": "2026-05-18T18:34:55.337346", "data": {"success": true, "phase": "record", "type": "project", "path": ".trae\\memories\\project\\代码审查必须通过.md", "reason": "团队规则", "message": "代码审查必须通过"}, "subscribers_notified": 2}
