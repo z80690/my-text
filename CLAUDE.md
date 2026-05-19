@@ -63,15 +63,15 @@ tree /F .trae            # 查看.trae目录树
 ## 项目规范
 
 ### 文件组织
-- .trae/rules/*.md：L3功能规则
+- .trae/rules/*.md：L3功能规则（支持最多3层嵌套）
 - .trae/memories/：记忆系统（user/project/feedback/reference）
 - .trae/mcp/：MCP服务配置
 - .trae/skills/：技能模块
 
 ### 规则管理
-- 以注意力机制为核心
-- 避免冗余，优先合并
-- L1/L2变更必须触发链路扫描
+- 规则之间不得彼此冲突
+- 以L1层规则为准
+- 支持动态加载
 
 ## 上下文管理指针
 
@@ -79,7 +79,7 @@ tree /F .trae            # 查看.trae目录树
 - 规则体系优化：吸取Claude Code最佳实践
 
 ### 最近变更
-- 2026-05-19 新增L1.7/L2.7/L3.8动态加载规则
+- 2026-05-19 同步TRAE官方文档规范
 
 ### 已知问题
 - MCP前端配置需用户手动创建
