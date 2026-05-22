@@ -76,6 +76,7 @@
         .module-suggest { background: #ff5722; }
         .module-algo { background: #7c4dff; }
         .module-token { background: #00e676; }
+        .module-rule-mgmt { background: #e91e63; }
         .control-panel {
             position: absolute;
             bottom: 20px;
@@ -162,7 +163,7 @@
 <body>
     <div class="header">
         <h1>⚙️ 规则引擎调度架构</h1>
-        <p>功能模块协同工作 | 消除信息孤岛 | v3.9</p>
+        <p>功能模块协同工作 | 消除信息孤岛 | v3.11</p>
     </div>
     
     <div class="legend">
@@ -182,6 +183,7 @@
         <div class="legend-item"><div class="legend-color module-suggest"></div><span>规则建议机制</span></div>
         <div class="legend-item"><div class="legend-color module-algo"></div><span>算法智能</span></div>
         <div class="legend-item"><div class="legend-color module-token"></div><span>Token优化</span></div>
+        <div class="legend-item"><div class="legend-color module-rule-mgmt"></div><span>规则管理</span></div>
     </div>
     
     <div class="stats-panel">
@@ -204,6 +206,7 @@
         <button id="btn-relation" onclick="showModule('relation')">查看关联</button>
         <button id="btn-algo" onclick="showModule('algo')">算法智能</button>
         <button id="btn-token" onclick="showModule('token')">Token优化</button>
+        <button id="btn-rule-mgmt" onclick="showModule('rule-mgmt')">规则管理</button>
     </div>
     
     <div class="tooltip" id="tooltip"></div>
@@ -409,7 +412,27 @@
                   x: 200, y: 450 },
                 { id: 'token-batch', name: '智能批量', type: 'sub', module: 'token', parent: 'token-core',
                   description: '合并相似请求，节省20-40% Token',
-                  x: 100, y: 400 }
+                  x: 100, y: 400 },
+
+                // ========== 规则管理模块 ==========
+                { id: 'rule-mgmt-core', name: '规则管理', type: 'module', module: 'rule-mgmt',
+                  description: '规则全生命周期管理\n包含：准入管理、生命周期、层级边界、冲突优化、版本管控',
+                  x: -600, y: 0 },
+                { id: 'rule-mgmt-access', name: '规则准入', type: 'sub', module: 'rule-mgmt', parent: 'rule-mgmt-core',
+                  description: '新增规则必须核验必要性\n分类：刚需强制约束、参考性经验建议、禁止新增',
+                  x: -700, y: -80 },
+                { id: 'rule-mgmt-lifecycle', name: '生命周期', type: 'sub', module: 'rule-mgmt', parent: 'rule-mgmt-core',
+                  description: '定期核验存量规则\n失效判定：3个月未引用、场景淘汰、逻辑过时',
+                  x: -700, y: 0 },
+                { id: 'rule-mgmt-layer', name: '层级边界', type: 'sub', module: 'rule-mgmt', parent: 'rule-mgmt-core',
+                  description: 'L1宪法、L2基本法、L3执行细则\n仅编号引用，禁止全文复刻',
+                  x: -700, y: 80 },
+                { id: 'rule-mgmt-conflict', name: '冲突优化', type: 'sub', module: 'rule-mgmt', parent: 'rule-mgmt-core',
+                  description: '检测规则自身逻辑冲突\n优先级：安全>质量>流程>效率',
+                  x: -500, y: -80 },
+                { id: 'rule-mgmt-version', name: '版本管控', type: 'sub', module: 'rule-mgmt', parent: 'rule-mgmt-core',
+                  description: '变更记录关联版本号\n重大变更需评估影响范围',
+                  x: -500, y: 80 }
             ],
             links: [
                 { source: 'rule-engine', target: '6a-core', relation: '调度 → 6A流程启动任务' },
@@ -495,7 +518,21 @@
                 { source: 'token-core', target: 'dialogue-core', relation: 'Token优化与摘要压缩协同' },
                 { source: 'token-cache', target: 'algo-cache', relation: '共享缓存策略' },
                 { source: 'token-core', target: 'quality-core', relation: '成本优化不影响质量' },
-                { source: 'token-batch', target: 'task-core', relation: '批量处理优化任务执行' }
+                { source: 'token-batch', target: 'task-core', relation: '批量处理优化任务执行' },
+
+                // 规则管理模块链接
+                { source: 'rule-engine', target: 'rule-mgmt-core', relation: '调度 → 规则管理检查' },
+                { source: 'rule-mgmt-core', target: '6a-core', relation: '管理 → 6A流程合规' },
+                { source: 'rule-mgmt-core', target: 'quality-core', relation: '管理 → 质量模块合规' },
+                { source: 'rule-mgmt-core', target: 'security-core', relation: '管理 → 安全模块合规' },
+                { source: 'rule-mgmt-core', target: 'suggest-core', relation: '规则建议触发准入检查' },
+                { source: 'rule-mgmt-access', target: 'rule-mgmt-lifecycle', relation: '准入后进入生命周期' },
+                { source: 'rule-mgmt-lifecycle', target: 'rule-mgmt-layer', relation: '生命周期检查层级边界' },
+                { source: 'rule-mgmt-layer', target: 'rule-mgmt-conflict', relation: '层级边界触发冲突检测' },
+                { source: 'rule-mgmt-conflict', target: 'rule-mgmt-version', relation: '冲突解决后版本管控' },
+                { source: 'rule-mgmt-version', target: 'abtest-core', relation: '版本变更触发AB测试评估' },
+                { source: 'suggest-core', target: 'rule-mgmt-access', relation: '规则建议走准入流程' },
+                { source: 'rule-mgmt-conflict', target: 'algo-game', relation: '冲突解决复用博弈决策' }
             ]
         };
         
@@ -534,7 +571,8 @@
                 'dialogue': '#00bcd4',
                 'suggest': '#ff5722',
                 'algo': '#7c4dff',
-                'token': '#00e676'
+                'token': '#00e676',
+                'rule-mgmt': '#e91e63'
             };
             return colors[d.module] || '#9e9e9e';
         }
@@ -640,7 +678,8 @@
                         '6a': '#e74c3c', 'quality': '#27ae60', 'security': '#9b59b6',
                         'test': '#3498db', 'identity': '#e67e22', 'git': '#1abc9c',
                         'task': '#f39c12', 'coding': '#95a5a6', 'abtest': '#2ecc71',
-                        'source': '#e91e63', 'dialogue': '#00bcd4', 'suggest': '#ff5722'
+                        'source': '#e91e63', 'dialogue': '#00bcd4', 'suggest': '#ff5722',
+                        'algo': '#7c4dff', 'token': '#00e676', 'rule-mgmt': '#e91e63'
                     };
                     return colors[d.source.module] || 'rgba(255,255,255,0.3)';
                 });
@@ -652,7 +691,7 @@
                 'test': '#3498db', 'identity': '#e67e22', 'git': '#1abc9c',
                 'task': '#f39c12', 'coding': '#95a5a6', 'abtest': '#2ecc71',
                 'source': '#e91e63', 'dialogue': '#00bcd4', 'suggest': '#ff5722',
-                'algo': '#7c4dff', 'token': '#00e676'
+                'algo': '#7c4dff', 'token': '#00e676', 'rule-mgmt': '#e91e63'
             };
             
             node.style('opacity', d => {
