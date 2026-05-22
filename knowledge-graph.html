@@ -77,6 +77,7 @@
         .module-algo { background: #7c4dff; }
         .module-token { background: #00e676; }
         .module-rule-mgmt { background: #e91e63; }
+        .module-emotional { background: #ff9800; }
         .control-panel {
             position: absolute;
             bottom: 20px;
@@ -163,7 +164,7 @@
 <body>
     <div class="header">
         <h1>⚙️ 规则引擎调度架构</h1>
-        <p>功能模块协同工作 | 消除信息孤岛 | v3.11</p>
+        <p>功能模块协同工作 | 消除信息孤岛 | v3.12</p>
     </div>
     
     <div class="legend">
@@ -184,6 +185,7 @@
         <div class="legend-item"><div class="legend-color module-algo"></div><span>算法智能</span></div>
         <div class="legend-item"><div class="legend-color module-token"></div><span>Token优化</span></div>
         <div class="legend-item"><div class="legend-color module-rule-mgmt"></div><span>规则管理</span></div>
+        <div class="legend-item"><div class="legend-color module-emotional"></div><span>情绪感知</span></div>
     </div>
     
     <div class="stats-panel">
@@ -207,6 +209,7 @@
         <button id="btn-algo" onclick="showModule('algo')">算法智能</button>
         <button id="btn-token" onclick="showModule('token')">Token优化</button>
         <button id="btn-rule-mgmt" onclick="showModule('rule-mgmt')">规则管理</button>
+        <button id="btn-emotional" onclick="showModule('emotional')">情绪感知</button>
     </div>
     
     <div class="tooltip" id="tooltip"></div>
