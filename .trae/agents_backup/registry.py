@@ -46,14 +46,12 @@ class AgentRegistry:
         if not agents_path.exists():
             return
         
-        # 扫描所有 *.md 文件（排除已处理的）
-        for md_file in agents_path.glob("*.md"):
+        for md_file in agents_path.glob("*_agent.md"):
             agent_data = self._parse_agent_markdown(md_file)
             if agent_data:
                 agent_id = agent_data['id']
-                if agent_id not in self._agents:
-                    self._agents[agent_id] = agent_data
-                    print(f"  [+] 解析智能体: {agent_data['name']} ({agent_id})")
+                self._agents[agent_id] = agent_data
+                print(f"  [+] 解析智能体: {agent_data['name']} ({agent_id})")
     
     def _parse_agent_markdown(self, file_path: Path) -> Optional[Dict[str, Any]]:
         """解析智能体markdown文件"""

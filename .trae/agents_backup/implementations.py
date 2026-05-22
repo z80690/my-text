@@ -1,0 +1,181 @@
+# -*- coding: utf-8 -*-
+"""
+智能体实现文件
+批量注册20个智能体
+"""
+
+from .base import BaseAgent, AgentConfig
+from .registry import get_registry
+
+# 智能体配置列表
+AGENTS_CONFIG = [
+    {
+        "id": "assistant_agent",
+        "name": "通用助手智能体",
+        "description": "一般性问题解答、信息查询、综合建议",
+        "type": "general",
+        "capabilities": ["question_answering", "information_retrieval"]
+    },
+    {
+        "id": "user_proxy_agent",
+        "name": "用户代理智能体",
+        "description": "用户请求处理、代理服务、交互管理",
+        "type": "proxy",
+        "capabilities": ["request_handling", "interaction_management"]
+    },
+    {
+        "id": "code_executor_agent",
+        "name": "代码执行智能体",
+        "description": "代码编写、调试、分析、优化",
+        "type": "code",
+        "capabilities": ["code_writing", "debugging", "analysis"]
+    },
+    {
+        "id": "message_filter_agent",
+        "name": "消息过滤智能体",
+        "description": "消息过滤、内容审核、信息提取",
+        "type": "filter",
+        "capabilities": ["content_filtering", "moderation"]
+    },
+    {
+        "id": "society_of_mind_agent",
+        "name": "心智社会智能体",
+        "description": "复杂推理、多维度分析、深度思考",
+        "type": "thinking",
+        "capabilities": ["complex_reasoning", "multidimensional_analysis"]
+    },
+    {
+        "id": "base_agent",
+        "name": "基础智能体",
+        "description": "基础任务处理、通用功能",
+        "type": "base",
+        "capabilities": ["basic_tasks", "general_functions"]
+    },
+    {
+        "id": "closure_agent",
+        "name": "闭包智能体",
+        "description": "闭包概念、封装技术",
+        "type": "technical",
+        "capabilities": ["closure_concepts", "encapsulation"]
+    },
+    {
+        "id": "routed_agent",
+        "name": "路由智能体",
+        "description": "任务路由、分发策略",
+        "type": "routing",
+        "capabilities": ["task_routing", "distribution_strategy"]
+    },
+    {
+        "id": "tool_agent",
+        "name": "工具智能体",
+        "description": "工具调用、资源管理、系统操作",
+        "type": "tool",
+        "capabilities": ["tool_calling", "resource_management"]
+    },
+    {
+        "id": "chess_agent",
+        "name": "国际象棋智能体",
+        "description": "棋类游戏、策略规划、博弈分析",
+        "type": "game",
+        "capabilities": ["chess_playing", "strategy_planning"]
+    },
+    {
+        "id": "fastapi_agent",
+        "name": "FastAPI智能体",
+        "description": "API设计、FastAPI框架、Web服务开发",
+        "type": "web",
+        "capabilities": ["api_design", "fastapi_development"]
+    },
+    {
+        "id": "streamlit_agent",
+        "name": "Streamlit智能体",
+        "description": "界面设计、数据可视化、交互式应用",
+        "type": "web",
+        "capabilities": ["ui_design", "data_visualization"]
+    },
+    {
+        "id": "graphrag_agent",
+        "name": "GraphRAG智能体",
+        "description": "知识图谱构建、信息检索、语义分析",
+        "type": "knowledge",
+        "capabilities": ["knowledge_graph", "semantic_analysis"]
+    },
+    {
+        "id": "dspy_agent",
+        "name": "DSPy智能体",
+        "description": "AI模型开发、提示词工程、模型训练",
+        "type": "ai",
+        "capabilities": ["model_development", "prompt_engineering"]
+    },
+    {
+        "id": "xlang_agent",
+        "name": "跨语言智能体",
+        "description": "翻译、跨语言沟通、多语言内容处理",
+        "type": "language",
+        "capabilities": ["translation", "multilingual_processing"]
+    },
+    {
+        "id": "semantic_router_agent",
+        "name": "语义路由智能体",
+        "description": "意图识别、语义理解、情感分析",
+        "type": "nlp",
+        "capabilities": ["intent_recognition", "semantic_understanding"]
+    },
+    {
+        "id": "editor_agent",
+        "name": "编辑器智能体",
+        "description": "文本编辑、内容优化、格式调整",
+        "type": "content",
+        "capabilities": ["text_editing", "content_optimization"]
+    },
+    {
+        "id": "writer_agent",
+        "name": "作家智能体",
+        "description": "文章撰写、邮件编辑、文档生成",
+        "type": "content",
+        "capabilities": ["article_writing", "document_generation"]
+    },
+    {
+        "id": "teachable_agent",
+        "name": "可教学智能体",
+        "description": "知识获取、能力提升、适应性学习",
+        "type": "learning",
+        "capabilities": ["knowledge_acquisition", "adaptive_learning"]
+    },
+    {
+        "id": "grpc_agent",
+        "name": "gRPC智能体",
+        "description": "gRPC框架、RPC服务、API设计",
+        "type": "network",
+        "capabilities": ["grpc_development", "rpc_services"]
+    }
+]
+
+# 通用智能体实现类
+class GenericAgent(BaseAgent):
+    def execute(self, task: str, context: dict = None) -> dict:
+        return {
+            "status": "ok",
+            "message": f"{self.name} 执行任务: {task}",
+            "agent_id": self.id,
+            "timestamp": "2026-04-27T12:00:00"
+        }
+
+def load_all_agents():
+    """加载所有智能体"""
+    registry = get_registry()
+    
+    for agent_config in AGENTS_CONFIG:
+        config = AgentConfig(
+            id=agent_config["id"],
+            name=agent_config["name"],
+            description=agent_config["description"],
+            type=agent_config["type"],
+            capabilities=agent_config["capabilities"]
+        )
+        agent = GenericAgent(config)
+        registry.register(agent)
+        print(f"已注册智能体: {agent.name} ({agent.id})")
+
+# 自动加载
+load_all_agents()
