@@ -152,7 +152,7 @@
 - 监督报告定期汇总，用于规则体系优化
 
 - **L2支撑**: 规则优先级与冲突解决、质量规范、安全规范
-- **L3支撑**: 6a-project-flow.md、quality-gate.md、security-audit.md
+- **L3支撑**: 6a-project-flow.md、quality-gate.md、security-audit.md、recursive-thinking.md
 
 ### 5.5 独立监督铁律 [L1-5.5.1]
 **监控智能体/质量评审员为最高权限角色，与规则引擎平级且互相制衡**：
@@ -205,6 +205,9 @@
 - 所有思考过程必须记录在执行日志中
 - 思考结果必须作为执行依据
 - 未完成思考不得执行任务
+
+- **L2支撑**: 递归思考规范
+- **L3支撑**: recursive-thinking.md
 
 ---
 
