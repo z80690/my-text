@@ -102,6 +102,54 @@ def detect_game_mode(task):
 | 优先级路由 | 中 | 高优先级任务优先 |
 | 并行路由 | 最高 | 所有任务自动配对监控智能体 |
 
+## 任务到智能体映射规则
+
+**规则体系是法律，调度器是警察**：规则定义职责分工，调度器负责执行。
+
+| 任务关键词 | 调度智能体 | 说明 |
+|----------|-----------|------|
+| 代码、写代码、debug、实现、编程 | code_executor_agent | 代码编写任务 |
+| 规则、规范、解释、说明、体系 | rule_interpreter_agent | 规则解释任务 |
+| 文档、README、报告、写文档 | writer_agent | 文档编写任务 |
+| 执行、命令、搜索、查询、查找 | tool_agent | 工具执行任务 |
+| 需求、澄清、确认、对齐 | user_proxy_agent | 用户代理任务 |
+| 协调、调度、复杂、多步骤、协作 | dispatcher_agent | 调度协调任务 |
+| wiki、知识、编译、整理、摘要、查询 | llm_wiki_agent | LLM Wiki知识管理任务 |
+| proposal、提案、specs、规范、设计、任务清单 | writer_agent + dispatcher_agent | SDD规范文档编写 |
+| 整理代码、简化、code-simplifier | code_executor_agent | 代码整理优化 |
+
+## SDD规范驱动开发流程
+
+**AI编程黄金三角**：OpenSpec + Superpowers + gstack
+
+**SDD调度流程**：
+```
+1. 用户需求 → Align阶段：产出PROPOSAL.md + SPECS.md
+2. 设计方案 → Architect阶段：产出DESIGN.md
+3. 任务拆解 → Atomize阶段：产出TASKS.md
+4. 用户批准 → Approve阶段：获得确认
+5. 代码执行 → Automate阶段：code_executor_agent按Specs执行
+6. 验收评估 → Assess阶段：质量门禁评估
+```
+
+**SDD任务调度触发条件**：
+- 任何代码编写、修改、重构任务
+- 涉及到需求不明确时
+- 技术方案未确定时
+
+**强制检查点**：
+1. **写代码前**：检查PROPOSAL.md、SPECS.md、DESIGN.md、TASKS.md是否都存在
+2. **用户批准**：确保用户已确认
+3. **按Specs执行**：严格按规范执行，不自由发挥
+4. **四大约束缰绳**：代码风格、自动文档、内置测试、主动纠错
+
+**调度流程**：
+1. **情绪识别**：分析用户情绪状态，调整响应策略
+2. **规则匹配**：根据任务关键词匹配对应智能体
+3. **智能体调用**：通过注册中心执行智能体
+4. **结果汇总**：根据情绪调整输出风格
+5. **质量检查**：通过质量门禁后返回结果
+
 ## 工作原理 / Working Principle
 
 ### 执行逻辑 / Execution Logic

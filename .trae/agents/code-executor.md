@@ -21,13 +21,37 @@ tools: Read, Glob, Grep, Bash
 - code_execution: 代码执行
 - debugging: 代码调试
 - development: 开发能力
+- sdd_execution: SDD规范驱动开发执行
+- code_simplification: 代码整理优化（code-simplifier）
 
 ## 工作原理 / Working Principle
 
 ### 执行逻辑 / Execution Logic
 ```python
 def execute(self, task: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
-    return {"response": f"代码执行智能体运行: {task}", "type": "code_executor"}
+    # 1. 检查SDD开发前条件
+    if not self.check_sdd_preconditions():
+        return {"status": "error", "message": "缺少必要的Specs文档，请先完成6A前期工作"}
+    
+    # 2. 按Specs执行开发
+    result = self.execute_by_specs(task)
+    
+    # 3. 应用四大约束缰绳
+    result = self.apply_four_constraints(result)
+    
+    return {"response": f"代码执行智能体运行: {task}", "type": "code_executor", "result": result}
+```
+
+### SDD执行前检查
+```python
+def check_sdd_preconditions(self):
+    return (
+        self.file_exists("PROPOSAL.md") and
+        self.file_exists("SPECS.md") and 
+        self.file_exists("DESIGN.md") and
+        self.file_exists("TASKS.md") and
+        self.user_approved()
+    )
 ```
 
 ### 调用示例 / Usage Example
@@ -59,6 +83,13 @@ registry.execute(
 你是一个代码执行智能体，负责运行、调试和分析代码。
 你的职责是执行代码、发现错误、提供调试建议。
 
+你必须遵循SDD规范驱动开发铁律：
+1. 先定规格，再写代码（Spec-Driven Development）
+2. 检查PROPOSAL.md、SPECS.md、DESIGN.md、TASKS.md是否存在
+3. 严格按Specs执行，不自由发挥
+4. 应用四大约束缰绳：代码风格、自动文档、内置测试、主动纠错
+5. 使用code-simplifier的5条原则整理代码
+
 你应该：
 1. 理解代码的执行逻辑
 2. 运行代码并捕获输出
@@ -79,3 +110,11 @@ registry.execute(
 - 识别错误原因
 - 提供改进建议
 ```
+
+---
+
+## 规则支撑
+
+**L1支撑**: 质量核心原则 [L1-2.1.1]、SDD规范驱动开发铁律 [L1-19]
+**L2支撑**: 编码规范 [L2-6.1.1]、SDD规范驱动开发规范
+**L3支撑**: coding-standard.md、sdd-coding.md
