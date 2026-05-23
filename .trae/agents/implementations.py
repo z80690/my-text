@@ -6,6 +6,12 @@
 
 from .base import BaseAgent, AgentConfig
 from .registry import get_registry
+from .llm_wiki_agent import LlmWikiAgent
+from .dispatcher_agent import DispatcherAgent
+from .code_executor_agent import CodeExecutorAgent
+from .rule_interpreter_agent import RuleInterpreterAgent
+from .tool_agent import ToolAgent
+from .monitor_agent import MonitorAgent
 
 # 智能体配置列表
 AGENTS_CONFIG = [
@@ -148,6 +154,41 @@ AGENTS_CONFIG = [
         "description": "gRPC框架、RPC服务、API设计",
         "type": "network",
         "capabilities": ["grpc_development", "rpc_services"]
+    },
+    {
+        "id": "llm_wiki_agent",
+        "name": "LLM Wiki管理员",
+        "description": "LLM Wiki知识管理、知识编译、查询、校验",
+        "type": "knowledge",
+        "capabilities": ["knowledge_ingest", "knowledge_query", "knowledge_lint", "index_management"]
+    },
+    {
+        "id": "dispatcher_agent",
+        "name": "智能体团队调度员",
+        "description": "协调、分发、博弈调度、智能路由、负载均衡",
+        "type": "coordinator",
+        "capabilities": ["task_scheduling", "game_theory", "intelligent_routing", "team_coordination", "load_balancing"]
+    },
+    {
+        "id": "rule_interpreter_agent",
+        "name": "规则解释智能体",
+        "description": "规则文档解析、逻辑转换",
+        "type": "interpreter",
+        "capabilities": ["rule_parsing", "logic_conversion", "document_understanding"]
+    },
+    {
+        "id": "monitor_agent",
+        "name": "监控智能体",
+        "description": "系统监控、性能分析、问题诊断",
+        "type": "monitor",
+        "capabilities": ["system_monitoring", "performance_analysis", "problem_diagnosis"]
+    },
+    {
+        "id": "nuwa_agent",
+        "name": "女娲智能体",
+        "description": "智能体创建、能力生成、知识注入",
+        "type": "creator",
+        "capabilities": ["agent_creation", "capability_generation", "knowledge_injection"]
     }
 ]
 
@@ -173,7 +214,23 @@ def load_all_agents():
             type=agent_config["type"],
             capabilities=agent_config["capabilities"]
         )
-        agent = GenericAgent(config)
+        
+        # 使用专门的实现类
+        specialized_agents = {
+            'llm_wiki_agent': LlmWikiAgent,
+            'dispatcher_agent': DispatcherAgent,
+            'code_executor_agent': CodeExecutorAgent,
+            'rule_interpreter_agent': RuleInterpreterAgent,
+            'tool_agent': ToolAgent,
+            'monitor_agent': MonitorAgent
+        }
+        
+        agent_id = agent_config["id"]
+        if agent_id in specialized_agents:
+            agent = specialized_agents[agent_id](config)
+        else:
+            agent = GenericAgent(config)
+        
         registry.register(agent)
         print(f"已注册智能体: {agent.name} ({agent.id})")
 
