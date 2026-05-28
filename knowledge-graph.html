@@ -3,729 +3,313 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>规则引擎调度架构 - 功能模块协同图</title>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <title>规则体系知识图谱</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             min-height: 100vh;
             overflow: hidden;
         }
-        .header {
-            position: absolute;
-            top: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            z-index: 100;
+        #header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 46, 0.95);
+            padding: 15px 30px;
+            z-index: 1000;
+            border-bottom: 2px solid #0f3460;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
-        .header h1 {
-            color: #fff;
-            font-size: 22px;
-            font-weight: 600;
-            margin-bottom: 6px;
+        #header h1 {
+            color: #e94560;
+            font-size: 24px;
+            margin-bottom: 5px;
         }
-        .header p {
-            color: #a0aec0;
-            font-size: 13px;
+        #header p {
+            color: #aaa;
+            font-size: 14px;
         }
-        .legend {
-            position: absolute;
-            top: 85px;
-            right: 20px;
-            background: rgba(255,255,255,0.12);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 14px;
-            color: #fff;
-            z-index: 100;
-            min-width: 180px;
+        #graph {
+            width: 100vw;
+            height: 100vh;
         }
-        .legend h3 {
-            font-size: 13px;
+        .node circle {
+            stroke-width: 3px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .node circle:hover {
+            filter: brightness(1.3);
+        }
+        .node text {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            font-size: 12px;
+            fill: #fff;
+            text-anchor: middle;
+            pointer-events: none;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+        .link {
+            stroke: #533483;
+            stroke-width: 2px;
+            opacity: 0.6;
+            transition: all 0.3s ease;
+        }
+        .link:hover {
+            stroke: #e94560;
+            opacity: 1;
+            stroke-width: 3px;
+        }
+        #legend {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(26, 26, 46, 0.9);
+            padding: 15px 20px;
+            border-radius: 10px;
+            border: 1px solid #0f3460;
+        }
+        #legend h3 {
+            color: #e94560;
             margin-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-            padding-bottom: 6px;
+            font-size: 14px;
         }
         .legend-item {
             display: flex;
             align-items: center;
-            margin-bottom: 6px;
-            font-size: 11px;
+            margin: 5px 0;
+            color: #ddd;
+            font-size: 12px;
         }
         .legend-color {
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
-            margin-right: 8px;
+            margin-right: 10px;
+            border: 2px solid;
         }
-        .engine-node { background: #f9ca24; box-shadow: 0 0 15px rgba(249,202,36,0.6); }
-        .module-6a { background: #e74c3c; }
-        .module-quality { background: #27ae60; }
-        .module-security { background: #9b59b6; }
-        .module-test { background: #3498db; }
-        .module-identity { background: #e67e22; }
-        .module-git { background: #1abc9c; }
-        .module-task { background: #f39c12; }
-        .module-coding { background: #95a5a6; }
-        .module-abtest { background: #2ecc71; }
-        .module-source { background: #e91e63; }
-        .module-dialogue { background: #00bcd4; }
-        .module-suggest { background: #ff5722; }
-        .module-algo { background: #7c4dff; }
-        .module-token { background: #00e676; }
-        .module-rule-mgmt { background: #e91e63; }
-        .module-emotional { background: #ff9800; }
-        .control-panel {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255,255,255,0.12);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 14px 20px;
-            color: #fff;
-            z-index: 100;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-        .control-panel button {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: #fff;
-            padding: 8px 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.2s ease;
-        }
-        .control-panel button:hover {
-            background: rgba(255,255,255,0.35);
-            transform: translateY(-1px);
-        }
-        .control-panel button.active {
-            background: #f9ca24;
-            color: #1a1a2e;
-        }
-        .tooltip {
-            position: absolute;
-            background: rgba(0,0,0,0.92);
-            color: #fff;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 12px;
-            pointer-events: none;
-            z-index: 1000;
-            max-width: 280px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        #info {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            width: 300px;
+            background: rgba(26, 26, 46, 0.95);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #0f3460;
             display: none;
-            line-height: 1.5;
         }
-        .tooltip-title {
-            font-weight: 600;
-            margin-bottom: 6px;
-            padding-bottom: 6px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-            color: #f9ca24;
+        #info h3 {
+            color: #e94560;
+            margin-bottom: 10px;
         }
-        .tooltip-info { color: #ccc; }
-        .tooltip-relation { 
-            color: #4ecdc4; 
-            margin-top: 6px;
-            font-size: 11px;
+        #info p {
+            color: #ddd;
+            font-size: 13px;
+            line-height: 1.6;
         }
-        .stats-panel {
+        #info .close {
             position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(255,255,255,0.12);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 12px 16px;
-            color: #fff;
-            z-index: 100;
+            top: 10px;
+            right: 15px;
+            color: #888;
+            cursor: pointer;
+            font-size: 20px;
         }
-        .stats-panel h3 {
-            font-size: 12px;
-            margin-bottom: 8px;
+        #info .close:hover {
+            color: #e94560;
         }
-        .stats-text {
-            font-size: 11px;
-            color: #a0aec0;
-        }
-        .stats-text span { color: #4ecdc4; font-weight: 600; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>⚙️ 规则引擎调度架构</h1>
-        <p>功能模块协同工作 | 消除信息孤岛 | v3.12</p>
+    <div id="header">
+        <h1>🎯 规则体系知识图谱 v5.0</h1>
+        <p>以时间维度代替空间维度 - 递归思考执行铁律</p>
     </div>
-    
-    <div class="legend">
-        <h3>模块类型</h3>
-        <div class="legend-item"><div class="legend-color engine-node"></div><span>规则引擎（调度中心）</span></div>
-        <div class="legend-item"><div class="legend-color module-6a"></div><span>6A项目流程</span></div>
-        <div class="legend-item"><div class="legend-color module-quality"></div><span>质量保障</span></div>
-        <div class="legend-item"><div class="legend-color module-security"></div><span>安全审计</span></div>
-        <div class="legend-item"><div class="legend-color module-test"></div><span>测试指南</span></div>
-        <div class="legend-item"><div class="legend-color module-identity"></div><span>动态身份</span></div>
-        <div class="legend-item"><div class="legend-color module-git"></div><span>Git工作流</span></div>
-        <div class="legend-item"><div class="legend-color module-task"></div><span>任务拆分</span></div>
-        <div class="legend-item"><div class="legend-color module-coding"></div><span>编码规范</span></div>
-        <div class="legend-item"><div class="legend-color module-abtest"></div><span>AB测试</span></div>
-        <div class="legend-item"><div class="legend-color module-source"></div><span>信源知信度</span></div>
-        <div class="legend-item"><div class="legend-color module-dialogue"></div><span>对话摘要压缩</span></div>
-        <div class="legend-item"><div class="legend-color module-suggest"></div><span>规则建议机制</span></div>
-        <div class="legend-item"><div class="legend-color module-algo"></div><span>算法智能</span></div>
-        <div class="legend-item"><div class="legend-color module-token"></div><span>Token优化</span></div>
-        <div class="legend-item"><div class="legend-color module-rule-mgmt"></div><span>规则管理</span></div>
-        <div class="legend-item"><div class="legend-color module-emotional"></div><span>情绪感知</span></div>
-    </div>
-    
-    <div class="stats-panel">
-        <h3>系统状态</h3>
-        <div class="stats-text">
-            节点: <span id="nodeCount">0</span> | 
-            连接: <span id="linkCount">0</span> | 
-            孤岛: <span id="islandCount" style="color:#27ae60;">0</span>
+
+    <div id="graph"></div>
+
+    <div id="legend">
+        <h3>📊 图例</h3>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #e94560; border-color: #ff6b8a;"></div>
+            <span>L1 - 顶层原则</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #533483; border-color: #7c4dff;"></div>
+            <span>L2 - 行为规范</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background: #0f3460; border-color: #1e5f9f;"></div>
+            <span>L3 - 操作指南</span>
         </div>
     </div>
-    
-    <div class="control-panel">
-        <button id="btn-all" onclick="showModule('all')">显示全部</button>
-        <button id="btn-engine" onclick="showModule('engine')">规则引擎</button>
-        <button id="btn-6a" onclick="showModule('6a')">6A流程</button>
-        <button id="btn-quality" onclick="showModule('quality')">质量模块</button>
-        <button id="btn-security" onclick="showModule('security')">安全模块</button>
-        <button id="btn-source" onclick="showModule('source')">信源评估</button>
-        <button id="btn-dialogue" onclick="showModule('dialogue')">对话摘要</button>
-        <button id="btn-relation" onclick="showModule('relation')">查看关联</button>
-        <button id="btn-algo" onclick="showModule('algo')">算法智能</button>
-        <button id="btn-token" onclick="showModule('token')">Token优化</button>
-        <button id="btn-rule-mgmt" onclick="showModule('rule-mgmt')">规则管理</button>
-        <button id="btn-emotional" onclick="showModule('emotional')">情绪感知</button>
-    </div>
-    
-    <div class="tooltip" id="tooltip"></div>
-    
-    <svg id="graph" width="100%" height="100vh"></svg>
-    
-    <script>
-        const graphData = {
-            nodes: [
-                { id: 'rule-engine', name: '规则引擎', type: 'engine', module: 'engine', 
-                  description: '核心调度器，协调所有功能模块协同工作\n功能：解析规则 → 计算优先级 → 检测冲突 → 执行调度 → 聚合结果',
-                  x: 0, y: 0 },
-                
-                { id: '6a-core', name: '6A项目流程', type: 'module', module: '6a',
-                  description: 'Align → Architect → Atomize → Approve → Automate → Assess\n项目管理核心流程',
-                  x: -350, y: -200 },
-                { id: '6a-align', name: 'Align需求对齐', type: 'sub', module: '6a', parent: '6a-core',
-                  description: '澄清需求边界，确认业务场景与目标',
-                  x: -450, y: -280 },
-                { id: '6a-architect', name: 'Architect方案设计', type: 'sub', module: '6a', parent: '6a-core',
-                  description: '提供2种技术方案对比，推荐最佳方案',
-                  x: -350, y: -320 },
-                { id: '6a-atomize', name: 'Atomize任务拆解', type: 'sub', module: '6a', parent: '6a-core',
-                  description: '递归拆解为最小可执行单元（原子任务）',
-                  x: -250, y: -280 },
-                { id: '6a-approve', name: 'Approve审批确认', type: 'sub', module: '6a', parent: '6a-core',
-                  description: '关键节点获得用户确认',
-                  x: -450, y: -150 },
-                { id: '6a-automate', name: 'Automate任务执行', type: 'sub', module: '6a', parent: '6a-core',
-                  description: '按批准范围执行任务',
-                  x: -350, y: -100 },
-                { id: '6a-assess', name: 'Assess评估验收', type: 'sub', module: '6a', parent: '6a-core',
-                  description: '交付时提供验收清单和评分',
-                  x: -250, y: -150 },
-                
-                { id: 'quality-core', name: '质量保障', type: 'module', module: 'quality',
-                  description: '四维质量模型：准确性、安全性、可维护性、可测试性\n质量门禁：90分直接通过，75-89分需审查，<60分拒绝',
-                  x: 350, y: -200 },
-                { id: 'quality-gate', name: '质量门禁', type: 'sub', module: 'quality', parent: 'quality-core',
-                  description: '评分标准与门禁规则，质量评分<60分拒绝通过',
-                  x: 450, y: -280 },
-                { id: 'quality-guide', name: '质量指南', type: 'sub', module: 'quality', parent: 'quality-core',
-                  description: '四维质量检查流程和度量标准',
-                  x: 350, y: -320 },
-                { id: 'quality-check', name: '质量检查', type: 'sub', module: 'quality', parent: 'quality-core',
-                  description: '单元测试覆盖率≥70%、静态检查0 critical、安全审计0 high',
-                  x: 250, y: -280 },
-                
-                { id: 'security-core', name: '安全审计', type: 'module', module: 'security',
-                  description: '零容忍硬编码、最小权限原则、风险操作审批',
-                  x: 350, y: 200 },
-                { id: 'security-key', name: '密钥管理', type: 'sub', module: 'security', parent: 'security-core',
-                  description: '绝对禁止硬编码任何密钥、Token、密码',
-                  x: 450, y: 120 },
-                { id: 'security-permission', name: '权限管理', type: 'sub', module: 'security', parent: 'security-core',
-                  description: '最小权限原则，只请求完成任务所需最小权限',
-                  x: 450, y: 200 },
-                { id: 'security-risk', name: '风险审批', type: 'sub', module: 'security', parent: 'security-core',
-                  description: '删除、覆盖、大规模修改前必须确认',
-                  x: 450, y: 280 },
-                
-                { id: 'test-core', name: '测试指南', type: 'module', module: 'test',
-                  description: '测试策略：单元测试 → 集成测试 → 端到端测试\n重构安全网：测试覆盖、重构验证',
-                  x: -350, y: 200 },
-                { id: 'test-unit', name: '单元测试', type: 'sub', module: 'test', parent: 'test-core',
-                  description: 'pytest/jest编写，覆盖核心逻辑',
-                  x: -450, y: 120 },
-                { id: 'test-refactor', name: '重构测试', type: 'sub', module: 'test', parent: 'test-core',
-                  description: '重构前确保测试覆盖，重构后验证行为不变',
-                  x: -450, y: 200 },
-                { id: 'test-safety', name: '安全网', type: 'sub', module: 'test', parent: 'test-core',
-                  description: '小步重构 + 测试安全网 + 代码审查',
-                  x: -450, y: 280 },
-                
-                { id: 'identity-core', name: '动态身份', type: 'module', module: 'identity',
-                  description: '根据任务上下文动态加载身份：需求分析师、架构师、开发者、测试工程师等',
-                  x: 0, y: -350 },
-                { id: 'identity-analyst', name: '需求分析师', type: 'sub', module: 'identity', parent: 'identity-core',
-                  description: '理解业务需求、澄清边界、收集信息',
-                  x: -100, y: -420 },
-                { id: 'identity-architect', name: '架构师', type: 'sub', module: 'identity', parent: 'identity-core',
-                  description: '设计技术方案、评估可行性、技术选型',
-                  x: 0, y: -450 },
-                { id: 'identity-developer', name: '开发者', type: 'sub', module: 'identity', parent: 'identity-core',
-                  description: '编写代码、实现功能、调试程序',
-                  x: 100, y: -420 },
-                { id: 'identity-tester', name: '测试工程师', type: 'sub', module: 'identity', parent: 'identity-core',
-                  description: '编写测试用例、执行测试、报告缺陷',
-                  x: 200, y: -380 },
-                
-                { id: 'task-core', name: '任务拆分', type: 'module', module: 'task',
-                  description: '复杂任务递归拆分为最小可执行单元\n拆分标准：单一职责、可独立执行、可测试、≤4小时',
-                  x: 0, y: 350 },
-                { id: 'task-decompose', name: '递归拆分', type: 'sub', module: 'task', parent: 'task-core',
-                  description: '父任务 → 子任务 → 直到不可再分',
-                  x: -100, y: 420 },
-                { id: 'task-atomic', name: '原子任务', type: 'sub', module: 'task', parent: 'task-core',
-                  description: '最小可执行单元，不可再拆分',
-                  x: 0, y: 450 },
-                { id: 'task-verify', name: '验收确认', type: 'sub', module: 'task', parent: 'task-core',
-                  description: '子任务完成后验证，确保父任务质量',
-                  x: 100, y: 420 },
-                
-                { id: 'git-core', name: 'Git工作流', type: 'module', module: 'git',
-                  description: '分支策略、提交规范、Code Review流程',
-                  x: -200, y: 0 },
-                { id: 'git-branch', name: '分支管理', type: 'sub', module: 'git', parent: 'git-core',
-                  description: 'main保护分支，feat/fix/docs功能分支',
-                  x: -280, y: -60 },
-                { id: 'git-commit', name: '提交规范', type: 'sub', module: 'git', parent: 'git-core',
-                  description: 'feat/fix/docs等类型，规范的提交信息',
-                  x: -280, y: 20 },
-                { id: 'git-review', name: '代码审查', type: 'sub', module: 'git', parent: 'git-core',
-                  description: 'PR/MR审查，自动化检查通过',
-                  x: -280, y: 100 },
-                
-                { id: 'coding-core', name: '编码规范', type: 'module', module: 'coding',
-                  description: '命名规范（camelCase/PascalCase）、类型提示、代码风格',
-                  x: 200, y: 0 },
-                { id: 'coding-naming', name: '命名规范', type: 'sub', module: 'coding', parent: 'coding-core',
-                  description: '变量camelCase、类PascalCase、常量UPPER_SNAKE_CASE',
-                  x: 280, y: -60 },
-                { id: 'coding-type', name: '类型提示', type: 'sub', module: 'coding', parent: 'coding-core',
-                  description: '必须使用完整类型提示，禁止any滥用',
-                  x: 280, y: 20 },
-                { id: 'coding-smell', name: '代码异味', type: 'sub', module: 'coding', parent: 'coding-core',
-                  description: '识别：神秘命名、重复代码、过长函数、参数过长',
-                  x: 280, y: 100 },
-                
-                { id: 'abtest-core', name: 'AB测试', type: 'module', module: 'abtest',
-                  description: '规则体系能力评估，对比v1.0与v3.x能力提升',
-                  x: -200, y: 350 },
-                { id: 'abtest-metric', name: '能力度量', type: 'sub', module: 'abtest', parent: 'abtest-core',
-                  description: '需求对齐、任务拆分、质量保障、安全等7维度',
-                  x: -300, y: 400 },
-                { id: 'abtest-result', name: '测试结果', type: 'sub', module: 'abtest', parent: 'abtest-core',
-                  description: '能力提升125.6%（27分→61分）',
-                  x: -200, y: 450 },
-                { id: 'abtest-optimize', name: '持续优化', type: 'sub', module: 'abtest', parent: 'abtest-core',
-                  description: '根据测试结果优化规则体系',
-                  x: -100, y: 400 },
-                
-                { id: 'source-core', name: '信源知信度', type: 'module', module: 'source',
-                  description: '知识来源可信度评分机制\n优先级：用户输入100 > 项目规则95 > 项目结构90 > 本地知识80 > 互联网70',
-                  x: 500, y: -400 },
-                { id: 'source-user', name: '用户输入', type: 'sub', module: 'source', parent: 'source-core',
-                  description: '知信度：100分\n最高优先级，用户说了算',
-                  x: 580, y: -460 },
-                { id: 'source-rule', name: '项目规则文件', type: 'sub', module: 'source', parent: 'source-core',
-                  description: '知信度：95分\nAGENTS.md、CLAUDE.md、rules/*',
-                  x: 580, y: -400 },
-                { id: 'source-scan', name: '项目结构扫描', type: 'sub', module: 'source', parent: 'source-core',
-                  description: '知信度：90分\n文件系统、依赖文件',
-                  x: 580, y: -340 },
-                
-                { id: 'dialogue-core', name: '对话摘要压缩', type: 'module', module: 'dialogue',
-                  description: '长对话自动摘要关键信息\n触发：20轮中等压缩，50轮深度压缩',
-                  x: 500, y: 400 },
-                { id: 'dialogue-decision', name: '关键决策记录', type: 'sub', module: 'dialogue', parent: 'dialogue-core',
-                  description: '技术选型、任务范围、规则变更决策',
-                  x: 580, y: 340 },
-                { id: 'dialogue-state', name: '任务状态', type: 'sub', module: 'dialogue', parent: 'dialogue-core',
-                  description: '6A阶段、进度、问题阻塞',
-                  x: 580, y: 400 },
-                { id: 'dialogue-constraint', name: '关键约束', type: 'sub', module: 'dialogue', parent: 'dialogue-core',
-                  description: '安全约束、质量约束、环境约束',
-                  x: 580, y: 460 },
-                
-                { id: 'suggest-core', name: '规则建议机制', type: 'module', module: 'suggest',
-                  description: '主动建议优化规则\n触发：规则效果不好、失败模式重复、用户多次修正',
-                  x: -500, y: 400 },
-                { id: 'suggest-trigger', name: '触发场景', type: 'sub', module: 'suggest', parent: 'suggest-core',
-                  description: '规则效果不好、失败模式重复、新技术出现、冲突频繁、用户修正',
-                  x: -580, y: 340 },
-                { id: 'suggest-draft', name: '建议草案', type: 'sub', module: 'suggest', parent: 'suggest-core',
-                  description: '触发原因、建议内容、预期影响、优先级',
-                  x: -580, y: 400 },
-                { id: 'suggest-approve', name: '审批执行', type: 'sub', module: 'suggest', parent: 'suggest-core',
-                  description: '用户审批后同步更新L1/L2/L3',
-                  x: -580, y: 460 },
-                
-                { id: 'algo-core', name: '算法智能', type: 'module', module: 'algo',
-                  description: '提升性能与智能决策能力\n包含：缓存算法、向量匹配、意图识别、博弈决策、自适应学习',
-                  x: -500, y: -400 },
-                { id: 'algo-cache', name: '缓存算法', type: 'sub', module: 'algo', parent: 'algo-core',
-                  description: 'LRU Cache、Prompt缓存，减少重复API调用',
-                  x: -580, y: -460 },
-                { id: 'algo-vector', name: '向量匹配', type: 'sub', module: 'algo', parent: 'algo-core',
-                  description: '余弦相似度计算，语义路由、意图识别',
-                  x: -580, y: -400 },
-                { id: 'algo-game', name: '博弈决策', type: 'sub', module: 'algo', parent: 'algo-core',
-                  description: 'Minimax算法、纳什均衡，方案对比与冲突解决',
-                  x: -580, y: -340 },
-                
-                { id: 'token-core', name: 'Token优化', type: 'module', module: 'token',
-                  description: '减少API调用成本\n包含：Prompt缓存、响应压缩、智能批量、上下文精简、向量缓存、智能重试',
-                  x: 200, y: 350 },
-                { id: 'token-cache', name: 'Prompt缓存', type: 'sub', module: 'token', parent: 'token-core',
-                  description: '相同Prompt复用，节省30-50% Token',
-                  x: 300, y: 400 },
-                { id: 'token-compress', name: '响应压缩', type: 'sub', module: 'token', parent: 'token-core',
-                  description: '响应内容压缩，节省10-20% Token',
-                  x: 200, y: 450 },
-                { id: 'token-batch', name: '智能批量', type: 'sub', module: 'token', parent: 'token-core',
-                  description: '合并相似请求，节省20-40% Token',
-                  x: 100, y: 400 },
 
-                // ========== 规则管理模块 ==========
-                { id: 'rule-mgmt-core', name: '规则管理', type: 'module', module: 'rule-mgmt',
-                  description: '规则全生命周期管理\n包含：准入管理、生命周期、层级边界、冲突优化、版本管控',
-                  x: -600, y: 0 },
-                { id: 'rule-mgmt-access', name: '规则准入', type: 'sub', module: 'rule-mgmt', parent: 'rule-mgmt-core',
-                  description: '新增规则必须核验必要性\n分类：刚需强制约束、参考性经验建议、禁止新增',
-                  x: -700, y: -80 },
-                { id: 'rule-mgmt-lifecycle', name: '生命周期', type: 'sub', module: 'rule-mgmt', parent: 'rule-mgmt-core',
-                  description: '定期核验存量规则\n失效判定：3个月未引用、场景淘汰、逻辑过时',
-                  x: -700, y: 0 },
-                { id: 'rule-mgmt-layer', name: '层级边界', type: 'sub', module: 'rule-mgmt', parent: 'rule-mgmt-core',
-                  description: 'L1宪法、L2基本法、L3执行细则\n仅编号引用，禁止全文复刻',
-                  x: -700, y: 80 },
-                { id: 'rule-mgmt-conflict', name: '冲突优化', type: 'sub', module: 'rule-mgmt', parent: 'rule-mgmt-core',
-                  description: '检测规则自身逻辑冲突\n优先级：安全>质量>流程>效率',
-                  x: -500, y: -80 },
-                { id: 'rule-mgmt-version', name: '版本管控', type: 'sub', module: 'rule-mgmt', parent: 'rule-mgmt-core',
-                  description: '变更记录关联版本号\n重大变更需评估影响范围',
-                  x: -500, y: 80 }
+    <div id="info">
+        <span class="close" onclick="document.getElementById('info').style.display='none'">×</span>
+        <h3 id="info-title"></h3>
+        <p id="info-desc"></p>
+    </div>
+
+    <script>
+        const data = {
+            nodes: [
+                { id: "core", name: "华为芯片设计理念", desc: "以时间维度代替空间维度", level: "L1", group: 1 },
+                { id: "recursive", name: "递归思考执行铁律", desc: "最高执行准则：串行化、递归式、聚焦性、可验证", level: "L1", group: 1 },
+                { id: "quality", name: "质量核心", desc: "质量是生命线，不可妥协", level: "L1", group: 1 },
+                { id: "safety", name: "安全铁律", desc: "安全 > 功能 > 性能", level: "L1", group: 1 },
+                { id: "6a", name: "6A流程", desc: "Align→Architect→Atomize→Approve→Automate→Assess", level: "L1", group: 1 },
+                { id: "collaboration", name: "三Agent协作", desc: "调度Agent、开发Agent、监督Agent", level: "L1", group: 1 },
+                
+                { id: "recursive-l2", name: "递归执行规范", desc: "串行执行、递归拆分、阶段验证、禁止跳步", level: "L2", group: 2 },
+                { id: "safety-l2", name: "安全执行规范", desc: "数据安全、系统安全、代码安全", level: "L2", group: 2 },
+                { id: "quality-l2", name: "质量规范", desc: "功能完整、测试通过、代码规范", level: "L2", group: 2 },
+                { id: "6a-l2", name: "6A流程规范", desc: "各阶段详细执行标准", level: "L2", group: 2 },
+                { id: "dev-l2", name: "开发Agent规范", desc: "递归执行、自验证、质量保障", level: "L2", group: 2 },
+                { id: "supervise-l2", name: "监督Agent规范", desc: "递归监督、代码审查、质量评估", level: "L2", group: 2 },
+                { id: "schedule-l2", name: "调度Agent规范", desc: "任务拆分、路由分配、资源调度", level: "L2", group: 2 },
+                { id: "efficiency-l2", name: "效率优化规范", desc: "API优化、工具选择、成本控制", level: "L2", group: 2 },
+                { id: "incentive-l2", name: "正向激励规范", desc: "信任度、权限等级、激励机制", level: "L2", group: 2 },
+                
+                { id: "recursive-l3", name: "递归思考指南", desc: "详细的递归执行操作指导", level: "L3", group: 3 },
+                { id: "6a-l3", name: "6A流程指南", desc: "详细的6A流程操作指导", level: "L3", group: 3 },
+                { id: "quality-l3", name: "质量体系指南", desc: "详细的质量检查操作指导", level: "L3", group: 3 },
+                { id: "task-l3", name: "任务拆解指南", desc: "详细的任务拆分操作指导", level: "L3", group: 3 },
+                { id: "incentive-l3", name: "正向激励指南", desc: "详细的激励机制操作指导", level: "L3", group: 3 },
+                { id: "algorithm-l3", name: "算法优化指南", desc: "详细的算法优化操作指导", level: "L3", group: 3 },
+                { id: "abtest", name: "AB测试方案", desc: "验证递归规则效果的测试方案", level: "L3", group: 3 }
             ],
             links: [
-                { source: 'rule-engine', target: '6a-core', relation: '调度 → 6A流程启动任务' },
-                { source: 'rule-engine', target: 'quality-core', relation: '调度 → 质量门禁检查' },
-                { source: 'rule-engine', target: 'security-core', relation: '调度 → 安全审计检查' },
-                { source: 'rule-engine', target: 'test-core', relation: '调度 → 测试执行' },
-                { source: 'rule-engine', target: 'identity-core', relation: '调度 → 身份加载' },
-                { source: 'rule-engine', target: 'task-core', relation: '调度 → 任务拆分' },
-                { source: 'rule-engine', target: 'git-core', relation: '调度 → Git流程' },
-                { source: 'rule-engine', target: 'coding-core', relation: '调度 → 代码规范' },
-                { source: 'rule-engine', target: 'abtest-core', relation: '调度 → 规则评估' },
-                { source: 'rule-engine', target: 'source-core', relation: '调度 → 信源评估' },
-                { source: 'rule-engine', target: 'dialogue-core', relation: '调度 → 对话摘要' },
-                { source: 'rule-engine', target: 'suggest-core', relation: '调度 → 规则建议' },
-                { source: 'rule-engine', target: 'algo-core', relation: '调度 → 算法优化' },
-                { source: 'rule-engine', target: 'token-core', relation: '调度 → Token优化' },
+                { source: "core", target: "recursive" },
+                { source: "recursive", target: "quality" },
+                { source: "recursive", target: "safety" },
+                { source: "recursive", target: "6a" },
+                { source: "recursive", target: "collaboration" },
                 
-                { source: '6a-align', target: '6a-architect', relation: '需求确认后进入方案设计' },
-                { source: '6a-architect', target: '6a-atomize', relation: '方案审批后进入任务拆解' },
-                { source: '6a-atomize', target: '6a-approve', relation: '拆分完成后审批' },
-                { source: '6a-approve', target: '6a-automate', relation: '审批通过后执行' },
-                { source: '6a-automate', target: '6a-assess', relation: '执行完成后评估' },
+                { source: "recursive", target: "recursive-l2" },
+                { source: "safety", target: "safety-l2" },
+                { source: "quality", target: "quality-l2" },
+                { source: "6a", target: "6a-l2" },
+                { source: "collaboration", target: "dev-l2" },
+                { source: "collaboration", target: "supervise-l2" },
+                { source: "collaboration", target: "schedule-l2" },
                 
-                { source: '6a-atomize', target: 'task-core', relation: '6A调用任务拆分' },
-                { source: '6a-automate', target: 'coding-core', relation: '6A调用编码规范' },
-                { source: '6a-automate', target: 'test-core', relation: '6A调用测试指南' },
-                { source: '6a-assess', target: 'quality-core', relation: '6A调用质量门禁' },
-                { source: '6a-automate', target: 'git-core', relation: '6A调用Git工作流' },
+                { source: "recursive-l2", target: "efficiency-l2" },
+                { source: "recursive-l2", target: "incentive-l2" },
                 
-                { source: 'quality-core', target: 'coding-core', relation: '质量检查编码规范' },
-                { source: 'quality-core', target: 'test-core', relation: '质量验证测试覆盖' },
-                { source: 'quality-core', target: 'security-core', relation: '质量包含安全检查' },
-                { source: 'quality-check', target: 'abtest-core', relation: '质量数据支撑AB测试' },
+                { source: "recursive-l2", target: "recursive-l3" },
+                { source: "6a-l2", target: "6a-l3" },
+                { source: "quality-l2", target: "quality-l3" },
+                { source: "schedule-l2", target: "task-l3" },
+                { source: "incentive-l2", target: "incentive-l3" },
+                { source: "efficiency-l2", target: "algorithm-l3" },
                 
-                { source: 'security-core', target: 'coding-core', relation: '安全检查代码规范' },
-                { source: 'security-core', target: 'git-core', relation: '安全检查Git提交' },
-                { source: 'security-risk', target: '6a-approve', relation: '风险操作需6A审批' },
-                
-                { source: 'test-core', target: 'coding-core', relation: '测试验证代码质量' },
-                { source: 'test-core', target: 'git-core', relation: '测试通过后提交' },
-                { source: 'test-safety', target: 'task-core', relation: '测试为任务拆分提供保障' },
-                
-                { source: 'task-core', target: 'quality-core', relation: '任务质量影响整体质量' },
-                { source: 'task-core', target: 'test-core', relation: '原子任务需可测试' },
-                { source: 'task-core', target: 'identity-core', relation: '根据身份类型拆分任务' },
-                
-                { source: 'coding-core', target: 'git-core', relation: '编码规范纳入Git审查' },
-                { source: 'coding-smell', target: 'quality-guide', relation: '代码异味影响质量评分' },
-                
-                { source: 'identity-core', target: '6a-core', relation: '身份参与6A各阶段' },
-                { source: 'identity-core', target: 'source-core', relation: '身份影响信源选择' },
-                { source: 'identity-developer', target: 'coding-core', relation: '开发者遵循编码规范' },
-                { source: 'identity-tester', target: 'test-core', relation: '测试工程师使用测试指南' },
-                
-                { source: 'abtest-core', target: 'quality-core', relation: 'AB测试评估质量模块' },
-                { source: 'abtest-core', target: '6a-core', relation: 'AB测试评估6A流程' },
-                { source: 'abtest-result', target: 'rule-engine', relation: '测试结果优化规则引擎' },
-                
-                { source: 'source-core', target: 'rule-engine', relation: '信源评估支撑规则解析' },
-                { source: 'source-core', target: '6a-core', relation: '信源选择影响调研策略' },
-                { source: 'source-user', target: 'source-rule', relation: '用户输入优先级最高' },
-                { source: 'source-rule', target: 'source-scan', relation: '规则文件优于结构扫描' },
-                { source: 'source-scan', target: 'rule-engine', relation: '项目结构支撑技术选型' },
-                
-                { source: 'dialogue-core', target: 'rule-engine', relation: '对话摘要支撑上下文管理' },
-                { source: 'dialogue-core', target: '6a-core', relation: '摘要保留6A关键决策' },
-                { source: 'dialogue-decision', target: 'task-core', relation: '决策记录影响任务拆分' },
-                { source: 'dialogue-state', target: 'quality-core', relation: '状态记录支撑质量评估' },
-                
-                { source: 'suggest-core', target: 'rule-engine', relation: '规则建议优化引擎决策' },
-                { source: 'suggest-core', target: 'quality-core', relation: '建议提升质量规则' },
-                { source: 'suggest-core', target: 'abtest-core', relation: '建议来源AB测试数据' },
-                { source: 'suggest-trigger', target: 'suggest-draft', relation: '触发场景生成草案' },
-                { source: 'suggest-draft', target: 'suggest-approve', relation: '草案提交审批' },
-                { source: 'suggest-approve', target: 'rule-engine', relation: '审批后更新规则引擎' },
-                
-                { source: 'algo-core', target: 'token-core', relation: '算法优化支撑Token节省' },
-                { source: 'algo-cache', target: 'token-cache', relation: '缓存算法复用Prompt' },
-                { source: 'algo-vector', target: 'source-core', relation: '向量匹配增强信源评估' },
-                { source: 'algo-game', target: '6a-architect', relation: '博弈决策辅助方案对比' },
-                { source: 'algo-core', target: 'quality-core', relation: '算法优化提升质量评分' },
-                
-                { source: 'token-core', target: 'dialogue-core', relation: 'Token优化与摘要压缩协同' },
-                { source: 'token-cache', target: 'algo-cache', relation: '共享缓存策略' },
-                { source: 'token-core', target: 'quality-core', relation: '成本优化不影响质量' },
-                { source: 'token-batch', target: 'task-core', relation: '批量处理优化任务执行' },
-
-                // 规则管理模块链接
-                { source: 'rule-engine', target: 'rule-mgmt-core', relation: '调度 → 规则管理检查' },
-                { source: 'rule-mgmt-core', target: '6a-core', relation: '管理 → 6A流程合规' },
-                { source: 'rule-mgmt-core', target: 'quality-core', relation: '管理 → 质量模块合规' },
-                { source: 'rule-mgmt-core', target: 'security-core', relation: '管理 → 安全模块合规' },
-                { source: 'rule-mgmt-core', target: 'suggest-core', relation: '规则建议触发准入检查' },
-                { source: 'rule-mgmt-access', target: 'rule-mgmt-lifecycle', relation: '准入后进入生命周期' },
-                { source: 'rule-mgmt-lifecycle', target: 'rule-mgmt-layer', relation: '生命周期检查层级边界' },
-                { source: 'rule-mgmt-layer', target: 'rule-mgmt-conflict', relation: '层级边界触发冲突检测' },
-                { source: 'rule-mgmt-conflict', target: 'rule-mgmt-version', relation: '冲突解决后版本管控' },
-                { source: 'rule-mgmt-version', target: 'abtest-core', relation: '版本变更触发AB测试评估' },
-                { source: 'suggest-core', target: 'rule-mgmt-access', relation: '规则建议走准入流程' },
-                { source: 'rule-mgmt-conflict', target: 'algo-game', relation: '冲突解决复用博弈决策' }
+                { source: "recursive-l3", target: "abtest" }
             ]
         };
-        
-        const svg = d3.select('#graph');
-        let graphWidth = window.innerWidth;
-        let graphHeight = window.innerHeight;
-        
-        const zoom = d3.zoom()
-            .scaleExtent([0.3, 3])
-            .on('zoom', (event) => {
-                container.attr('transform', event.transform);
-            });
-        svg.call(zoom);
-        
-        const container = svg.append('g');
-        
-        const simulation = d3.forceSimulation(graphData.nodes)
-            .force('link', d3.forceLink(graphData.links).id(d => d.id).distance(100))
-            .force('charge', d3.forceManyBody().strength(-600))
-            .force('center', d3.forceCenter(graphWidth / 2, graphHeight / 2))
-            .force('collision', d3.forceCollide().radius(50));
-        
-        function getNodeColor(d) {
-            if (d.type === 'engine') return '#f9ca24';
-            const colors = {
-                '6a': '#e74c3c',
-                'quality': '#27ae60',
-                'security': '#9b59b6',
-                'test': '#3498db',
-                'identity': '#e67e22',
-                'git': '#1abc9c',
-                'task': '#f39c12',
-                'coding': '#95a5a6',
-                'abtest': '#2ecc71',
-                'source': '#e91e63',
-                'dialogue': '#00bcd4',
-                'suggest': '#ff5722',
-                'algo': '#7c4dff',
-                'token': '#00e676',
-                'rule-mgmt': '#e91e63'
-            };
-            return colors[d.module] || '#9e9e9e';
-        }
-        
-        function getNodeRadius(d) {
-            if (d.type === 'engine') return 45;
-            if (d.type === 'module') return 32;
-            return 18;
-        }
-        
-        const link = container.append('g')
-            .selectAll('line')
-            .data(graphData.links)
-            .enter().append('line')
-            .attr('stroke', 'rgba(255,255,255,0.2)')
-            .attr('stroke-width', 1.5)
-            .attr('stroke-dasharray', d => d.relation ? '5,5' : '0');
-        
-        const node = container.append('g')
-            .selectAll('g')
-            .data(graphData.nodes)
-            .enter().append('g')
-            .attr('class', 'node')
+
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        const svg = d3.select("#graph").append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        const colorScale = {
+            1: { fill: "#e94560", stroke: "#ff6b8a" },
+            2: { fill: "#533483", stroke: "#7c4dff" },
+            3: { fill: "#0f3460", stroke: "#1e5f9f" }
+        };
+
+        const sizeScale = {
+            "L1": 40,
+            "L2": 30,
+            "L3": 22
+        };
+
+        const simulation = d3.forceSimulation(data.nodes)
+            .force("link", d3.forceLink(data.links).id(d => d.id).distance(120))
+            .force("charge", d3.forceManyBody().strength(-800))
+            .force("center", d3.forceCenter(width / 2, height / 2))
+            .force("collision", d3.forceCollide().radius(d => sizeScale[d.level] + 10));
+
+        const link = svg.append("g")
+            .selectAll("line")
+            .data(data.links)
+            .enter().append("line")
+            .attr("class", "link");
+
+        const node = svg.append("g")
+            .selectAll("g")
+            .data(data.nodes)
+            .enter().append("g")
+            .attr("class", "node")
             .call(d3.drag()
-                .on('start', dragStarted)
-                .on('drag', dragged)
-                .on('end', dragEnded));
-        
-        node.append('circle')
-            .attr('r', getNodeRadius)
-            .attr('fill', getNodeColor)
-            .attr('stroke', '#fff')
-            .attr('stroke-width', 2)
-            .style('filter', d => d.type === 'engine' ? 'drop-shadow(0 0 20px rgba(249,202,36,0.7))' : 'drop-shadow(0 2px 6px rgba(0,0,0,0.4))');
-        
-        node.append('text')
-            .text(d => d.name)
-            .attr('text-anchor', 'middle')
-            .attr('dy', d => getNodeRadius(d) + 14)
-            .attr('fill', '#fff')
-            .attr('font-size', d => d.type === 'engine' ? '12px' : '10px')
-            .style('pointer-events', 'none');
-        
-        simulation.on('tick', () => {
-            link.attr('x1', d => d.source.x)
-                .attr('y1', d => d.source.y)
-                .attr('x2', d => d.target.x)
-                .attr('y2', d => d.target.y);
-            node.attr('transform', d => `translate(${d.x},${d.y})`);
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
+
+        node.append("circle")
+            .attr("r", d => sizeScale[d.level])
+            .attr("fill", d => colorScale[d.group].fill)
+            .attr("stroke", d => colorScale[d.group].stroke)
+            .on("click", showInfo);
+
+        node.append("text")
+            .attr("dy", d => sizeScale[d.level] + 15)
+            .text(d => d.name);
+
+        simulation.on("tick", () => {
+            link
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+
+            node
+                .attr("transform", d => `translate(${d.x},${d.y})`);
         });
-        
-        function dragStarted(event, d) {
+
+        function dragstarted(event, d) {
             if (!event.active) simulation.alphaTarget(0.3).restart();
             d.fx = d.x;
             d.fy = d.y;
         }
+
         function dragged(event, d) {
             d.fx = event.x;
             d.fy = event.y;
         }
-        function dragEnded(event, d) {
+
+        function dragended(event, d) {
             if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
         }
-        
-        const tooltip = d3.select('#tooltip');
-        node.on('mouseover', function(event, d) {
-            tooltip.style('display', 'block')
-                .html(`<div class="tooltip-title">${d.name}</div>
-                       <div class="tooltip-info">${d.description.replace(/\n/g, '<br>')}</div>` +
-                       (d.relation ? `<div class="tooltip-relation">→ ${d.relation}</div>` : ''));
-        })
-        .on('mousemove', function(event) {
-            tooltip.style('left', (event.pageX + 15) + 'px')
-                   .style('top', (event.pageY - 10) + 'px');
-        })
-        .on('mouseout', function() {
-            tooltip.style('display', 'none');
-        });
-        
-        document.getElementById('nodeCount').textContent = graphData.nodes.length;
-        document.getElementById('linkCount').textContent = graphData.links.length;
-        
-        function showModule(type) {
-            document.querySelectorAll('.control-panel button').forEach(btn => btn.classList.remove('active'));
-            document.getElementById('btn-' + type).classList.add('active');
-            
-            if (type === 'all') {
-                node.style('opacity', 1);
-                link.style('opacity', 1).attr('stroke', 'rgba(255,255,255,0.2)');
-                return;
-            }
-            
-            if (type === 'engine') {
-                node.style('opacity', d => d.type === 'engine' || d.type === 'module' ? 1 : 0.15);
-                link.style('opacity', d => d.source.type === 'engine' || d.target.type === 'engine' ? 1 : 0.1);
-                return;
-            }
-            
-            if (type === 'relation') {
-                node.style('opacity', d => d.type === 'module' ? 1 : 0.2);
-                link.style('opacity', 0.6).attr('stroke', d => {
-                    const colors = {
-                        '6a': '#e74c3c', 'quality': '#27ae60', 'security': '#9b59b6',
-                        'test': '#3498db', 'identity': '#e67e22', 'git': '#1abc9c',
-                        'task': '#f39c12', 'coding': '#95a5a6', 'abtest': '#2ecc71',
-                        'source': '#e91e63', 'dialogue': '#00bcd4', 'suggest': '#ff5722',
-                        'algo': '#7c4dff', 'token': '#00e676', 'rule-mgmt': '#e91e63'
-                    };
-                    return colors[d.source.module] || 'rgba(255,255,255,0.3)';
-                });
-                return;
-            }
-            
-            const moduleColors = {
-                '6a': '#e74c3c', 'quality': '#27ae60', 'security': '#9b59b6',
-                'test': '#3498db', 'identity': '#e67e22', 'git': '#1abc9c',
-                'task': '#f39c12', 'coding': '#95a5a6', 'abtest': '#2ecc71',
-                'source': '#e91e63', 'dialogue': '#00bcd4', 'suggest': '#ff5722',
-                'algo': '#7c4dff', 'token': '#00e676', 'rule-mgmt': '#e91e63'
-            };
-            
-            node.style('opacity', d => {
-                if (d.module === type) return 1;
-                if (d.type === 'engine') return 0.8;
-                if (d.parent) {
-                    const parent = graphData.nodes.find(n => n.id === d.parent);
-                    return parent && parent.module === type ? 1 : 0.15;
-                }
-                return 0.15;
-            });
-            
-            link.style('opacity', d => {
-                if (d.source.module === type || d.target.module === type) return 1;
-                return 0.1;
-            }).attr('stroke', d => {
-                if (d.source.module === type || d.target.module === type) {
-                    return moduleColors[type] || '#f9ca24';
-                }
-                return 'rgba(255,255,255,0.1)';
-            });
+
+        function showInfo(event, d) {
+            const info = document.getElementById("info");
+            document.getElementById("info-title").textContent = `${d.level}: ${d.name}`;
+            document.getElementById("info-desc").textContent = d.desc;
+            info.style.display = "block";
         }
-        
-        setTimeout(() => showModule('engine'), 1000);
-        
-        window.addEventListener('resize', () => {
-            graphWidth = window.innerWidth;
-            graphHeight = window.innerHeight;
-            simulation.force('center', d3.forceCenter(graphWidth / 2, graphHeight / 2));
+
+        window.addEventListener("resize", () => {
+            const newWidth = window.innerWidth;
+            const newHeight = window.innerHeight;
+            svg.attr("width", newWidth).attr("height", newHeight);
+            simulation.force("center", d3.forceCenter(newWidth / 2, newHeight / 2));
             simulation.alpha(0.3).restart();
         });
     </script>
 </body>
 </html>
+
