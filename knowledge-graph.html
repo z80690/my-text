@@ -131,8 +131,8 @@
 </head>
 <body>
     <div id="header">
-        <h1>🎯 规则体系知识图谱 v5.0</h1>
-        <p>滔定律（τ定律）- 高效做事、科学决策原则</p>
+        <h1>🎯 规则体系知识图谱 v6.0</h1>
+        <p>滔定律（τ定律）- 高效做事、科学决策原则，L1/L2/L3 全面打通</p>
     </div>
 
     <div id="graph"></div>
@@ -178,13 +178,13 @@
                 { id: "efficiency-l2", name: "效率优化规范", desc: "API优化、工具选择、成本控制", level: "L2", group: 2 },
                 { id: "incentive-l2", name: "正向激励规范", desc: "信任度、权限等级、激励机制", level: "L2", group: 2 },
                 
+                { id: "tao-l3", name: "滔定律执行指南", desc: "详细的滔定律执行操作指导：串行化、聚焦性、可验证、递归式", level: "L3", group: 3 },
                 { id: "recursive-l3", name: "递归思考指南", desc: "详细的递归执行操作指导", level: "L3", group: 3 },
-                { id: "6a-l3", name: "6A流程指南", desc: "详细的6A流程操作指导", level: "L3", group: 3 },
+                { id: "6a-l3", name: "6A 流程指南", desc: "详细的 6A 流程操作指导", level: "L3", group: 3 },
                 { id: "quality-l3", name: "质量体系指南", desc: "详细的质量检查操作指导", level: "L3", group: 3 },
                 { id: "task-l3", name: "任务拆解指南", desc: "详细的任务拆分操作指导", level: "L3", group: 3 },
-                { id: "incentive-l3", name: "正向激励指南", desc: "详细的激励机制操作指导", level: "L3", group: 3 },
                 { id: "algorithm-l3", name: "算法优化指南", desc: "详细的算法优化操作指导", level: "L3", group: 3 },
-                { id: "abtest", name: "AB测试方案", desc: "验证递归规则效果的测试方案", level: "L3", group: 3 }
+                { id: "abtest", name: "AB 测试方案", desc: "验证规则体系效果的测试方案", level: "L3", group: 3 }
             ],
             links: [
                 { source: "tao", target: "quality" },
@@ -193,6 +193,7 @@
                 { source: "tao", target: "collaboration" },
                 
                 { source: "tao", target: "recursive-l2" },
+                { source: "recursive-l2", target: "tao-l3" },
                 { source: "safety", target: "safety-l2" },
                 { source: "quality", target: "quality-l2" },
                 { source: "6a", target: "6a-l2" },
