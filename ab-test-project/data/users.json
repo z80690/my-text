@@ -1,0 +1,20 @@
+[
+  {
+    "id": 1780028203275,
+    "username": "testuser",
+    "email": "test@example.com",
+    "createdAt": "2026-05-29T04:16:43.275Z"
+  },
+  {
+    "id": 1780028226368,
+    "username": "testuser",
+    "email": "test@example.com",
+    "createdAt": "2026-05-29T04:17:06.368Z"
+  },
+  {
+    "id": 1780028325480,
+    "username": "testuser",
+    "email": "test@example.com",
+    "createdAt": "2026-05-29T04:18:45.480Z"
+  }
+]
