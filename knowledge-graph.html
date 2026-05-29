@@ -132,7 +132,7 @@
 <body>
     <div id="header">
         <h1>🎯 规则体系知识图谱 v5.0</h1>
-        <p>以时间维度代替空间维度 - 递归思考执行铁律</p>
+        <p>滔定律（τ定律）- 高效做事、科学决策原则</p>
     </div>
 
     <div id="graph"></div>
@@ -162,8 +162,7 @@
     <script>
         const data = {
             nodes: [
-                { id: "core", name: "华为芯片设计理念", desc: "以时间维度代替空间维度", level: "L1", group: 1 },
-                { id: "recursive", name: "递归思考执行铁律", desc: "最高执行准则：串行化、递归式、聚焦性、可验证", level: "L1", group: 1 },
+                { id: "tao", name: "滔定律（τ定律）", desc: "高效做事、科学决策原则：不堆资源、不搞复杂并行，把复杂事拆成一步一步串行做，一步一检查、聚焦当下、不跳步、不贪多", level: "L1", group: 1 },
                 { id: "quality", name: "质量核心", desc: "质量是生命线，不可妥协", level: "L1", group: 1 },
                 { id: "safety", name: "安全铁律", desc: "安全 > 功能 > 性能", level: "L1", group: 1 },
                 { id: "6a", name: "6A流程", desc: "Align→Architect→Atomize→Approve→Automate→Assess", level: "L1", group: 1 },
@@ -188,13 +187,12 @@
                 { id: "abtest", name: "AB测试方案", desc: "验证递归规则效果的测试方案", level: "L3", group: 3 }
             ],
             links: [
-                { source: "core", target: "recursive" },
-                { source: "recursive", target: "quality" },
-                { source: "recursive", target: "safety" },
-                { source: "recursive", target: "6a" },
-                { source: "recursive", target: "collaboration" },
+                { source: "tao", target: "quality" },
+                { source: "tao", target: "safety" },
+                { source: "tao", target: "6a" },
+                { source: "tao", target: "collaboration" },
                 
-                { source: "recursive", target: "recursive-l2" },
+                { source: "tao", target: "recursive-l2" },
                 { source: "safety", target: "safety-l2" },
                 { source: "quality", target: "quality-l2" },
                 { source: "6a", target: "6a-l2" },
