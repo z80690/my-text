@@ -28,6 +28,9 @@ Thumbs.db
 *.log
 npm-debug.log*
 
+# Archived rules (hidden from git, can be restored if needed)
+.trae/rules/archived/
+
 # Cache
 .cache/
 .temp/
