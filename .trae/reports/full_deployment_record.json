@@ -1,0 +1,97 @@
+{
+  "deployment_type": "全量生效",
+  "version": "v1.0.0",
+  "status": "production",
+  "timestamp": "2026-06-01 01:33:32",
+  "approval_status": "approved",
+  "deployment_details": {
+    "total_rules": 26,
+    "new_modules_deployed": 6,
+    "deployment_rate": 100.0
+  },
+  "modules_deployed": [
+    {
+      "id": "rule-engine",
+      "name": "规则引擎",
+      "priority": 100,
+      "status": "active"
+    },
+    {
+      "id": "rule-mgmt-core",
+      "name": "规则管理",
+      "priority": 100,
+      "status": "active"
+    },
+    {
+      "id": "test-core",
+      "name": "测试指南",
+      "priority": 50,
+      "status": "active"
+    },
+    {
+      "id": "git-core",
+      "name": "Git工作流",
+      "priority": 50,
+      "status": "active"
+    },
+    {
+      "id": "source-core",
+      "name": "信源知信度",
+      "priority": 10,
+      "status": "active"
+    },
+    {
+      "id": "dialogue-core",
+      "name": "对话摘要压缩",
+      "priority": 10,
+      "status": "active"
+    }
+  ],
+  "deployment_checklist": {
+    "checklist": [
+      {
+        "item": "灰度试运行通过率≥95%",
+        "required": true,
+        "status": "pass"
+      },
+      {
+        "item": "无P0/P1级问题",
+        "required": true,
+        "status": "pass"
+      },
+      {
+        "item": "用户审批确认",
+        "required": true,
+        "status": "pass"
+      },
+      {
+        "item": "规则解析器验证",
+        "required": true,
+        "status": "pass"
+      },
+      {
+        "item": "优先级计算器验证",
+        "required": true,
+        "status": "pass"
+      },
+      {
+        "item": "冲突检测机制验证",
+        "required": true,
+        "status": "pass"
+      },
+      {
+        "item": "模块调度器验证",
+        "required": true,
+        "status": "pass"
+      }
+    ],
+    "all_pass": true,
+    "pass_count": 7,
+    "total_count": 7
+  },
+  "next_steps": [
+    "监控系统运行状态",
+    "收集用户反馈",
+    "准备下一版本迭代"
+  ]
+}

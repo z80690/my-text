@@ -78,6 +78,9 @@
         .module-token { background: #00e676; }
         .module-rule-mgmt { background: #e91e63; }
         .module-emotional { background: #ff9800; }
+        .layer-l1 { background: linear-gradient(135deg, #f9ca24, #f0932b); box-shadow: 0 0 12px rgba(249,202,36,0.5); }
+        .layer-l2 { background: linear-gradient(135deg, #3498db, #2980b9); box-shadow: 0 0 12px rgba(52,152,219,0.5); }
+        .layer-l3 { background: linear-gradient(135deg, #9b59b6, #8e44ad); box-shadow: 0 0 12px rgba(155,89,182,0.5); }
         .control-panel {
             position: absolute;
             bottom: 20px;
@@ -164,12 +167,16 @@
 <body>
     <div class="header">
         <h1>⚙️ 规则引擎调度架构</h1>
-        <p>功能模块协同工作 | 消除信息孤岛 | v3.12</p>
+        <p>功能模块协同工作 | 消除信息孤岛 | v1.0.0</p>
     </div>
     
     <div class="legend">
         <h3>模块类型</h3>
         <div class="legend-item"><div class="legend-color engine-node"></div><span>规则引擎（调度中心）</span></div>
+        <div class="legend-item"><div class="legend-color layer-l1"></div><span>L1层级（优先级100）</span></div>
+        <div class="legend-item"><div class="legend-color layer-l2"></div><span>L2层级（优先级50）</span></div>
+        <div class="legend-item"><div class="legend-color layer-l3"></div><span>L3层级（优先级10）</span></div>
+        <h3 style="margin-top:12px;border-top:1px solid rgba(255,255,255,0.2);padding-top:8px;">功能模块</h3>
         <div class="legend-item"><div class="legend-color module-6a"></div><span>6A项目流程</span></div>
         <div class="legend-item"><div class="legend-color module-quality"></div><span>质量保障</span></div>
         <div class="legend-item"><div class="legend-color module-security"></div><span>安全审计</span></div>
@@ -219,8 +226,8 @@
     <script>
         const graphData = {
             nodes: [
-                { id: 'rule-engine', name: '规则引擎', type: 'engine', module: 'engine', 
-                  description: '核心调度器，协调所有功能模块协同工作\n功能：解析规则 → 计算优先级 → 检测冲突 → 执行调度 → 聚合结果',
+                { id: 'rule-engine', name: '规则引擎', type: 'engine', module: 'engine', layer: 'l1',
+                  description: '核心调度器，协调所有功能模块协同工作\n功能：解析规则 → 计算优先级 → 检测冲突 → 执行调度 → 聚合结果\n优先级: L1(100分)',
                   x: 0, y: 0 },
                 
                 { id: '6a-core', name: '6A项目流程', type: 'module', module: '6a',
@@ -271,8 +278,8 @@
                   description: '删除、覆盖、大规模修改前必须确认',
                   x: 450, y: 280 },
                 
-                { id: 'test-core', name: '测试指南', type: 'module', module: 'test',
-                  description: '测试策略：单元测试 → 集成测试 → 端到端测试\n重构安全网：测试覆盖、重构验证',
+                { id: 'test-core', name: '测试指南', type: 'module', module: 'test', layer: 'l2',
+                  description: '测试策略：单元测试 → 集成测试 → 端到端测试\n重构安全网：测试覆盖、重构验证\n优先级: L2(50分)',
                   x: -350, y: 200 },
                 { id: 'test-unit', name: '单元测试', type: 'sub', module: 'test', parent: 'test-core',
                   description: 'pytest/jest编写，覆盖核心逻辑',
@@ -313,8 +320,8 @@
                   description: '子任务完成后验证，确保父任务质量',
                   x: 100, y: 420 },
                 
-                { id: 'git-core', name: 'Git工作流', type: 'module', module: 'git',
-                  description: '分支策略、提交规范、Code Review流程',
+                { id: 'git-core', name: 'Git工作流', type: 'module', module: 'git', layer: 'l2',
+                  description: '分支策略、提交规范、Code Review流程\n优先级: L2(50分)',
                   x: -200, y: 0 },
                 { id: 'git-branch', name: '分支管理', type: 'sub', module: 'git', parent: 'git-core',
                   description: 'main保护分支，feat/fix/docs功能分支',
@@ -352,8 +359,8 @@
                   description: '根据测试结果优化规则体系',
                   x: -100, y: 400 },
                 
-                { id: 'source-core', name: '信源知信度', type: 'module', module: 'source',
-                  description: '知识来源可信度评分机制\n优先级：用户输入100 > 项目规则95 > 项目结构90 > 本地知识80 > 互联网70',
+                { id: 'source-core', name: '信源知信度', type: 'module', module: 'source', layer: 'l3',
+                  description: '知识来源可信度评分机制\n优先级：用户输入100 > 项目规则95 > 项目结构90 > 本地知识80 > 互联网70\n优先级: L3(10分)',
                   x: 500, y: -400 },
                 { id: 'source-user', name: '用户输入', type: 'sub', module: 'source', parent: 'source-core',
                   description: '知信度：100分\n最高优先级，用户说了算',
@@ -365,8 +372,8 @@
                   description: '知信度：90分\n文件系统、依赖文件',
                   x: 580, y: -340 },
                 
-                { id: 'dialogue-core', name: '对话摘要压缩', type: 'module', module: 'dialogue',
-                  description: '长对话自动摘要关键信息\n触发：20轮中等压缩，50轮深度压缩',
+                { id: 'dialogue-core', name: '对话摘要压缩', type: 'module', module: 'dialogue', layer: 'l3',
+                  description: '长对话自动摘要关键信息\n触发：20轮中等压缩，50轮深度压缩\n优先级: L3(10分)',
                   x: 500, y: 400 },
                 { id: 'dialogue-decision', name: '关键决策记录', type: 'sub', module: 'dialogue', parent: 'dialogue-core',
                   description: '技术选型、任务范围、规则变更决策',
@@ -418,8 +425,8 @@
                   x: 100, y: 400 },
 
                 // ========== 规则管理模块 ==========
-                { id: 'rule-mgmt-core', name: '规则管理', type: 'module', module: 'rule-mgmt',
-                  description: '规则全生命周期管理\n包含：准入管理、生命周期、层级边界、冲突优化、版本管控',
+                { id: 'rule-mgmt-core', name: '规则管理', type: 'module', module: 'rule-mgmt', layer: 'l1',
+                  description: '规则全生命周期管理\n包含：准入管理、生命周期、层级边界、冲突优化、版本管控\n优先级: L1(100分)',
                   x: -600, y: 0 },
                 { id: 'rule-mgmt-access', name: '规则准入', type: 'sub', module: 'rule-mgmt', parent: 'rule-mgmt-core',
                   description: '新增规则必须核验必要性\n分类：刚需强制约束、参考性经验建议、禁止新增',

@@ -1,0 +1,147 @@
+{
+  "report_type": "灰度试运行报告",
+  "version": "v1.0.0",
+  "timestamp": "2026-06-01 01:30:29",
+  "summary": {
+    "total_rules": 26,
+    "parsing_success_rate": 100.0,
+    "priority_detection": {
+      "correct": true,
+      "expected_vs_actual": {
+        "规则引擎": {
+          "expected": 100,
+          "actual": 100
+        },
+        "规则管理": {
+          "expected": 100,
+          "actual": 100
+        },
+        "测试指南": {
+          "expected": 50,
+          "actual": 50
+        },
+        "Git工作流": {
+          "expected": 50,
+          "actual": 50
+        },
+        "信源知信度": {
+          "expected": 10,
+          "actual": 10
+        },
+        "对话摘要压缩": {
+          "expected": 10,
+          "actual": 10
+        }
+      }
+    },
+    "conflict_resolution": 18,
+    "module_dispatch": {
+      "dispatch_success": true,
+      "execution_count": 2
+    }
+  },
+  "validation_details": {
+    "G1_rule_parsing": {
+      "status": "pass",
+      "description": "规则解析器能正确加载并解析所有.md规则文件",
+      "files_parsed": 26,
+      "new_modules": [
+        {
+          "name": "对话摘要压缩",
+          "core_functions": 4,
+          "execution_steps": 4
+        },
+        {
+          "name": "Git工作流",
+          "core_functions": 4,
+          "execution_steps": 4
+        },
+        {
+          "name": "规则引擎",
+          "core_functions": 4,
+          "execution_steps": 4
+        },
+        {
+          "name": "规则管理",
+          "core_functions": 4,
+          "execution_steps": 4
+        },
+        {
+          "name": "信源知信度",
+          "core_functions": 4,
+          "execution_steps": 4
+        },
+        {
+          "name": "测试指南",
+          "core_functions": 4,
+          "execution_steps": 4
+        }
+      ]
+    },
+    "G2_priority_calculation": {
+      "status": "pass",
+      "description": "优先级计算器能正确计算L1(100)/L2(50)/L3(10)",
+      "l1_count": 4,
+      "l2_count": 20,
+      "l3_count": 2
+    },
+    "G3_conflict_detection": {
+      "status": "pass",
+      "description": "冲突检测与裁决机制正常运作",
+      "conflicts_detected": 9,
+      "resolutions": 18
+    },
+    "G4_module_dispatch": {
+      "status": "pass",
+      "description": "模块调度器能协调多个模块按优先级协同"
+    }
+  },
+  "new_modules_validation": {
+    "modules_validated": 6,
+    "all_correct": true,
+    "details": [
+      {
+        "module": "规则引擎",
+        "expected_priority": 100,
+        "actual_priority": 100,
+        "correct": true
+      },
+      {
+        "module": "规则管理",
+        "expected_priority": 100,
+        "actual_priority": 100,
+        "correct": true
+      },
+      {
+        "module": "测试指南",
+        "expected_priority": 50,
+        "actual_priority": 50,
+        "correct": true
+      },
+      {
+        "module": "Git工作流",
+        "expected_priority": 50,
+        "actual_priority": 50,
+        "correct": true
+      },
+      {
+        "module": "信源知信度",
+        "expected_priority": 10,
+        "actual_priority": 10,
+        "correct": true
+      },
+      {
+        "module": "对话摘要压缩",
+        "expected_priority": 10,
+        "actual_priority": 10,
+        "correct": true
+      }
+    ]
+  },
+  "issues": [],
+  "recommendations": [
+    "继续监控规则解析性能",
+    "优化优先级检测逻辑以提高准确性",
+    "完善冲突裁决策略以处理更复杂场景"
+  ]
+}

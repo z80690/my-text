@@ -1,0 +1,604 @@
+{
+  "report_type": "规则解析报告",
+  "version": "v1.0.0",
+  "summary": {
+    "total_files": 26,
+    "valid_files": 26,
+    "total_rules": 26,
+    "parsing_success_rate": 100.0
+  },
+  "validation": {
+    "utf8_lf_check": {
+      "valid": 26,
+      "invalid": 0,
+      "invalid_files": []
+    },
+    "parse_errors": []
+  },
+  "rules": [
+    {
+      "name": "6A 项目管理流程 (L3)",
+      "file_name": "6a-project-flow.md",
+      "core_functions": [],
+      "execution_steps": [],
+      "constraint_rules": [],
+      "related_modules": []
+    },
+    {
+      "name": "任务执行记录",
+      "file_name": "ab-test-plan.md",
+      "core_functions": [],
+      "execution_steps": [],
+      "constraint_rules": [],
+      "related_modules": []
+    },
+    {
+      "name": "AB测试标准规则（规范完整版）",
+      "file_name": "ab-test-standard.md",
+      "core_functions": [],
+      "execution_steps": [],
+      "constraint_rules": [],
+      "related_modules": []
+    },
+    {
+      "name": "算法优化规范 (L3)",
+      "file_name": "algorithm-optimization.md",
+      "core_functions": [],
+      "execution_steps": [],
+      "constraint_rules": [],
+      "related_modules": []
+    },
+    {
+      "name": "❌ 错误：没有类型提示",
+      "file_name": "coding-standards.md",
+      "core_functions": [],
+      "execution_steps": [],
+      "constraint_rules": [],
+      "related_modules": []
+    },
+    {
+      "name": "对话摘要压缩",
+      "file_name": "dialogue-core.md",
+      "core_functions": [
+        "定义压缩触发阈值，自动判断何时进行对话压缩",
+        "设计压缩策略，提取关键信息并去除冗余内容",
+        "制定摘要输出格式，结构化展示要点与决策记录",
+        "实现自动摘要功能，支持中等压缩与深度压缩两种模式"
+      ],
+      "execution_steps": [
+        "设置压缩触发条件，20轮中等压缩、50轮深度压缩",
+        "设计压缩算法，提取对话关键信息与核心意图",
+        "制定摘要格式，包含要点列表、决策记录、待办事项",
+        "实现自动压缩功能，按阈值自动触发并输出摘要"
+      ],
+      "constraint_rules": [
+        "中等压缩保留核心信息，深度压缩仅保留关键决策",
+        "摘要输出必须清晰可读，便于快速回顾对话内容",
+        "压缩过程必须保持对话语义完整性",
+        "压缩结果必须可追溯到原始对话"
+      ],
+      "related_modules": [
+        "规则引擎",
+        "任务拆分",
+        "规则管理"
+      ]
+    },
+    {
+      "name": "动态身份系统规范 (L3)",
+      "file_name": "dynamic-identity.md",
+      "core_functions": [],
+      "execution_steps": [],
+      "constraint_rules": [],
+      "related_modules": []
+    },
+    {
+      "name": "情绪感知与响应适配执行细则",
+      "file_name": "emotional-adaptation.md",
+      "core_functions": [],
+      "execution_steps": [],
+      "constraint_rules": [],
+      "related_modules": []
+    },
+    {
+      "name": "熵减执行指南 (L3)",
+      "file_name": "entropy-reduction.md",
+      "core_functions": [],
+      "execution_steps": [],
+      "constraint_rules": [],
+      "related_modules": []
+    },
+    {
+      "name": "Git工作流",
+      "file_name": "git-core.md",
+      "core_functions": [
+        "定义分支命名规范，区分main保护分支与功能分支",
+        "制定提交信息标准，统一feat/fix/docs等类型格式",
+        "建立Code Review流程，确保代码质量与规范符合要求",
+        "设置合并门禁规则，必须通过所有检查才能合并代码"
+      ],
+      "execution_steps": [
+        "定义分支策略，区分main、feat、fix、docs等分支类型",
+        "制定提交信息规范，要求类型+描述的标准格式",
+        "建立PR/MR审查流程，明确审查要点与通过条件",
+        "配置合并门禁，设置自动检查与人工审查要求"
+      ],
+      "constraint_rules": [
+        "main分支必须设置保护，禁止直接推送",
+        "提交信息必须符合规范，否则拒绝提交",
+        "Code Review必须至少两名开发者批准",
+        "合并前必须通过所有自动化检查"
+      ],
+      "related_modules": [
+        "编码规范",
+        "质量保障",
+        "测试指南",
+        "规则引擎",
+        "规则管理"
+      ]
+    },
+    {
+      "name": "知识库管理",
+      "file_name": "knowledge-base.md",
+      "core_functions": [],
+      "execution_steps": [],
+      "constraint_rules": [],
+      "related_modules": []
+    },
+    {
+      "name": "页面标题",
+      "file_name": "llm-wiki.md",
+      "core_functions": [],
+      "execution_steps": [],
+      "constraint_rules": [],
+      "related_modules": []
+    },
+    {
+      "name": "安全审计",
+      "file_name": "quality-system.md",
+      "core_functions": [],
+      "execution_steps": [],
+      "constraint_rules": [],
+      "related_modules": []
+    },
+    {
+      "name": "质疑反馈执行指南 (L3)",
+      "file_name": "questioning-feedback.md",
+      "core_functions": [],
+      "execution_steps": [],
+      "constraint_rules": [],
+      "related_modules": []
+    },
+    {
+      "name": "规则系统索引",
+      "file_name": "README.md",
+      "core_functions": [],
+      "execution_steps": [],
+      "constraint_rules": [],
+      "related_modules": []
+    },
+    {
+      "name": "阶段验证报告",
+      "file_name": "recursive-thinking.md",
+      "core_functions": [],
+      "execution_steps": [],
+      "constraint_rules": [],
+      "related_modules": []
+    },
+    {
+      "name": "规则引擎",
+      "file_name": "rule-engine.md",
+      "core_functions": [
+        "解析L1/L2/L3规则文件格式，提取规则内容与元数据",
+        "计算规则优先级，L1最高(100)、L2中等(50)、L3最低(10)",
+        "检测同优先级规则冲突，按策略自动裁决",
+        "协调各模块协同执行，确保规则正确应用"
+      ],
+      "execution_steps": [
+        "初始化规则解析器，加载所有规则文件",
+        "解析规则内容，提取优先级与触发条件",
+        "检测规则冲突，按优先级进行裁决",
+        "调度执行规则，输出执行结果"
+      ],
+      "constraint_rules": [
+        "规则文件必须为UTF-8编码、LF换行格式",
+        "规则优先级必须为正整数，数值越大优先级越高",
+        "冲突裁决遵循L1>L2>L3原则，同层级按时间戳排序",
+        "不允许循环依赖，规则间依赖关系必须无环"
+      ],
+      "related_modules": [
+        "6A项目流程",
+        "质量保障",
+        "安全审计",
+        "测试指南",
+        "动态身份",
+        "任务拆分",
+        "Git工作流",
+        "编码规范",
+        "AB测试",
+        "信源知信度",
+        "对话摘要压缩",
+        "规则建议机制",
+        "算法智能",
+        "Token优化",
+        "规则管理",
+        "情绪感知"
+      ]
+    },
+    {
+      "name": "规则管理",
+      "file_name": "rule-mgmt-core.md",
+      "core_functions": [
+        "管理规则完整生命周期，从创建到归档全流程控制",
+        "实现规则版本控制，支持版本号管理与回滚机制",
+        "检测规则冲突并提供解决策略，确保规则一致性",
+        "定义规则编辑与审核权限，实现分级权限控制"
+      ],
+      "execution_steps": [
+        "定义规则生命周期各阶段状态与转换条件",
+        "建立版本号规则，记录每次变更历史与回滚点",
+        "制定冲突检测策略，自动识别并解决规则冲突",
+        "设置权限分级，区分编辑、审核、管理员权限"
+      ],
+      "constraint_rules": [
+        "规则版本号采用语义化版本控制，格式为vX.Y.Z",
+        "规则变更必须经过审核才能生效，禁止直接发布",
+        "权限分级必须严格执行，未授权用户无法修改规则",
+        "规则归档后可恢复，但删除操作需要二次确认"
+      ],
+      "related_modules": [
+        "规则引擎",
+        "6A项目流程",
+        "质量保障",
+        "安全审计",
+        "测试指南",
+        "动态身份",
+        "任务拆分",
+        "Git工作流",
+        "编码规范",
+        "AB测试",
+        "信源知信度",
+        "对话摘要压缩",
+        "规则建议机制",
+        "算法智能",
+        "Token优化",
+        "情绪感知"
+      ]
+    },
+    {
+      "name": "规则建议机制 (L3)",
+      "file_name": "rule-suggestion.md",
+      "core_functions": [],
+      "execution_steps": [],
+      "constraint_rules": [],
+      "related_modules": []
+    },
+    {
+      "name": "实施任务清单",
+      "file_name": "sdd-coding.md",
+      "core_functions": [],
+      "execution_steps": [],
+      "constraint_rules": [],
+      "related_modules": []
+    },
+    {
+      "name": "或",
+      "file_name": "security-audit.md",
+      "core_functions": [],
+      "execution_steps": [],
+      "constraint_rules": [],
+      "related_modules": []
+    },
+    {
+      "name": "信源知信度",
+      "file_name": "source-core.md",
+      "core_functions": [
+        "建立知信度评分体系，评估知识来源可信度",
+        "定义知识来源分类，区分用户输入、规则文件、文件系统、网络搜索",
+        "实现加权计算算法，按来源权重计算综合可信度",
+        "提供可信度查询接口，支持实时获取知识可信度"
+      ],
+      "execution_steps": [
+        "定义知信度评分标准，设置各来源基础分值",
+        "分类知识来源，明确各类来源的特点与可靠性",
+        "设计加权计算算法，根据来源权重计算综合得分",
+        "实现查询接口，支持获取单个或批量知识可信度"
+      ],
+      "constraint_rules": [
+        "知信度评分范围为0-100，数值越高可信度越高",
+        "用户输入可信度最高(100)，网络搜索可信度最低(70)",
+        "加权计算必须考虑来源类型与时效性",
+        "可信度结果必须透明可追溯"
+      ],
+      "related_modules": [
+        "规则引擎",
+        "动态身份",
+        "规则管理"
+      ]
+    },
+    {
+      "name": "韬（τ）定律执行指南 (L3)",
+      "file_name": "tao-law-execution.md",
+      "core_functions": [],
+      "execution_steps": [],
+      "constraint_rules": [],
+      "related_modules": []
+    },
+    {
+      "name": "任务拆分规则 (L3)",
+      "file_name": "task-decomposition.md",
+      "core_functions": [],
+      "execution_steps": [],
+      "constraint_rules": [],
+      "related_modules": []
+    },
+    {
+      "name": "测试指南",
+      "file_name": "test-core.md",
+      "core_functions": [
+        "制定测试分层策略，覆盖单元、集成、端到端测试",
+        "定义测试编写规范，统一pytest/jest测试格式要求",
+        "建立重构安全网，验证重构后行为与重构前一致",
+        "设置质量门禁，测试不通过禁止代码合并"
+      ],
+      "execution_steps": [
+        "划分测试层级，明确各层测试范围与目标",
+        "制定测试编写规范，定义用例结构与命名规则",
+        "建立重构验证流程，确保功能完整性不受影响",
+        "设置CI/CD质量门禁，配置自动检查与阻断规则"
+      ],
+      "constraint_rules": [
+        "单元测试覆盖率必须达到80%以上",
+        "集成测试必须覆盖核心业务流程",
+        "端到端测试必须验证完整用户场景",
+        "质量门禁规则必须严格执行，不允许绕过"
+      ],
+      "related_modules": [
+        "质量保障",
+        "编码规范",
+        "规则引擎",
+        "规则管理"
+      ]
+    },
+    {
+      "name": "Token优化规范 (L3)",
+      "file_name": "token-optimization.md",
+      "core_functions": [],
+      "execution_steps": [],
+      "constraint_rules": [],
+      "related_modules": []
+    }
+  ],
+  "new_modules": [
+    {
+      "file_name": "dialogue-core.md",
+      "file_path": "C:\\Users\\Administrator\\Desktop\\my-text\\.trae\\rules\\dialogue-core.md",
+      "name": "对话摘要压缩",
+      "core_functions": [
+        "定义压缩触发阈值，自动判断何时进行对话压缩",
+        "设计压缩策略，提取关键信息并去除冗余内容",
+        "制定摘要输出格式，结构化展示要点与决策记录",
+        "实现自动摘要功能，支持中等压缩与深度压缩两种模式"
+      ],
+      "execution_steps": [
+        "设置压缩触发条件，20轮中等压缩、50轮深度压缩",
+        "设计压缩算法，提取对话关键信息与核心意图",
+        "制定摘要格式，包含要点列表、决策记录、待办事项",
+        "实现自动压缩功能，按阈值自动触发并输出摘要"
+      ],
+      "constraint_rules": [
+        "中等压缩保留核心信息，深度压缩仅保留关键决策",
+        "摘要输出必须清晰可读，便于快速回顾对话内容",
+        "压缩过程必须保持对话语义完整性",
+        "压缩结果必须可追溯到原始对话"
+      ],
+      "related_modules": [
+        "规则引擎",
+        "任务拆分",
+        "规则管理"
+      ],
+      "raw_content": "# 对话摘要压缩\n\n## 核心功能\n定义压缩触发阈值，自动判断何时进行对话压缩\n设计压缩策略，提取关键信息并去除冗余内容\n制定摘要输出格式，结构化展示要点与决策记录\n实现自动摘要功能，支持中等压缩与深度压缩两种模式\n\n## 执行步骤\n设置压缩触发条件，20轮中等压缩、50轮深度压缩\n设计压缩算法，提取对话关键信息与核心意图\n制定摘要格式，包含要点列表、决策记录、待办事项\n实现自动压缩功能，按阈值自动触发并输出摘要\n\n## 约束规则\n中等压缩保留核心信息，深度压缩仅保留关键决策\n摘要输出必须清晰可读，便于快速回顾对话内容\n压缩过程必须保持对话语义完整性\n压缩结果必须可追溯到原始对话\n\n## 关联模块\n规则引擎、任务拆分、规则管理"
+    },
+    {
+      "file_name": "git-core.md",
+      "file_path": "C:\\Users\\Administrator\\Desktop\\my-text\\.trae\\rules\\git-core.md",
+      "name": "Git工作流",
+      "core_functions": [
+        "定义分支命名规范，区分main保护分支与功能分支",
+        "制定提交信息标准，统一feat/fix/docs等类型格式",
+        "建立Code Review流程，确保代码质量与规范符合要求",
+        "设置合并门禁规则，必须通过所有检查才能合并代码"
+      ],
+      "execution_steps": [
+        "定义分支策略，区分main、feat、fix、docs等分支类型",
+        "制定提交信息规范，要求类型+描述的标准格式",
+        "建立PR/MR审查流程，明确审查要点与通过条件",
+        "配置合并门禁，设置自动检查与人工审查要求"
+      ],
+      "constraint_rules": [
+        "main分支必须设置保护，禁止直接推送",
+        "提交信息必须符合规范，否则拒绝提交",
+        "Code Review必须至少两名开发者批准",
+        "合并前必须通过所有自动化检查"
+      ],
+      "related_modules": [
+        "编码规范",
+        "质量保障",
+        "测试指南",
+        "规则引擎",
+        "规则管理"
+      ],
+      "raw_content": "# Git工作流\n\n## 核心功能\n定义分支命名规范，区分main保护分支与功能分支\n制定提交信息标准，统一feat/fix/docs等类型格式\n建立Code Review流程，确保代码质量与规范符合要求\n设置合并门禁规则，必须通过所有检查才能合并代码\n\n## 执行步骤\n定义分支策略，区分main、feat、fix、docs等分支类型\n制定提交信息规范，要求类型+描述的标准格式\n建立PR/MR审查流程，明确审查要点与通过条件\n配置合并门禁，设置自动检查与人工审查要求\n\n## 约束规则\nmain分支必须设置保护，禁止直接推送\n提交信息必须符合规范，否则拒绝提交\nCode Review必须至少两名开发者批准\n合并前必须通过所有自动化检查\n\n## 关联模块\n编码规范、质量保障、测试指南、规则引擎、规则管理"
+    },
+    {
+      "file_name": "rule-engine.md",
+      "file_path": "C:\\Users\\Administrator\\Desktop\\my-text\\.trae\\rules\\rule-engine.md",
+      "name": "规则引擎",
+      "core_functions": [
+        "解析L1/L2/L3规则文件格式，提取规则内容与元数据",
+        "计算规则优先级，L1最高(100)、L2中等(50)、L3最低(10)",
+        "检测同优先级规则冲突，按策略自动裁决",
+        "协调各模块协同执行，确保规则正确应用"
+      ],
+      "execution_steps": [
+        "初始化规则解析器，加载所有规则文件",
+        "解析规则内容，提取优先级与触发条件",
+        "检测规则冲突，按优先级进行裁决",
+        "调度执行规则，输出执行结果"
+      ],
+      "constraint_rules": [
+        "规则文件必须为UTF-8编码、LF换行格式",
+        "规则优先级必须为正整数，数值越大优先级越高",
+        "冲突裁决遵循L1>L2>L3原则，同层级按时间戳排序",
+        "不允许循环依赖，规则间依赖关系必须无环"
+      ],
+      "related_modules": [
+        "6A项目流程",
+        "质量保障",
+        "安全审计",
+        "测试指南",
+        "动态身份",
+        "任务拆分",
+        "Git工作流",
+        "编码规范",
+        "AB测试",
+        "信源知信度",
+        "对话摘要压缩",
+        "规则建议机制",
+        "算法智能",
+        "Token优化",
+        "规则管理",
+        "情绪感知"
+      ],
+      "raw_content": "# 规则引擎\n\n## 核心功能\n解析L1/L2/L3规则文件格式，提取规则内容与元数据\n计算规则优先级，L1最高(100)、L2中等(50)、L3最低(10)\n检测同优先级规则冲突，按策略自动裁决\n协调各模块协同执行，确保规则正确应用\n\n## 执行步骤\n初始化规则解析器，加载所有规则文件\n解析规则内容，提取优先级与触发条件\n检测规则冲突，按优先级进行裁决\n调度执行规则，输出执行结果\n\n## 约束规则\n规则文件必须为UTF-8编码、LF换行格式\n规则优先级必须为正整数，数值越大优先级越高\n冲突裁决遵循L1>L2>L3原则，同层级按时间戳排序\n不允许循环依赖，规则间依赖关系必须无环\n\n## 关联模块\n6A项目流程、质量保障、安全审计、测试指南、动态身份、任务拆分、Git工作流、编码规范、AB测试、信源知信度、对话摘要压缩、规则建议机制、算法智能、Token优化、规则管理、情绪感知"
+    },
+    {
+      "file_name": "rule-mgmt-core.md",
+      "file_path": "C:\\Users\\Administrator\\Desktop\\my-text\\.trae\\rules\\rule-mgmt-core.md",
+      "name": "规则管理",
+      "core_functions": [
+        "管理规则完整生命周期，从创建到归档全流程控制",
+        "实现规则版本控制，支持版本号管理与回滚机制",
+        "检测规则冲突并提供解决策略，确保规则一致性",
+        "定义规则编辑与审核权限，实现分级权限控制"
+      ],
+      "execution_steps": [
+        "定义规则生命周期各阶段状态与转换条件",
+        "建立版本号规则，记录每次变更历史与回滚点",
+        "制定冲突检测策略，自动识别并解决规则冲突",
+        "设置权限分级，区分编辑、审核、管理员权限"
+      ],
+      "constraint_rules": [
+        "规则版本号采用语义化版本控制，格式为vX.Y.Z",
+        "规则变更必须经过审核才能生效，禁止直接发布",
+        "权限分级必须严格执行，未授权用户无法修改规则",
+        "规则归档后可恢复，但删除操作需要二次确认"
+      ],
+      "related_modules": [
+        "规则引擎",
+        "6A项目流程",
+        "质量保障",
+        "安全审计",
+        "测试指南",
+        "动态身份",
+        "任务拆分",
+        "Git工作流",
+        "编码规范",
+        "AB测试",
+        "信源知信度",
+        "对话摘要压缩",
+        "规则建议机制",
+        "算法智能",
+        "Token优化",
+        "情绪感知"
+      ],
+      "raw_content": "# 规则管理\n\n## 核心功能\n管理规则完整生命周期，从创建到归档全流程控制\n实现规则版本控制，支持版本号管理与回滚机制\n检测规则冲突并提供解决策略，确保规则一致性\n定义规则编辑与审核权限，实现分级权限控制\n\n## 执行步骤\n定义规则生命周期各阶段状态与转换条件\n建立版本号规则，记录每次变更历史与回滚点\n制定冲突检测策略，自动识别并解决规则冲突\n设置权限分级，区分编辑、审核、管理员权限\n\n## 约束规则\n规则版本号采用语义化版本控制，格式为vX.Y.Z\n规则变更必须经过审核才能生效，禁止直接发布\n权限分级必须严格执行，未授权用户无法修改规则\n规则归档后可恢复，但删除操作需要二次确认\n\n## 关联模块\n规则引擎、6A项目流程、质量保障、安全审计、测试指南、动态身份、任务拆分、Git工作流、编码规范、AB测试、信源知信度、对话摘要压缩、规则建议机制、算法智能、Token优化、情绪感知"
+    },
+    {
+      "file_name": "source-core.md",
+      "file_path": "C:\\Users\\Administrator\\Desktop\\my-text\\.trae\\rules\\source-core.md",
+      "name": "信源知信度",
+      "core_functions": [
+        "建立知信度评分体系，评估知识来源可信度",
+        "定义知识来源分类，区分用户输入、规则文件、文件系统、网络搜索",
+        "实现加权计算算法，按来源权重计算综合可信度",
+        "提供可信度查询接口，支持实时获取知识可信度"
+      ],
+      "execution_steps": [
+        "定义知信度评分标准，设置各来源基础分值",
+        "分类知识来源，明确各类来源的特点与可靠性",
+        "设计加权计算算法，根据来源权重计算综合得分",
+        "实现查询接口，支持获取单个或批量知识可信度"
+      ],
+      "constraint_rules": [
+        "知信度评分范围为0-100，数值越高可信度越高",
+        "用户输入可信度最高(100)，网络搜索可信度最低(70)",
+        "加权计算必须考虑来源类型与时效性",
+        "可信度结果必须透明可追溯"
+      ],
+      "related_modules": [
+        "规则引擎",
+        "动态身份",
+        "规则管理"
+      ],
+      "raw_content": "# 信源知信度\n\n## 核心功能\n建立知信度评分体系，评估知识来源可信度\n定义知识来源分类，区分用户输入、规则文件、文件系统、网络搜索\n实现加权计算算法，按来源权重计算综合可信度\n提供可信度查询接口，支持实时获取知识可信度\n\n## 执行步骤\n定义知信度评分标准，设置各来源基础分值\n分类知识来源，明确各类来源的特点与可靠性\n设计加权计算算法，根据来源权重计算综合得分\n实现查询接口，支持获取单个或批量知识可信度\n\n## 约束规则\n知信度评分范围为0-100，数值越高可信度越高\n用户输入可信度最高(100)，网络搜索可信度最低(70)\n加权计算必须考虑来源类型与时效性\n可信度结果必须透明可追溯\n\n## 关联模块\n规则引擎、动态身份、规则管理"
+    },
+    {
+      "file_name": "test-core.md",
+      "file_path": "C:\\Users\\Administrator\\Desktop\\my-text\\.trae\\rules\\test-core.md",
+      "name": "测试指南",
+      "core_functions": [
+        "制定测试分层策略，覆盖单元、集成、端到端测试",
+        "定义测试编写规范，统一pytest/jest测试格式要求",
+        "建立重构安全网，验证重构后行为与重构前一致",
+        "设置质量门禁，测试不通过禁止代码合并"
+      ],
+      "execution_steps": [
+        "划分测试层级，明确各层测试范围与目标",
+        "制定测试编写规范，定义用例结构与命名规则",
+        "建立重构验证流程，确保功能完整性不受影响",
+        "设置CI/CD质量门禁，配置自动检查与阻断规则"
+      ],
+      "constraint_rules": [
+        "单元测试覆盖率必须达到80%以上",
+        "集成测试必须覆盖核心业务流程",
+        "端到端测试必须验证完整用户场景",
+        "质量门禁规则必须严格执行，不允许绕过"
+      ],
+      "related_modules": [
+        "质量保障",
+        "编码规范",
+        "规则引擎",
+        "规则管理"
+      ],
+      "raw_content": "# 测试指南\n\n## 核心功能\n制定测试分层策略，覆盖单元、集成、端到端测试\n定义测试编写规范，统一pytest/jest测试格式要求\n建立重构安全网，验证重构后行为与重构前一致\n设置质量门禁，测试不通过禁止代码合并\n\n## 执行步骤\n划分测试层级，明确各层测试范围与目标\n制定测试编写规范，定义用例结构与命名规则\n建立重构验证流程，确保功能完整性不受影响\n设置CI/CD质量门禁，配置自动检查与阻断规则\n\n## 约束规则\n单元测试覆盖率必须达到80%以上\n集成测试必须覆盖核心业务流程\n端到端测试必须验证完整用户场景\n质量门禁规则必须严格执行，不允许绕过\n\n## 关联模块\n质量保障、编码规范、规则引擎、规则管理"
+    }
+  ],
+  "all_modules": [
+    "6A 项目管理流程 (L3)",
+    "任务执行记录",
+    "AB测试标准规则（规范完整版）",
+    "算法优化规范 (L3)",
+    "❌ 错误：没有类型提示",
+    "对话摘要压缩",
+    "动态身份系统规范 (L3)",
+    "情绪感知与响应适配执行细则",
+    "熵减执行指南 (L3)",
+    "Git工作流",
+    "知识库管理",
+    "页面标题",
+    "安全审计",
+    "质疑反馈执行指南 (L3)",
+    "规则系统索引",
+    "阶段验证报告",
+    "规则引擎",
+    "规则管理",
+    "规则建议机制 (L3)",
+    "实施任务清单",
+    "或",
+    "信源知信度",
+    "韬（τ）定律执行指南 (L3)",
+    "任务拆分规则 (L3)",
+    "测试指南",
+    "Token优化规范 (L3)"
+  ]
+}
