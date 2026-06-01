@@ -1,0 +1,22 @@
+{
+  "name": "L2-Soft-Mode",
+  "version": "1.0.0",
+  "description": "L2流程约束 - 软模式（测试/灰度环境：仅警告不拦截）",
+  
+  "mode": "soft",
+  "description_cn": "测试环境模式",
+  "block_on_violation": false,
+  "default_response": "操作已记录，继续执行（测试模式）",
+  "log_level": "INFO",
+  
+  "permissions": {
+    "can_switch_mode": ["admin"]
+  },
+  
+  "rules": [
+    "code_review_suggested",
+    "test_suggested",
+    "lint_suggested",
+    "security_audit_suggested"
+  ]
+}

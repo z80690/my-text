@@ -1,0 +1,23 @@
+{
+  "name": "L1-Blacklist",
+  "version": "1.0.0",
+  "description": "L1硬约束 - 黑名单（直接拦截）",
+  
+  "blocked_commands": [
+    "rm", "rmdir", "exec", "run", "shell",
+    "format", "shutdown", "reboot", "halt",
+    "kill", "killall", "poweroff"
+  ],
+  
+  "blocked_files": [
+    ".env", "private.key", "config.json",
+    "credentials.json", "secrets.yml",
+    "ssh_key", "id_rsa", "id_dsa"
+  ],
+  
+  "blocked_paths": [
+    "/etc/", "/root/", "/home/", "/usr/bin/",
+    "C:\\Windows\\", "C:\\Program Files\\",
+    "\\\\.\\"
+  ]
+}

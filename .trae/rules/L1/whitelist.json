@@ -1,0 +1,21 @@
+{
+  "name": "L1-Whitelist",
+  "version": "1.0.0",
+  "description": "L1硬约束 - 白名单（允许的操作）",
+  
+  "allowed_commands": [
+    "read", "list", "cat", "echo", "cd", "pwd",
+    "create", "update", "delete", "search",
+    "write", "append", "copy", "move", "rename"
+  ],
+  
+  "allowed_paths": [
+    "./", "./docs/", "./my-text/", "./src/",
+    "./tests/", "./config/", "./.trae/"
+  ],
+  
+  "allowed_extensions": [
+    ".txt", ".md", ".json", ".js", ".py",
+    ".yaml", ".yml", ".html", ".css"
+  ]
+}

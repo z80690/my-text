@@ -1,0 +1,22 @@
+{
+  "name": "MCP-Interceptor",
+  "version": "1.0.0",
+  "description": "MCP执行拦截层 - 绑定L1硬约束做安全拦截",
+  
+  "rules": {
+    "L1_path": "./.trae/rules/L1/",
+    "L2_path": "./.trae/rules/L2/",
+    "L3_path": "./.trae/rules/L3/"
+  },
+  
+  "interception": {
+    "retry_count": 2,
+    "retry_interval_ms": 1000,
+    "total_timeout_ms": 10000,
+    "log_level": "ERROR"
+  },
+  
+  "logging": {
+    "required_fields": ["request_id", "level", "layer", "description", "timestamp"]
+  }
+}

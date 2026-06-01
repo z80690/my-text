@@ -1,0 +1,24 @@
+{
+  "name": "L1-Security-Rules",
+  "version": "1.0.0",
+  "description": "L1硬约束 - 安全底线规则（只读，不执行）",
+  
+  "blocked_commands": [
+    "exec", "run", "shell", "cmd", "powershell",
+    "rm -rf", "format", "del /f /s /q", "rmdir /s /q"
+  ],
+  
+  "blocked_patterns": [
+    "\\.\\./", "\\.\\.\\\\",
+    "C:\\\\Windows", "/etc/passwd", "/etc/shadow",
+    "\\|\\|", "&&", ";", "\\$\\(", "`"
+  ],
+  
+  "blocked_keywords": [
+    "sudo", "su", "chmod", "chown", "kill",
+    "nc", "ncat", "netcat", "telnet", "ftp"
+  ],
+  
+  "path_length_limit": 255,
+  "content_length_limit": 1000
+}

@@ -1,0 +1,22 @@
+{
+  "name": "L2-Strict-Mode",
+  "version": "1.0.0",
+  "description": "L2流程约束 - 强模式（正式环境：违规直接拦截）",
+  
+  "mode": "strict",
+  "description_cn": "正式环境模式",
+  "block_on_violation": true,
+  "default_response": "服务暂时繁忙，请稍后再试",
+  "log_level": "WARN",
+  
+  "permissions": {
+    "can_switch_mode": ["admin"]
+  },
+  
+  "rules": [
+    "code_review_required",
+    "test_required",
+    "lint_required",
+    "security_audit_required"
+  ]
+}

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP规则配置管理</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .card-header h3 { color: #333; font-size: 18px; }
+        .layer-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .layer-l1 { background: #fee2e2; color: #dc2626; }
+        .layer-l2 { background: #dbeafe; color: #2563eb; }
+        .layer-l3 { background: #dcfce7; color: #16a34a; }
+        .rule-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: #f9fafb; border-radius: 8px; margin-bottom: 8px; }
+        .rule-item:last-child { margin-bottom: 0; }
+        .rule-name { font-weight: 500; color: #374151; }
+        .rule-status { padding: 4px 10px; border-radius: 12px; font-size: 12px; }
+        .status-allowed { background: #dcfce7; color: #16a34a; }
+        .status-blocked { background: #fee2e2; color: #dc2626; }
+        .status-warning { background: #fef3c7; color: #d97706; }
+        .mode-switch { display: flex; gap: 10px; align-items: center; }
+        .mode-btn { padding: 10px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+        .mode-btn.active { border-color: #667eea; background: #667eea; color: white; }
+        .mode-btn:hover { border-color: #667eea; }
+        .test-section { margin-top: 20px; }
+        .test-input { padding: 10px 15px; border: 2px solid #e5e7eb; border-radius: 8px; width: 100%; margin-bottom: 10px; font-size: 14px; }
+        .test-btn { padding: 10px 30px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; transition: background 0.2s; }
+        .test-btn:hover { background: #5a67d8; }
+        .test-result { margin-top: 15px; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 14px; }
+        .result-pass { background: #dcfce7; color: #16a34a; }
+        .result-block { background: #fee2e2; color: #dc2626; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 15px; }
+        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; text-align: center; }
+        .stat-value { font-size: 28px; font-weight: 700; }
+        .stat-label { font-size: 12px; opacity: 0.9; }
+        .sync-time { font-size: 12px; color: #9ca3af; margin-top: 10px; text-align: right; }
+        pre { font-size: 12px; overflow: auto; background: rgba(0,0,0,0.05); padding: 10px; border-radius: 4px; margin-top: 10px; }
+        .server-status { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .status-dot { width: 12px; height: 12px; border-radius: 50%; background: #dc2626; }
+        .status-dot.online { background: #16a34a; }
+        .quick-test { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 15px; }
+        .quick-btn { padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; background: white; cursor: pointer; font-weight: 500; transition: all 0.2s; text-align: center; }
+        .quick-btn:hover { border-color: #667eea; background: #667eea; color: white; }
+        .quick-btn.pass { border-color: #16a34a; }
+        .quick-btn.pass:hover { background: #16a34a; }
+        .quick-btn.block { border-color: #dc2626; }
+        .quick-btn.block:hover { background: #dc2626; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>MCP规则配置管理</h1>
+        <p>L1/L2/L3三层规则体系 · 可视化配置与状态监控</p>
+    </div>
+
+    <div class="container">
+        <!-- 服务状态 -->
+        <div class="card">
+            <div class="server-status">
+                <div class="status-dot" id="serverDot"></div>
+                <span id="serverStatus">检查服务状态...</span>
+            </div>
+            <div id="serverInfo" style="color: #6b7280; font-size: 14px;"></div>
+        </div>
+
+        <!-- 模式切换 -->
+        <div class="card">
+            <div class="card-header">
+                <h3>运行模式</h3>
+            </div>
+            <div class="mode-switch">
+                <button class="mode-btn active" id="strictMode">🔒 正式模式</button>
+                <button class="mode-btn" id="softMode">🔓 测试模式</button>
+            </div>
+            <p style="margin-top: 10px; color: #6b7280; font-size: 14px;">
+                <span id="modeDesc">正式模式：任何L1不通过 → 直接拦截</span>
+            </p>
+        </div>
+
+        <!-- 统计概览 -->
+        <div class="card">
+            <div class="card-header">
+                <h3>规则统计</h3>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">L1规则文件</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">2</div>
+                    <div class="stat-label">L2模式配置</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">测试用例</div>
+                </div>
+            </div>
+            <div class="sync-time">最后同步: <span id="syncTime">-</span></div>
+        </div>
+
+        <!-- L1规则 -->
+        <div class="card">
+            <div class="card-header">
+                <h3>L1 - 安全底线规则</h3>
+                <span class="layer-badge layer-l1">硬约束</span>
+            </div>
+
+            <h4 style="color: #dc2626; margin-bottom: 10px;">🚫 禁止命令</h4>
+            <div class="rule-item"><span class="rule-name">exec</span><span class="rule-status status-blocked">拦截</span></div>
+            <div class="rule-item"><span class="rule-name">run</span><span class="rule-status status-blocked">拦截</span></div>
+            <div class="rule-item"><span class="rule-name">shell</span><span class="rule-status status-blocked">拦截</span></div>
+            <div class="rule-item"><span class="rule-name">rm -rf</span><span class="rule-status status-blocked">拦截</span></div>
+            <div class="rule-item"><span class="rule-name">format</span><span class="rule-status status-blocked">拦截</span></div>
+
+            <h4 style="color: #16a34a; margin: 15px 0 10px;">✅ 允许命令</h4>
+            <div class="rule-item"><span class="rule-name">read</span><span class="rule-status status-allowed">放行</span></div>
+            <div class="rule-item"><span class="rule-name">list</span><span class="rule-status status-allowed">放行</span></div>
+            <div class="rule-item"><span class="rule-name">cat</span><span class="rule-status status-allowed">放行</span></div>
+            <div class="rule-item"><span class="rule-name">echo</span><span class="rule-status status-allowed">放行</span></div>
+
+            <h4 style="color: #d97706; margin: 15px 0 10px;">⚠️ 敏感文件</h4>
+            <div class="rule-item"><span class="rule-name">.env</span><span class="rule-status status-warning">保护</span></div>
+            <div class="rule-item"><span class="rule-name">private.key</span><span class="rule-status status-warning">保护</span></div>
+            <div class="rule-item"><span class="rule-name">config.json</span><span class="rule-status status-warning">保护</span></div>
+        </div>
+
+        <!-- L2规则 -->
+        <div class="card">
+            <div class="card-header">
+                <h3>L2 - 流程约束</h3>
+                <span class="layer-badge layer-l2">流程控制</span>
+            </div>
+
+            <h4 style="color: #2563eb; margin-bottom: 10px;">📋 正式模式 (strict)</h4>
+            <ul style="margin-left: 20px; color: #6b7280; font-size: 14px;">
+                <li>L1不通过 → 直接拦截</li>
+                <li>返回: "服务暂时繁忙，请稍后再试"</li>
+                <li>日志级别: WARN</li>
+            </ul>
+
+            <h4 style="color: #2563eb; margin: 15px 0 10px;">📋 测试模式 (soft)</h4>
+            <ul style="margin-left: 20px; color: #6b7280; font-size: 14px;">
+                <li>L1不通过 → 警告 + 放行</li>
+                <li>记录日志，便于调试</li>
+                <li>日志级别: INFO</li>
+            </ul>
+        </div>
+
+        <!-- L3建议 -->
+        <div class="card">
+            <div class="card-header">
+                <h3>L3 - 最佳实践建议</h3>
+                <span class="layer-badge layer-l3">辅助建议</span>
+            </div>
+
+            <div class="rule-item">
+                <span class="rule-name">rm 命令</span>
+                <span class="rule-status status-warning">建议使用 mv 替代</span>
+            </div>
+            <div class="rule-item">
+                <span class="rule-name">exec/shell命令</span>
+                <span class="rule-status status-warning">请使用封装接口</span>
+            </div>
+        </div>
+
+        <!-- 快速测试 -->
+        <div class="card">
+            <div class="card-header">
+                <h3>快速测试</h3>
+            </div>
+            <div class="quick-test">
+                <button class="quick-btn pass" onclick="quickTest('read', './test.txt')">✅ read 放行</button>
+                <button class="quick-btn block" onclick="quickTest('rm', './test.txt')">❌ rm 拦截</button>
+                <button class="quick-btn block" onclick="quickTest('exec', 'rm -rf /')">❌ exec 拦截</button>
+                <button class="quick-btn block" onclick="quickTest('shell', 'ls')">❌ shell 拦截</button>
+            </div>
+        </div>
+
+        <!-- 在线测试 -->
+        <div class="card">
+            <div class="card-header">
+                <h3>在线测试</h3>
+            </div>
+            <div class="test-section">
+                <input type="text" class="test-input" id="actionInput" placeholder="输入操作 (如: read, rm, exec)">
+                <input type="text" class="test-input" id="pathInput" placeholder="输入路径 (如: ./test.txt)">
+                <input type="text" class="test-input" id="contentInput" placeholder="输入内容 (可选)">
+                <button class="test-btn" onclick="runTest()">执行测试</button>
+                <div id="testResult" class="test-result" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('strictMode').addEventListener('click', function() {
+            document.getElementById('strictMode').classList.add('active');
+            document.getElementById('softMode').classList.remove('active');
+            document.getElementById('modeDesc').textContent = '正式模式：任何L1不通过 → 直接拦截';
+        });
+
+        document.getElementById('softMode').addEventListener('click', function() {
+            document.getElementById('softMode').classList.add('active');
+            document.getElementById('strictMode').classList.remove('active');
+            document.getElementById('modeDesc').textContent = '测试模式：L1不通过 → 警告记录，继续放行';
+        });
+
+        async function checkServerStatus() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                document.getElementById('serverDot').classList.add('online');
+                document.getElementById('serverStatus').textContent = 'MCP服务已连接';
+                document.getElementById('serverInfo').textContent = `服务正常运行 · ${data.timestamp}`;
+                document.getElementById('syncTime').textContent = data.timestamp;
+            } catch (error) {
+                document.getElementById('serverDot').classList.remove('online');
+                document.getElementById('serverStatus').textContent = 'MCP服务未连接';
+                document.getElementById('serverInfo').textContent = '请运行: node server.js';
+            }
+        }
+
+        async function quickTest(action, path) {
+            document.getElementById('actionInput').value = action;
+            document.getElementById('pathInput').value = path;
+            await runTest();
+        }
+
+        async function runTest() {
+            const action = document.getElementById('actionInput').value;
+            const path = document.getElementById('pathInput').value;
+            const content = document.getElementById('contentInput').value;
+
+            const resultDiv = document.getElementById('testResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'test-result';
+            resultDiv.innerHTML = '⏳ 正在调用MCP服务...';
+
+            try {
+                const response = await fetch('/api/intercept', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action, path, content })
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    resultDiv.className = 'test-result result-block';
+                    resultDiv.innerHTML = `<strong>❌ 调用失败</strong><br>${data.error}`;
+                    return;
+                }
+
+                const result = data.data;
+                resultDiv.className = `test-result ${result.blocked ? 'result-block' : 'result-pass'}`;
+
+                let icon = result.blocked ? '❌ 拦截' : '✅ 放行';
+                let message = result.message || (result.blocked ? 'MCP安全拦截' : '安全校验通过');
+
+                resultDiv.innerHTML = `
+                    <strong>${icon}</strong><br>
+                    <strong>消息:</strong> ${message}<br>
+                    <br>
+                    <strong>日志详情:</strong><br>
+                    <pre>${JSON.stringify(result.log, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.className = 'test-result result-block';
+                resultDiv.innerHTML = `<strong>❌ 网络错误</strong><br>${error.message}<br><br>请确保MCP服务已启动<br>命令: node server.js`;
+            }
+        }
+
+        checkServerStatus();
+        setInterval(checkServerStatus, 10000);
+    </script>
+</body>
+</html>
